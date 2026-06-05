@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
 // ── Theme base (navy/gold always fixed) ───────────────────────
 const T_BASE = {
@@ -12,9 +12,8 @@ const T_BASE = {
   white:    "#ffffff",
 };
 
-// T is rebuilt at render time by merging bg theme into base
-// Components read from T which always has current values
-let T = {
+// T defaults - gets overridden by applyBgTheme at render time
+var T = {
   ...T_BASE,
   bg:      "#f7f5f0",
   surface: "#ffffff",
