@@ -1,4 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+
+// ── Persistent state hook — saves to localStorage ─────────────
+function useLocalStorage(key, defaultValue) {
+  const [value, setValue] = useState(() => {
+    try {
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : defaultValue;
+    } catch { return defaultValue; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(key, JSON.stringify(value)); }
+    catch {}
+  }, [key, value]);
+  return [value, setValue];
+}
 
 // ── Theme base (navy/gold always fixed) ───────────────────────
 const T_BASE = {
@@ -206,8 +221,8 @@ function CarrierModal({ carrier, onClose, onEdit }) {
 
 // ── Carrier Hub ───────────────────────────────────────────────
 function CarrierHub() {
-  const [carriers, setCarriers] = useState(SAMPLE_CARRIERS);
-  const [selected, setSelected] = useState(null);
+  const [carriers, setCarriers] = useLocalStorage('acc_carriers', SAMPLE_CARRIERS);
+
   const [filterLine, setFilterLine] = useState("All");
   const [showAdd, setShowAdd] = useState(false);
   const [editingCarrier, setEditingCarrier] = useState(null);
@@ -634,10 +649,10 @@ const LINE_FIELD_TEMPLATES = {
 const DEFAULT_FIELDS = [{l:"Coverage Amount",p:"e.g. $100,000"},{l:"Deductible",p:"e.g. $1,000"},{l:"Coverage Type",p:"e.g. Standard"}];
 
 // ── Quote Builder ─────────────────────────────────────────────
-function QuoteBuilder() {
+function QuoteBuilder({ initialClient }) {
   const blankQuote = () => ({id:Date.now(),carrier:"",line:"Medicare",plan:"",premium:"",notes:"",customFields:[{l:"OTC Allowance",v:"$500/qtr"},{l:"Dental Included",v:"Yes"},{l:"MOOP",v:"$3,300"}],color:T.navy});
 
-  const [quotes, setQuotes] = useState([
+  const [quotes, setQuotes] = useLocalStorage('acc_quotes', [
     {id:1,carrier:"Humana",line:"Medicare",plan:"Gold Plus HMO H1036",premium:0,notes:"$0 premium. Strong dental & vision. SilverSneakers included.",color:"#006D9C",
      customFields:[{l:"Plan Type",v:"HMO"},{l:"OTC Allowance",v:"$500/qtr"},{l:"MOOP",v:"$3,300"},{l:"Drug Deductible",v:"$0"},{l:"Dental Included",v:"Yes"},{l:"Vision Included",v:"Yes"},{l:"Gym Benefit",v:"SilverSneakers"},{l:"Transportation",v:"Yes"}]},
     {id:2,carrier:"Aetna",line:"Medicare",plan:"Medicare Advantage Value HMO",premium:29,notes:"Low premium. Good drug formulary. No OTC.",color:"#7B2D8B",
@@ -646,7 +661,7 @@ function QuoteBuilder() {
      customFields:[{l:"Plan Type",v:"HMO"},{l:"OTC Allowance",v:"$300/qtr"},{l:"MOOP",v:"$3,900"},{l:"Drug Deductible",v:"$0"},{l:"Dental Included",v:"Yes"},{l:"Vision Included",v:"Yes"},{l:"Gym Benefit",v:"Renew Active"},{l:"Transportation",v:"Yes"}]},
   ]);
 
-  const [clientName, setClientName] = useState("James Stovall");
+  const [clientName, setClientName] = useState(initialClient?.name || "James Stovall");
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState(null); // quote id being edited
   const [newQ, setNewQ] = useState(blankQuote());
@@ -852,9 +867,9 @@ function QuoteBuilder() {
 }
 
 // ── Client Profiles ───────────────────────────────────────────
-function ClientProfiles() {
-  const [clients, setClients] = useState(SAMPLE_CLIENTS);
-  const [selected, setSelected] = useState(null);
+function ClientProfiles({ initialClient, onQuoteClient, setTab }) {
+  const [clients, setClients] = useLocalStorage('acc_clients', SAMPLE_CLIENTS);
+  const [selected, setSelected] = useState(initialClient||null);
   const [showAdd, setShowAdd] = useState(false);
   const [search, setSearch] = useState("");
   const [newClient, setNewClient] = useState({name:"",age:"",phone:"",email:"",line:"Health & ACA",status:"Prospect",notes:""});
@@ -950,8 +965,14 @@ function ClientProfiles() {
               <div style={{background:T.bg,borderRadius:12,padding:14,fontSize:13,color:T.sub,fontFamily:"'Lato',sans-serif",lineHeight:1.8,minHeight:80,whiteSpace:"pre-line"}}>{selected.notes||"No notes yet."}</div>
             </div>
 
+            {/* Quote this client button */}
+            <button onClick={()=>{ onQuoteClient&&onQuoteClient(selected); setSelected(null); }} 
+              style={{width:"100%",marginTop:14,padding:"13px",background:T.navy,color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+              📊 Build Quote for {selected.name} →
+            </button>
+
             {/* Add note */}
-            <div style={{marginTop:14,display:"flex",gap:8}}>
+            <div style={{marginTop:10,display:"flex",gap:8}}>
               <input value={newNote} onChange={e=>setNewNote(e.target.value)} placeholder="Add a note..." onKeyDown={e=>e.key==="Enter"&&addNote()}
                 style={{flex:1,padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
               <button onClick={addNote} style={{padding:"10px 16px",background:T.navy,color:"#fff",border:"none",borderRadius:10,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",fontSize:13}}>Save</button>
@@ -1382,8 +1403,14 @@ const DEFAULT_PROFILE = {
 };
 
 export default function App() {
-  const [tab,     setTab]     = useState("dashboard");
-  const [profile, setProfile] = useState(DEFAULT_PROFILE);
+  const [tab,          setTab]         = useState("dashboard");
+  const [profile,      setProfile]     = useLocalStorage("acc_profile", DEFAULT_PROFILE);
+  const [quoteClient,  setQuoteClient] = useState(null);
+
+  const handleQuoteClient = (client) => {
+    setQuoteClient(client);
+    setTab("quotes");
+  };
 
   const bg = BG_THEMES.find(b => b.name === profile.bgTheme) || BG_THEMES[0];
 
@@ -1421,8 +1448,8 @@ export default function App() {
       <div style={{maxWidth:1100, margin:"0 auto", padding:"24px 20px"}}>
         {tab==="dashboard" && <Dashboard setTab={setTab} profile={profile} bg={bg}/>}
         {tab==="carriers"  && <CarrierHub bg={bg}/>}
-        {tab==="quotes"    && <QuoteBuilder profile={profile} bg={bg}/>}
-        {tab==="clients"   && <ClientProfiles bg={bg}/>}
+        {tab==="quotes"    && <QuoteBuilder profile={profile} bg={bg} initialClient={quoteClient}/>}
+        {tab==="clients"   && <ClientProfiles bg={bg} onQuoteClient={handleQuoteClient} setTab={setTab}/>}
         {tab==="profile"   && <AgentProfile profile={profile} setProfile={setProfile} bg={bg}/>}
       </div>
     </div>
