@@ -229,7 +229,7 @@ function CarrierModal({ carrier, onClose, onEdit }) {
 // ── Carrier Hub ───────────────────────────────────────────────
 function CarrierHub() {
   const [carriers, setCarriers] = useLocalStorage('acc_carriers', SAMPLE_CARRIERS);
-
+  const [selected, setSelected] = useState(null);
   const [filterLine, setFilterLine] = useState("All");
   const [showAdd, setShowAdd] = useState(false);
   const [editingCarrier, setEditingCarrier] = useState(null);
@@ -777,7 +777,7 @@ function QuoteBuilder({ initialClient }) {
     setTimeout(function(){ w.print(); }, 500);
   };
 
-    const emailQuote = () => {
+  const emailQuote = () => {
     const subject = encodeURIComponent(`Insurance Quote Comparison — ${clientName}`);
     const body = encodeURIComponent(
       `Hi ${clientName},\n\nPlease find your personalized insurance quote comparison below.\n\n` +
