@@ -101,6 +101,13 @@ const GLOBAL_CSS = `
   @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   @keyframes shimmer{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}
+  @media print {
+    body { background: white !important; }
+    .no-print { display: none !important; }
+    .print-only { display: block !important; }
+    .print-page { page-break-inside: avoid; }
+  }
+  .print-only { display: none; }
 `;
 
 // ── Helpers ───────────────────────────────────────────────────
@@ -398,27 +405,60 @@ const LINE_FIELD_TEMPLATES = {
   ],
 
   "Life & Annuities": [
-    {l:"Product Type",       p:"Term / WL / IUL / UL / Annuity"},
-    {l:"Death Benefit",      p:"e.g. $500,000"},
-    {l:"Term Length",        p:"e.g. 20 years (Term only)"},
-    {l:"Monthly Premium",    p:"e.g. $85/mo"},
-    {l:"Cash Value",         p:"Yes / No"},
-    {l:"Index Strategy",     p:"e.g. S&P 500 PTP"},
-    {l:"Cap Rate",           p:"e.g. 11% (IUL)"},
-    {l:"Floor Rate",         p:"e.g. 0% (IUL)"},
-    {l:"Participation Rate", p:"e.g. 100%"},
-    {l:"Surrender Period",   p:"e.g. 10 years"},
-    {l:"Surrender Charge Yr1",p:"e.g. 10%"},
-    {l:"Free Withdrawal",    p:"e.g. 10%/yr after yr 1"},
-    {l:"Annuitization Period",p:"e.g. 7 years"},
-    {l:"Income Rider",       p:"Yes / No — rate detail"},
-    {l:"Guaranteed Income",  p:"e.g. $2,200/mo at 70"},
-    {l:"Waiver of Premium",  p:"Yes / No"},
-    {l:"Accidental Death",   p:"Yes / No"},
-    {l:"Living Benefits",    p:"Yes / No — chronic/critical/terminal"},
-    {l:"Guaranteed Issue",   p:"Yes / No"},
-    {l:"Simplified Issue",   p:"Yes / No"},
-    {l:"Conversion Option",  p:"Yes / No"},
+    // ── Product basics ──
+    {l:"Product Type",            p:"Term / WL / IUL / GUL / Annuity"},
+    {l:"Death Benefit",           p:"e.g. $500,000"},
+    {l:"Death Benefit Option",    p:"Level / Increasing"},
+    {l:"Monthly Premium",         p:"e.g. $250/mo"},
+    {l:"Target Premium",          p:"e.g. $3,000/yr"},
+    {l:"Minimum Premium",         p:"e.g. $150/mo"},
+    // ── IUL Illustration ──
+    {l:"Illustrated Rate",        p:"e.g. 6.5% assumed"},
+    {l:"Guaranteed Illustration Rate", p:"e.g. 4%"},
+    {l:"Index Strategy",          p:"e.g. S&P 500 PTP Cap"},
+    {l:"Cap Rate",                p:"e.g. 11%"},
+    {l:"Floor Rate",              p:"e.g. 0%"},
+    {l:"Participation Rate",      p:"e.g. 100%"},
+    {l:"Multiplier / Bonus",      p:"e.g. 50% bonus on gains"},
+    {l:"Spread / Margin",         p:"e.g. 1.5%"},
+    // ── Lapse protection ──
+    {l:"No-Lapse Guarantee Age (Guaranteed)", p:"e.g. To age 90"},
+    {l:"No-Lapse Guarantee Age (Non-Guaranteed)", p:"e.g. To age 121"},
+    {l:"Secondary Guarantee",     p:"Yes / No — duration"},
+    // ── Cash value ──
+    {l:"Guaranteed Cash Value at 65",    p:"e.g. $180,000"},
+    {l:"Non-Guaranteed Cash Value at 65",p:"e.g. $320,000"},
+    {l:"Guaranteed Cash Value at 70",    p:"e.g. $210,000"},
+    {l:"Non-Guaranteed Cash Value at 70",p:"e.g. $410,000"},
+    {l:"Guaranteed Death Benefit",       p:"Yes / No — amount"},
+    // ── Loans & withdrawals ──
+    {l:"Loan Rate",               p:"e.g. 5% wash loan"},
+    {l:"Loan Type",               p:"Fixed / Variable / Participating"},
+    {l:"Free Withdrawal",         p:"e.g. 10%/yr after yr 1"},
+    {l:"Surrender Period",        p:"e.g. 10 years"},
+    {l:"Surrender Charge Yr 1",   p:"e.g. 10%"},
+    // ── Income ──
+    {l:"Income Rider",            p:"Yes / No — rider name"},
+    {l:"Guaranteed Income at 65", p:"e.g. $2,200/mo"},
+    {l:"Guaranteed Income at 70", p:"e.g. $2,800/mo"},
+    {l:"Income Start Age",        p:"e.g. Age 65"},
+    {l:"Income Duration",         p:"e.g. Lifetime / 20 years"},
+    // ── Riders ──
+    {l:"Living Benefits",         p:"Chronic / Critical / Terminal"},
+    {l:"Waiver of Premium",       p:"Yes / No"},
+    {l:"Accidental Death",        p:"Yes / No"},
+    {l:"Child Rider",             p:"Yes / No — amount"},
+    // ── Underwriting ──
+    {l:"Guaranteed Issue",        p:"Yes / No"},
+    {l:"Simplified Issue",        p:"Yes / No"},
+    {l:"Table Rating",            p:"e.g. Standard / Table B"},
+    {l:"Conversion Option",       p:"Yes / No"},
+    // ── Term specific ──
+    {l:"Term Length",             p:"e.g. 20 years"},
+    // ── Annuity specific ──
+    {l:"Annuitization Period",    p:"e.g. 7 years"},
+    {l:"Guaranteed Income Rider", p:"Yes / No — roll-up rate"},
+    {l:"Roll-Up Rate",            p:"e.g. 7% simple / 6% compound"},
   ],
 
   "Preneed / Burial": [
@@ -710,6 +750,48 @@ function QuoteBuilder({ initialClient }) {
     setShowAdd(true);
   };
 
+  const printQuote = () => {
+    const w = window.open("", "_blank");
+    if (!w) { alert("Please allow popups for this site to use Print."); return; }
+    
+    let body = "<h1>Quote Comparison</h1>";
+    body += "<p>Client: " + clientName + "</p>";
+    body += "<p>Line: " + activeLine + "</p><hr>";
+    
+    quotes.forEach(function(q) {
+      body += "<h2>" + q.carrier + " — " + q.plan + "</h2>";
+      body += "<p>Premium: $" + q.premium + "/mo</p>";
+      (q.customFields||[]).forEach(function(f) {
+        if (f.v) body += "<p>" + f.l + ": <strong>" + f.v + "</strong></p>";
+      });
+      if (q.notes) body += "<p><em>" + q.notes + "</em></p>";
+      body += "<hr>";
+    });
+
+    body += "<p>" + (profile?.agencyName||"") + " | " + (profile?.firstName||"") + " " + (profile?.lastName||"") + "</p>";
+    body += "<p>" + (profile?.phone||"") + " | " + (profile?.email||"") + "</p>";
+
+    w.document.write("<html><body>" + body + "</body></html>");
+    w.document.close();
+    w.focus();
+    setTimeout(function(){ w.print(); }, 500);
+  };
+
+    const emailQuote = () => {
+    const subject = encodeURIComponent(`Insurance Quote Comparison — ${clientName}`);
+    const body = encodeURIComponent(
+      `Hi ${clientName},\n\nPlease find your personalized insurance quote comparison below.\n\n` +
+      quotes.map(q =>
+        `${q.carrier} — ${q.plan}\n` +
+        `Premium: $${q.premium}/mo\n` +
+        (q.customFields||[]).map(f => `${f.l}: ${f.v}`).join("\n") +
+        `\nNotes: ${q.notes||""}\n`
+      ).join("\n---\n") +
+      `\n\nBest regards,\n${profile?.firstName||""} ${profile?.lastName||""}\n${profile?.agencyName||""}\n${profile?.phone||""}\n${profile?.email||""}`
+    );
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
+
   return (
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20}}>
@@ -721,7 +803,15 @@ function QuoteBuilder({ initialClient }) {
               style={{fontSize:14,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",border:"none",borderBottom:`2px solid ${T.gold}`,background:"transparent",outline:"none",padding:"2px 4px"}}/>
           </div>
         </div>
-        <button onClick={()=>{setNewQ(blankQuote());setEditing(null);setShowAdd(true);}} style={{background:T.gold,color:T.navy,border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>+ Add Quote</button>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap",justifyContent:"flex-end"}}>
+          <button onClick={emailQuote} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",color:T.sub,display:"flex",alignItems:"center",gap:6}}>
+            ✉️ Email
+          </button>
+          <button onClick={printQuote} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",color:T.sub,display:"flex",alignItems:"center",gap:6}}>
+            🖨️ Print / PDF
+          </button>
+          <button onClick={()=>{setNewQ(blankQuote());setEditing(null);setShowAdd(true);}} style={{background:T.gold,color:T.navy,border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>+ Add Quote</button>
+        </div>
       </div>
 
       {/* Summary bar */}
