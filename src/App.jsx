@@ -1385,9 +1385,7 @@ function CarrierLinks() {
       )}
     </div>
   );
-}
-
-// ── Commission Log ────────────────────────────────────────────
+}// ── Commission Log ────────────────────────────────────────────
 function CommissionLog({ profile }) {
   const [commissions, setCommissions] = useLocalStorage("acc_commissions", []);
   const [showAdd, setShowAdd] = useState(false);
