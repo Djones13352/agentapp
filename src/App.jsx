@@ -15,44 +15,46 @@ function useLocalStorage(key, defaultValue) {
   return [value, setValue];
 }
 
-// ── Theme base (navy/gold always fixed) ───────────────────────
+// ── Theme — Navy + Electric Blue Professional ─────────────────
 const T_BASE = {
-  navy:     "#1a2744",
-  navyMid:  "#243660",
-  gold:     "#c9a84c",
-  goldLight:"#f0d98a",
-  green:    "#2d7a4f",
-  red:      "#c0392b",
-  amber:    "#d4850a",
-  white:    "#ffffff",
+  navy:      "#0B1F3A",
+  navyMid:   "#0f2847",
+  blue:      "#2563EB",
+  blueLight: "#60A5FA",
+  blueDim:   "#2563EB22",
+  green:     "#10B981",
+  greenDim:  "#10B98122",
+  red:       "#EF4444",
+  amber:     "#F59E0B",
+  white:     "#ffffff",
+  // keep gold as alias for accent
+  gold:      "#2563EB",
+  goldLight: "#60A5FA",
 };
 
-// T defaults - gets overridden by applyBgTheme at render time
 var T = {
   ...T_BASE,
-  bg:      "#f7f5f0",
+  bg:      "#F8FAFC",
   surface: "#ffffff",
-  card:    "#fafaf8",
-  border:  "#e8e4dc",
-  text:    "#1a1a2e",
-  sub:     "#5a5a7a",
-  muted:   "#9a9ab0",
+  card:    "#F1F5F9",
+  border:  "#E2E8F0",
+  text:    "#0F172A",
+  sub:     "#475569",
+  muted:   "#94A3B8",
 };
 
 function applyBgTheme(bg) {
   T = { ...T_BASE, ...bg };
 }
 
-// Background color swatches — each controls the full app palette including nav
+// Background color swatches
 const BG_THEMES = [
-  { name:"Classic Cream",  nav:"#1a2744", navText:"#ffffff", hero:"#1a2744", bg:"#f7f5f0", surface:"#ffffff", card:"#fafaf8", border:"#e8e4dc", text:"#1a1a2e", sub:"#5a5a7a",  muted:"#9a9ab0" },
-  { name:"Pure White",     nav:"#1a2744", navText:"#ffffff", hero:"#1a2744", bg:"#ffffff", surface:"#f8f8f8", card:"#f2f2f2", border:"#e0e0e0", text:"#1a1a2e", sub:"#5a5a7a",  muted:"#9a9ab0" },
-  { name:"Soft Gray",      nav:"#1a2744", navText:"#ffffff", hero:"#1a2744", bg:"#f0f0f0", surface:"#fafafa", card:"#f4f4f4", border:"#dcdcdc", text:"#1a1a2e", sub:"#5a5a7a",  muted:"#9a9ab0" },
-  { name:"Dark Mode",      nav:"#0a0a0f", navText:"#ffffff", hero:"#111118", bg:"#0e0e14", surface:"#16161f", card:"#1c1c28", border:"#2a2a40", text:"#eeeef5", sub:"#9090b0",  muted:"#505068" },
-  { name:"Deep Navy",      nav:"#081528", navText:"#ffffff", hero:"#0d1b2a", bg:"#0d1b2a", surface:"#162032", card:"#1c2a3e", border:"#243650", text:"#e8edf5", sub:"#8090a8",  muted:"#4a5a70" },
-  { name:"Warm Sand",      nav:"#2a1f0e", navText:"#ffffff", hero:"#2a1f0e", bg:"#fdf6ec", surface:"#fffdf8", card:"#fef9f0", border:"#ecdfc8", text:"#2a1f0e", sub:"#6a5a40",  muted:"#a08060" },
-  { name:"Forest",         nav:"#1a3325", navText:"#ffffff", hero:"#1a3325", bg:"#f0f5f1", surface:"#ffffff", card:"#f4faf5", border:"#d0e8d5", text:"#0e2018", sub:"#3a6045",  muted:"#7a9a80" },
-  { name:"Royal Purple",   nav:"#1e0a3c", navText:"#ffffff", hero:"#1e0a3c", bg:"#f5f0ff", surface:"#ffffff", card:"#f8f4ff", border:"#ddd0f0", text:"#1e0a3c", sub:"#5a3a7a",  muted:"#9a80b0" },
+  { name:"Professional",  nav:"#0B1F3A", navText:"#ffffff", hero:"#0B1F3A", bg:"#F8FAFC", surface:"#ffffff", card:"#F1F5F9", border:"#E2E8F0", text:"#0F172A", sub:"#475569", muted:"#94A3B8" },
+  { name:"Pure White",    nav:"#0B1F3A", navText:"#ffffff", hero:"#0B1F3A", bg:"#ffffff", surface:"#F8FAFC", card:"#F1F5F9", border:"#E2E8F0", text:"#0F172A", sub:"#475569", muted:"#94A3B8" },
+  { name:"Dark Mode",     nav:"#111827", navText:"#ffffff", hero:"#1F2937", bg:"#111827", surface:"#1F2937", card:"#374151", border:"#4B5563", text:"#F9FAFB", sub:"#D1D5DB", muted:"#9CA3AF" },
+  { name:"Deep Navy",     nav:"#0B1F3A", navText:"#ffffff", hero:"#0f2847", bg:"#0B1F3A", surface:"#0f2847", card:"#1a3a5c", border:"#1e4a72", text:"#F8FAFC", sub:"#CBD5E1", muted:"#64748B" },
+  { name:"Soft Gray",     nav:"#0B1F3A", navText:"#ffffff", hero:"#0B1F3A", bg:"#F1F5F9", surface:"#ffffff", card:"#E2E8F0", border:"#CBD5E1", text:"#0F172A", sub:"#475569", muted:"#94A3B8" },
+  { name:"Coverage Firm", nav:"#0B3C5D", navText:"#ffffff", hero:"#0B3C5D", bg:"#F0F9FF", surface:"#ffffff", card:"#E0F2FE", border:"#BAE6FD", text:"#0C4A6E", sub:"#0369A1", muted:"#7DD3FC" },
 ];
 
 // ── All insurance lines including P&C ────────────────────────
@@ -63,6 +65,25 @@ const LINE_GROUPS = {
 };
 const LINES = Object.values(LINE_GROUPS).flat();
 const PC_LINES = LINE_GROUPS["Property & Casualty"];
+
+// ── Carrier Link Types ────────────────────────────────────────
+const LINK_TYPES = [
+  {id:"login",      label:"Agent Login",      icon:"🔐", color:"#1a2744"},
+  {id:"quoting",    label:"Quoting Tool",     icon:"📊", color:"#2d7a4f"},
+  {id:"enrollment", label:"Enrollment Portal",icon:"📋", color:"#c9a84c"},
+  {id:"commission", label:"Commission Portal",icon:"💰", color:"#c0392b"},
+  {id:"training",   label:"Training / Cert",  icon:"🎓", color:"#5a3a7a"},
+  {id:"marketing",  label:"Marketing Portal", icon:"📣", color:"#0a1f3c"},
+  {id:"other",      label:"Other",            icon:"🔗", color:"#5a5a7a"},
+];
+
+// ── Quote Status ──────────────────────────────────────────────
+const QUOTE_STATUSES = [
+  {id:"open",       label:"Open",       icon:"📋", color:"#1a2744"},
+  {id:"pending",    label:"Pending",    icon:"⏳", color:"#d4850a"},
+  {id:"closed_won", label:"Closed Won", icon:"✅", color:"#2d7a4f"},
+  {id:"closed_lost",label:"Closed Lost",icon:"❌", color:"#c0392b"},
+];
 const isPCLine = (line) => PC_LINES.includes(line);
 
 const SAMPLE_CARRIERS = [
@@ -127,7 +148,7 @@ const lineColor = l => {
     "Pet Insurance":"#2E7D32","Travel Insurance":"#00838F","Farm & Ranch":"#558B2F",
     "Marine":"#01579B","Title Insurance":"#3E2723",
   };
-  return map[l]||"#1a2744";
+  return map[l]||"#0B1F3A";
 };
 
 // ── Carrier Card ──────────────────────────────────────────────
@@ -690,7 +711,7 @@ const DEFAULT_FIELDS = [{l:"Coverage Amount",p:"e.g. $100,000"},{l:"Deductible",
 
 // ── Quote Builder ─────────────────────────────────────────────
 function QuoteBuilder({ initialClient }) {
-  const blankQuote = () => ({id:Date.now(),carrier:"",line:"Medicare",plan:"",premium:"",notes:"",customFields:[{l:"OTC Allowance",v:"$500/qtr"},{l:"Dental Included",v:"Yes"},{l:"MOOP",v:"$3,300"}],color:T.navy});
+  const blankQuote = () => ({id:Date.now(),carrier:"",line:"Medicare",plan:"",premium:"",notes:"",customFields:[{l:"OTC Allowance",v:"$500/qtr"},{l:"Dental Included",v:"Yes"},{l:"MOOP",v:"$3,300"}],color:T.navy,status:"open",recommendation:"",bestFor:""});
 
   const [quotes, setQuotes] = useLocalStorage('acc_quotes', [
     {id:1,carrier:"Humana",line:"Medicare",plan:"Gold Plus HMO H1036",premium:0,notes:"$0 premium. Strong dental & vision. SilverSneakers included.",color:"#006D9C",
@@ -753,31 +774,88 @@ function QuoteBuilder({ initialClient }) {
   const printQuote = () => {
     const w = window.open("", "_blank");
     if (!w) { alert("Please allow popups for this site to use Print."); return; }
-    
-    let body = "<h1>Quote Comparison</h1>";
-    body += "<p>Client: " + clientName + "</p>";
-    body += "<p>Line: " + activeLine + "</p><hr>";
-    
+
+    const agentName = ((profile?.firstName||"") + " " + (profile?.lastName||"")).trim();
+    const today = new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
+
+    // Build each quote card as an HTML table column
+    let cardsHtml = "";
     quotes.forEach(function(q) {
-      body += "<h2>" + q.carrier + " — " + q.plan + "</h2>";
-      body += "<p>Premium: $" + q.premium + "/mo</p>";
+      const isL = (Number(q.premium)||0) === lowest;
+      let fieldsHtml = "";
       (q.customFields||[]).forEach(function(f) {
-        if (f.v) body += "<p>" + f.l + ": <strong>" + f.v + "</strong></p>";
+        if (f.v) {
+          fieldsHtml += "<tr>" +
+            "<td style='padding:5px 8px;font-size:11px;color:#666;border-bottom:1px solid #eee;width:55%'>" + f.l + "</td>" +
+            "<td style='padding:5px 8px;font-size:11px;font-weight:700;color:#1a2744;text-align:right;border-bottom:1px solid #eee'>" + f.v + "</td>" +
+            "</tr>";
+        }
       });
-      if (q.notes) body += "<p><em>" + q.notes + "</em></p>";
-      body += "<hr>";
+      const notesHtml = q.notes ? "<p style='font-size:10px;color:#666;font-style:italic;margin-top:8px;line-height:1.4'>" + q.notes + "</p>" : "";
+      const bestBadge = isL ? "<div style='background:#c9a84c;color:#1a2744;font-size:9px;font-weight:700;text-align:center;padding:3px;letter-spacing:1px'>⭐ LOWEST PREMIUM</div>" : "";
+
+      cardsHtml +=
+        "<td style='vertical-align:top;padding:0 6px;width:" + Math.floor(100/quotes.length) + "%'>" +
+        "<div style='border:2px solid " + (isL?"#c9a84c":"#ddd") + ";border-radius:10px;overflow:hidden;height:100%'>" +
+        bestBadge +
+        "<div style='height:4px;background:" + (q.color||"#1a2744") + "'></div>" +
+        "<div style='padding:12px'>" +
+        "<div style='font-size:15px;font-weight:700;color:#1a2744;margin-bottom:2px'>" + q.carrier + "</div>" +
+        "<div style='font-size:11px;color:#666;margin-bottom:6px'>" + q.plan + "</div>" +
+        "<div style='display:inline-block;background:" + (q.color||"#1a2744") + ";color:#fff;font-size:9px;padding:2px 7px;border-radius:20px;margin-bottom:10px'>" + q.line + "</div>" +
+        "<div style='background:#f7f5f0;border-radius:8px;padding:8px;text-align:center;margin-bottom:10px'>" +
+        "<div style='font-size:9px;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px'>Monthly Premium</div>" +
+        "<div style='font-size:24px;font-weight:700;color:" + (isL?"#2d7a4f":"#1a2744") + ";font-family:Georgia,serif'>" +
+        (Number(q.premium)===0?"$0":"$"+q.premium+"/mo") + "</div></div>" +
+        (fieldsHtml ? "<table style='width:100%;border-collapse:collapse;margin-bottom:4px'>" + fieldsHtml + "</table>" : "") +
+        notesHtml +
+        "</div></div></td>";
     });
 
-    body += "<p>" + (profile?.agencyName||"") + " | " + (profile?.firstName||"") + " " + (profile?.lastName||"") + "</p>";
-    body += "<p>" + (profile?.phone||"") + " | " + (profile?.email||"") + "</p>";
+    const html =
+      "<!DOCTYPE html><html><head><title>Quote — " + clientName + "</title>" +
+      "<style>" +
+      "body{font-family:Georgia,serif;padding:24px;color:#1a1a2e;margin:0}" +
+      "h1{margin:0 0 4px;font-size:20px;color:#1a2744}" +
+      "@media print{body{padding:16px}.no-print{display:none}}" +
+      "</style></head><body>" +
 
-    w.document.write("<html><body>" + body + "</body></html>");
+      // Header
+      "<table style='width:100%;border-bottom:3px solid #1a2744;padding-bottom:14px;margin-bottom:20px'><tr>" +
+      "<td><h1>Quote Comparison</h1>" +
+      "<p style='margin:2px 0;font-size:13px;color:#5a5a7a'>Prepared for: <strong>" + clientName + "</strong></p>" +
+      "<p style='margin:2px 0;font-size:12px;color:#5a5a7a'>Line: " + activeLine + " &nbsp;|&nbsp; Date: " + today + "</p></td>" +
+      "<td style='text-align:right'>" +
+      (profile?.logoUrl ? "<img src='" + profile.logoUrl + "' style='height:50px;margin-bottom:6px;display:block;margin-left:auto'>" : "") +
+      "<div style='font-weight:700;font-size:14px;color:#1a2744'>" + (profile?.agencyName||"") + "</div>" +
+      "<div style='font-size:12px;color:#5a5a7a'>" + agentName + (profile?.title?" · "+profile.title:"") + "</div>" +
+      "<div style='font-size:11px;color:#5a5a7a'>" + (profile?.phone||"") + (profile?.email?" &nbsp;|&nbsp; "+profile.email:"") + "</div>" +
+      "<div style='font-size:11px;color:#5a5a7a'>" + (profile?.website||"") + "</div>" +
+      "</td></tr></table>" +
+
+      // Quote cards side by side
+      "<table style='width:100%;border-collapse:collapse;margin-bottom:20px'><tr>" +
+      cardsHtml +
+      "</tr></table>" +
+
+      // Footer
+      "<table style='width:100%;border-top:2px solid #1a2744;padding-top:12px;margin-top:4px'><tr>" +
+      "<td><div style='font-size:12px;font-weight:700;color:#1a2744'>" + agentName + "</div>" +
+      "<div style='font-size:11px;color:#5a5a7a'>" + (profile?.agencyName||"") + (profile?.phone?" · "+profile.phone:"") + (profile?.email?" · "+profile.email:"") + "</div>" +
+      "<div style='font-size:11px;color:#5a5a7a'>Licensed in: " + (profile?.states||"") + "</div></td>" +
+      "<td style='text-align:right;font-size:10px;color:#999'>For illustration purposes only.<br>Rates subject to underwriting approval.</td>" +
+      "</tr></table>" +
+
+      "</body></html>";
+
+    w.document.open();
+    w.document.write(html);
     w.document.close();
     w.focus();
-    setTimeout(function(){ w.print(); }, 500);
+    setTimeout(function(){ w.print(); }, 600);
   };
 
-  const emailQuote = () => {
+    const emailQuote = () => {
     const subject = encodeURIComponent(`Insurance Quote Comparison — ${clientName}`);
     const body = encodeURIComponent(
       `Hi ${clientName},\n\nPlease find your personalized insurance quote comparison below.\n\n` +
@@ -841,6 +919,15 @@ function QuoteBuilder({ initialClient }) {
                   <div style={{fontSize:17,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>{q.carrier}</div>
                   <button onClick={()=>startEdit(q)} style={{background:T.bg,border:`1px solid ${T.border}`,borderRadius:8,padding:"3px 9px",fontSize:11,color:T.muted,cursor:"pointer",fontFamily:"'Lato',sans-serif"}}>Edit</button>
                 </div>
+                {/* Status selector */}
+                <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:8}}>
+                  {QUOTE_STATUSES.map(s=>(
+                    <button key={s.id} onClick={()=>setQuotes(quotes.map(x=>x.id===q.id?{...x,status:s.id}:x))}
+                      style={{padding:"3px 9px",borderRadius:20,border:`1px solid ${(q.status||"open")===s.id?s.color:T.border}`,background:(q.status||"open")===s.id?s.color+"18":T.surface,color:(q.status||"open")===s.id?s.color:T.muted,cursor:"pointer",fontSize:10,fontFamily:"'Lato',sans-serif",fontWeight:600,transition:"all 0.15s"}}>
+                      {s.icon} {s.label}
+                    </button>
+                  ))}
+                </div>
                 <div style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif",marginBottom:4}}>{q.plan}</div>
                 <div style={{fontSize:11,color:"#fff",background:lineColor(q.line),padding:"2px 8px",borderRadius:20,display:"inline-block",marginBottom:12,fontFamily:"'Lato',sans-serif",fontWeight:600}}>{q.line}</div>
 
@@ -862,6 +949,18 @@ function QuoteBuilder({ initialClient }) {
                 ))}
 
                 {q.notes && <div style={{marginTop:10,fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif",lineHeight:1.5,borderTop:`1px solid ${T.border}`,paddingTop:8}}>{q.notes}</div>}
+                {q.bestFor && (
+                  <div style={{marginTop:8,background:`${T.blue}10`,border:`1px solid ${T.blue}33`,borderRadius:8,padding:"8px 10px"}}>
+                    <div style={{fontSize:10,color:T.blue,fontFamily:"'Lato',sans-serif",fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:3}}>✦ Best For</div>
+                    <div style={{fontSize:12,color:T.navy,fontFamily:"'Lato',sans-serif",fontWeight:600}}>{q.bestFor}</div>
+                  </div>
+                )}
+                {q.recommendation && (
+                  <div style={{marginTop:6,background:`${T.green}10`,border:`1px solid ${T.green}33`,borderRadius:8,padding:"8px 10px"}}>
+                    <div style={{fontSize:10,color:T.green,fontFamily:"'Lato',sans-serif",fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:3}}>💬 Agent Recommendation</div>
+                    <div style={{fontSize:12,color:T.navy,fontFamily:"'Lato',sans-serif"}}>{q.recommendation}</div>
+                  </div>
+                )}
 
                 <button onClick={()=>setQuotes(quotes.filter(x=>x.id!==q.id))} style={{marginTop:12,width:"100%",padding:"7px",background:"transparent",border:`1px solid ${T.border}`,borderRadius:8,color:T.muted,fontSize:11,fontFamily:"'Lato',sans-serif",cursor:"pointer"}}>Remove</button>
               </div>
@@ -938,6 +1037,18 @@ function QuoteBuilder({ initialClient }) {
               <button onClick={addCustomField} style={{padding:"9px 14px",background:T.navy,color:"#fff",border:"none",borderRadius:10,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",fontSize:13}}>Add</button>
             </div>
 
+            {/* Best For */}
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Best For (client-facing)</div>
+              <input placeholder="e.g. Clients who want $0 premium + OTC benefits" value={newQ.bestFor||""} onChange={e=>setNewQ({...newQ,bestFor:e.target.value})}
+                style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,background:T.bg,outline:"none"}}/>
+            </div>
+            {/* Agent Recommendation */}
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Why I Recommend This</div>
+              <input placeholder="e.g. Strongest guaranteed death benefit for this age/budget" value={newQ.recommendation||""} onChange={e=>setNewQ({...newQ,recommendation:e.target.value})}
+                style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,background:T.bg,outline:"none"}}/>
+            </div>
             {/* Notes */}
             <div style={{marginBottom:18}}>
               <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Notes</div>
@@ -1110,6 +1221,498 @@ function ClientProfiles({ initialClient, onQuoteClient, setTab }) {
             <div style={{display:"flex",gap:10}}>
               <button onClick={()=>setShowAdd(false)} style={{flex:1,padding:"12px",background:T.bg,border:`1px solid ${T.border}`,borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",color:T.sub}}>Cancel</button>
               <button onClick={addClient} style={{flex:2,padding:"12px",background:T.navy,color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",fontSize:14}}>Save Client</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Carrier Links ────────────────────────────────────────────
+function CarrierLinks() {
+  const [links, setLinks] = useLocalStorage("acc_links", []);
+  const [showAdd, setShowAdd] = useState(false);
+  const [filterType, setFilterType] = useState("All");
+  const [newLink, setNewLink] = useState({carrier:"", url:"", type:"login", notes:""});
+  const [editId, setEditId] = useState(null);
+
+  const filtered = filterType==="All" ? links : links.filter(l=>l.type===filterType);
+
+  const saveLink = () => {
+    if (!newLink.carrier || !newLink.url) return;
+    const url = newLink.url.startsWith("http") ? newLink.url : "https://"+newLink.url;
+    if (editId) {
+      setLinks(links.map(l=>l.id===editId?{...newLink,url,id:editId}:l));
+      setEditId(null);
+    } else {
+      setLinks([...links,{...newLink,url,id:Date.now()}]);
+    }
+    setNewLink({carrier:"",url:"",type:"login",notes:""});
+    setShowAdd(false);
+  };
+
+  const deleteLink = (id) => {
+    if (window.confirm("Remove this link?")) setLinks(links.filter(l=>l.id!==id));
+  };
+
+  const startEdit = (link) => {
+    setNewLink({carrier:link.carrier,url:link.url,type:link.type,notes:link.notes||""});
+    setEditId(link.id);
+    setShowAdd(true);
+  };
+
+  // Group by carrier
+  const grouped = {};
+  filtered.forEach(l => {
+    if (!grouped[l.carrier]) grouped[l.carrier] = [];
+    grouped[l.carrier].push(l);
+  });
+
+  return (
+    <div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+        <div>
+          <h2 style={{fontSize:26,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>My Carrier Links</h2>
+          <p style={{fontSize:13,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>One-click access to all your carrier portals</p>
+        </div>
+        <button onClick={()=>{setNewLink({carrier:"",url:"",type:"login",notes:""});setEditId(null);setShowAdd(true);}}
+          style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>
+          + Add Link
+        </button>
+      </div>
+
+      {/* Filter by type */}
+      <div style={{display:"flex",gap:8,marginBottom:18,flexWrap:"wrap"}}>
+        {["All",...LINK_TYPES.map(l=>l.label)].map(t=>(
+          <button key={t} onClick={()=>setFilterType(t)}
+            style={{padding:"6px 14px",borderRadius:20,border:`1px solid ${filterType===t?T.navy:T.border}`,background:filterType===t?T.navy:T.surface,color:filterType===t?"#fff":T.sub,cursor:"pointer",fontSize:12,fontFamily:"'Lato',sans-serif",fontWeight:600,whiteSpace:"nowrap",transition:"all 0.15s"}}>
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {/* Empty state */}
+      {links.length===0 && (
+        <div style={{background:T.surface,border:`2px dashed ${T.border}`,borderRadius:20,padding:40,textAlign:"center"}}>
+          <div style={{fontSize:40,marginBottom:12}}>🔗</div>
+          <div style={{fontSize:18,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",marginBottom:8}}>No links yet</div>
+          <div style={{fontSize:13,color:T.muted,fontFamily:"'Lato',sans-serif",marginBottom:16}}>Add your carrier portal links for one-click access</div>
+          <button onClick={()=>setShowAdd(true)} style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 24px",fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer"}}>
+            + Add Your First Link
+          </button>
+        </div>
+      )}
+
+      {/* Grouped by carrier */}
+      {Object.entries(grouped).map(([carrier, carrierLinks])=>(
+        <div key={carrier} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,marginBottom:14,overflow:"hidden",animation:"fadeUp 0.3s ease"}}>
+          <div style={{background:T.navy,padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div style={{fontSize:16,fontWeight:700,color:"#fff",fontFamily:"'Playfair Display',serif"}}>{carrier}</div>
+            <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",fontFamily:"'Lato',sans-serif"}}>{carrierLinks.length} link{carrierLinks.length!==1?"s":""}</div>
+          </div>
+          <div style={{padding:12,display:"flex",flexDirection:"column",gap:8}}>
+            {carrierLinks.map(link=>{
+              const lt = LINK_TYPES.find(t=>t.id===link.type)||LINK_TYPES[6];
+              return (
+                <div key={link.id} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 12px",background:T.bg,borderRadius:10,border:`1px solid ${T.border}`}}>
+                  <div style={{width:36,height:36,borderRadius:10,background:lt.color+"18",border:`1px solid ${lt.color}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>
+                    {lt.icon}
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:13,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif"}}>{lt.label}</div>
+                    <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{link.url}</div>
+                    {link.notes&&<div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",fontStyle:"italic",marginTop:2}}>{link.notes}</div>}
+                  </div>
+                  <div style={{display:"flex",gap:6,flexShrink:0}}>
+                    <a href={link.url} target="_blank" rel="noreferrer"
+                      style={{background:lt.color,color:"#fff",border:"none",borderRadius:8,padding:"7px 14px",fontSize:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",textDecoration:"none",display:"flex",alignItems:"center",gap:4}}>
+                      {lt.icon} Open
+                    </a>
+                    <button onClick={()=>startEdit(link)} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"7px 10px",fontSize:12,color:T.muted,cursor:"pointer"}}>✏️</button>
+                    <button onClick={()=>deleteLink(link.id)} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"7px 10px",fontSize:12,color:T.red,cursor:"pointer"}}>✕</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+      {/* Add/Edit modal */}
+      {showAdd && (
+        <div style={{position:"fixed",inset:0,background:"rgba(26,39,68,0.5)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShowAdd(false)}>
+          <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:24,padding:28,width:"100%",maxWidth:440,animation:"fadeUp 0.3s ease"}}>
+            <h3 style={{fontSize:20,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",marginBottom:18}}>{editId?"Edit Link":"Add Carrier Link"}</h3>
+
+            {[
+              {label:"Carrier Name",key:"carrier",ph:"e.g. Aetna, Midland National"},
+              {label:"URL / Link",  key:"url",     ph:"e.g. producer.aetna.com"},
+            ].map(({label,key,ph})=>(
+              <div key={key} style={{marginBottom:14}}>
+                <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>{label}</div>
+                <input placeholder={ph} value={newLink[key]} onChange={e=>setNewLink({...newLink,[key]:e.target.value})}
+                  style={{width:"100%",padding:"11px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
+              </div>
+            ))}
+
+            {/* Link type */}
+            <div style={{marginBottom:14}}>
+              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Link Type</div>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                {LINK_TYPES.map(lt=>(
+                  <button key={lt.id} onClick={()=>setNewLink({...newLink,type:lt.id})}
+                    style={{padding:"6px 12px",borderRadius:20,border:`1px solid ${newLink.type===lt.id?lt.color:T.border}`,background:newLink.type===lt.id?lt.color+"18":T.surface,color:newLink.type===lt.id?lt.color:T.muted,cursor:"pointer",fontSize:12,fontFamily:"'Lato',sans-serif",fontWeight:600,transition:"all 0.15s"}}>
+                    {lt.icon} {lt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div style={{marginBottom:20}}>
+              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Notes (optional)</div>
+              <input placeholder="e.g. Use Chrome, login resets monthly..." value={newLink.notes} onChange={e=>setNewLink({...newLink,notes:e.target.value})}
+                style={{width:"100%",padding:"11px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
+            </div>
+
+            <div style={{display:"flex",gap:10}}>
+              <button onClick={()=>{setShowAdd(false);setEditId(null);}} style={{flex:1,padding:"12px",background:T.bg,border:`1px solid ${T.border}`,borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",color:T.sub}}>Cancel</button>
+              <button onClick={saveLink} style={{flex:2,padding:"12px",background:T.navy,color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",fontSize:14}}>Save Link</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Commission Log ────────────────────────────────────────────
+function CommissionLog({ profile }) {
+  const [commissions, setCommissions] = useLocalStorage("acc_commissions", []);
+  const [showAdd, setShowAdd] = useState(false);
+  const [filterMonth, setFilterMonth] = useState("All");
+  const [newComm, setNewComm] = useState({carrier:"",client:"",line:"Health & ACA",amount:"",date:new Date().toISOString().split("T")[0],type:"First Year",notes:""});
+
+  const addCommission = () => {
+    if (!newComm.carrier || !newComm.amount) return;
+    setCommissions([...commissions,{...newComm,id:Date.now(),amount:Number(newComm.amount)}]);
+    setNewComm({carrier:"",client:"",line:"Health & ACA",amount:"",date:new Date().toISOString().split("T")[0],type:"First Year",notes:""});
+    setShowAdd(false);
+  };
+
+  const deleteComm = (id) => {
+    if (window.confirm("Delete this entry?")) setCommissions(commissions.filter(c=>c.id!==id));
+  };
+
+  // Stats
+  const total = commissions.reduce((a,c)=>a+Number(c.amount),0);
+  const thisMonth = commissions.filter(c=>{
+    const d = new Date(c.date);
+    const now = new Date();
+    return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  }).reduce((a,c)=>a+Number(c.amount),0);
+
+  // Group by month
+  const byMonth = {};
+  commissions.forEach(c=>{
+    const key = new Date(c.date).toLocaleDateString("en-US",{year:"numeric",month:"long"});
+    if (!byMonth[key]) byMonth[key]=[];
+    byMonth[key].push(c);
+  });
+
+  // Export to CSV
+  const exportCSV = () => {
+    const rows = [["Date","Carrier","Client","Line","Type","Amount","Notes"]];
+    commissions.forEach(c=>rows.push([c.date,c.carrier,c.client,c.line,c.type,"$"+c.amount,c.notes||""]));
+    const csv = rows.map(r=>r.map(v=>'"'+v+'"').join(",")).join("
+");
+    const blob = new Blob([csv],{type:"text/csv"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href=url; a.download="commissions.csv"; a.click();
+  };
+
+  return (
+    <div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+        <div>
+          <h2 style={{fontSize:26,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>Commission Log</h2>
+          <p style={{fontSize:13,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>Track earnings by carrier and client</p>
+        </div>
+        <div style={{display:"flex",gap:8}}>
+          {commissions.length>0&&<button onClick={exportCSV} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",color:T.sub}}>📥 Export CSV</button>}
+          <button onClick={()=>setShowAdd(true)} style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>+ Log Commission</button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:12,marginBottom:20}}>
+        {[
+          {label:"This Month",value:"$"+thisMonth.toLocaleString(),color:T.green},
+          {label:"All Time",value:"$"+total.toLocaleString(),color:T.navy},
+          {label:"Total Entries",value:commissions.length,color:T.gold},
+        ].map(({label,value,color})=>(
+          <div key={label} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:14,padding:14,textAlign:"center"}}>
+            <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{label}</div>
+            <div style={{fontSize:24,fontWeight:700,color,fontFamily:"'Courier Prime',monospace"}}>{value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Empty state */}
+      {commissions.length===0 && (
+        <div style={{background:T.surface,border:`2px dashed ${T.border}`,borderRadius:20,padding:40,textAlign:"center"}}>
+          <div style={{fontSize:40,marginBottom:12}}>💰</div>
+          <div style={{fontSize:18,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",marginBottom:8}}>No commissions logged yet</div>
+          <div style={{fontSize:13,color:T.muted,fontFamily:"'Lato',sans-serif",marginBottom:16}}>Start tracking your earnings by carrier and client</div>
+          <button onClick={()=>setShowAdd(true)} style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 24px",fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer"}}>+ Log First Commission</button>
+        </div>
+      )}
+
+      {/* By month */}
+      {Object.entries(byMonth).sort((a,b)=>new Date(b[0])-new Date(a[0])).map(([month,entries])=>{
+        const monthTotal = entries.reduce((a,c)=>a+Number(c.amount),0);
+        return (
+          <div key={month} style={{marginBottom:16}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+              <div style={{fontSize:14,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>{month}</div>
+              <div style={{fontSize:14,fontWeight:700,color:T.green,fontFamily:"'Courier Prime',monospace"}}>${monthTotal.toLocaleString()}</div>
+            </div>
+            {entries.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(c=>(
+              <div key={c.id} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"12px 14px",marginBottom:8,display:"flex",alignItems:"center",gap:12}}>
+                <div style={{width:44,height:44,borderRadius:12,background:`${T.green}15`,border:`1px solid ${T.green}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <div style={{fontSize:14,fontWeight:700,color:T.green,fontFamily:"'Courier Prime',monospace"}}>${Number(c.amount).toLocaleString()}</div>
+                </div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:14,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif"}}>{c.carrier}</div>
+                  <div style={{fontSize:12,color:T.muted,fontFamily:"'Lato',sans-serif"}}>{c.client&&c.client+" · "}{c.line} · {c.type}</div>
+                  <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif"}}>{new Date(c.date).toLocaleDateString()}{c.notes&&" · "+c.notes}</div>
+                </div>
+                <button onClick={()=>deleteComm(c.id)} style={{background:"none",border:"none",color:T.muted,cursor:"pointer",fontSize:16,padding:"4px"}}>✕</button>
+              </div>
+            ))}
+          </div>
+        );
+      })}
+
+      {/* Add modal */}
+      {showAdd && (
+        <div style={{position:"fixed",inset:0,background:"rgba(26,39,68,0.5)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShowAdd(false)}>
+          <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:24,padding:28,width:"100%",maxWidth:440,maxHeight:"90vh",overflowY:"auto",animation:"fadeUp 0.3s ease"}}>
+            <h3 style={{fontSize:20,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",marginBottom:18}}>Log Commission</h3>
+            {[
+              {label:"Carrier",     key:"carrier", ph:"e.g. Mutual of Omaha"},
+              {label:"Client Name", key:"client",  ph:"e.g. James Stovall"},
+              {label:"Amount ($)",  key:"amount",  ph:"e.g. 450"},
+            ].map(({label,key,ph})=>(
+              <div key={key} style={{marginBottom:14}}>
+                <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>{label}</div>
+                <input placeholder={ph} value={newComm[key]} onChange={e=>setNewComm({...newComm,[key]:e.target.value})}
+                  style={{width:"100%",padding:"11px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
+              </div>
+            ))}
+            <div style={{marginBottom:14}}>
+              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Date Received</div>
+              <input type="date" value={newComm.date} onChange={e=>setNewComm({...newComm,date:e.target.value})}
+                style={{width:"100%",padding:"11px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
+            </div>
+            <div style={{marginBottom:14}}>
+              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Line of Business</div>
+              <select value={newComm.line} onChange={e=>setNewComm({...newComm,line:e.target.value})}
+                style={{width:"100%",padding:"11px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,background:T.bg,outline:"none"}}>
+                {LINES.map(l=><option key={l}>{l}</option>)}
+              </select>
+            </div>
+            <div style={{marginBottom:14}}>
+              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Commission Type</div>
+              <select value={newComm.type} onChange={e=>setNewComm({...newComm,type:e.target.value})}
+                style={{width:"100%",padding:"11px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,background:T.bg,outline:"none"}}>
+                {["First Year","Renewal","Override","Bonus","Advance","Chargeback"].map(t=><option key={t}>{t}</option>)}
+              </select>
+            </div>
+            <div style={{marginBottom:20}}>
+              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Notes</div>
+              <input placeholder="Optional notes..." value={newComm.notes} onChange={e=>setNewComm({...newComm,notes:e.target.value})}
+                style={{width:"100%",padding:"11px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
+            </div>
+            <div style={{display:"flex",gap:10}}>
+              <button onClick={()=>setShowAdd(false)} style={{flex:1,padding:"12px",background:T.bg,border:`1px solid ${T.border}`,borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",color:T.sub}}>Cancel</button>
+              <button onClick={addCommission} style={{flex:2,padding:"12px",background:T.green,color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",fontSize:14}}>Save Commission</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── License Tracker ──────────────────────────────────────────
+function LicenseTracker() {
+  const [licenses, setLicenses] = useLocalStorage("acc_licenses", [
+    {id:1, state:"TN", licenseNum:"", npn:"", line:"Life & Health", expDate:"2025-12-31", status:"Active", notes:""},
+    {id:2, state:"AL", licenseNum:"", npn:"", line:"Life & Health", expDate:"2025-12-31", status:"Active", notes:""},
+    {id:3, state:"MS", licenseNum:"", npn:"", line:"Life & Health", expDate:"2025-12-31", status:"Active", notes:""},
+  ]);
+  const [showAdd, setShowAdd] = useState(false);
+  const [newLic, setNewLic] = useState({state:"",licenseNum:"",npn:"",line:"Life & Health",expDate:"",status:"Active",notes:""});
+  const [editId, setEditId] = useState(null);
+
+  const now = new Date();
+
+  const getDaysUntil = (dateStr) => {
+    if (!dateStr) return null;
+    return Math.floor((new Date(dateStr) - now) / (1000*60*60*24));
+  };
+
+  const getStatusColor = (dateStr) => {
+    const days = getDaysUntil(dateStr);
+    if (days === null) return T.muted;
+    if (days < 0)   return T.red;
+    if (days <= 30) return T.red;
+    if (days <= 90) return T.amber;
+    return T.green;
+  };
+
+  const getStatusLabel = (dateStr) => {
+    const days = getDaysUntil(dateStr);
+    if (days === null) return "No expiry";
+    if (days < 0)   return "EXPIRED";
+    if (days <= 30) return `${days}d left`;
+    if (days <= 90) return `${days}d left`;
+    return "Active";
+  };
+
+  const saveLicense = () => {
+    if (!newLic.state) return;
+    if (editId) {
+      setLicenses(licenses.map(l=>l.id===editId?{...newLic,id:editId}:l));
+      setEditId(null);
+    } else {
+      setLicenses([...licenses,{...newLic,id:Date.now()}]);
+    }
+    setNewLic({state:"",licenseNum:"",npn:"",line:"Life & Health",expDate:"",status:"Active",notes:""});
+    setShowAdd(false);
+  };
+
+  const startEdit = (lic) => {
+    setNewLic({...lic});
+    setEditId(lic.id);
+    setShowAdd(true);
+  };
+
+  const expiring = licenses.filter(l=>{
+    const d = getDaysUntil(l.expDate);
+    return d !== null && d >= 0 && d <= 90;
+  });
+
+  return (
+    <div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+        <div>
+          <h2 style={{fontSize:26,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>License Tracker</h2>
+          <p style={{fontSize:13,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>States, license numbers, NPN & expiration dates</p>
+        </div>
+        <button onClick={()=>{setNewLic({state:"",licenseNum:"",npn:"",line:"Life & Health",expDate:"",status:"Active",notes:""});setEditId(null);setShowAdd(true);}}
+          style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>
+          + Add License
+        </button>
+      </div>
+
+      {/* Expiring soon alert */}
+      {expiring.length>0 && (
+        <div style={{background:`${T.amber}15`,border:`1px solid ${T.amber}44`,borderRadius:14,padding:14,marginBottom:16,display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontSize:24}}>⚠️</span>
+          <div>
+            <div style={{fontSize:14,fontWeight:700,color:T.amber,fontFamily:"'Lato',sans-serif"}}>
+              {expiring.length} license{expiring.length!==1?"s":""} expiring within 90 days
+            </div>
+            <div style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>
+              {expiring.map(l=>`${l.state} (${getStatusLabel(l.expDate)})`).join(" · ")}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Stats row */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:20}}>
+        {[
+          {label:"Total States",  value:licenses.length,                                    color:T.blue},
+          {label:"Expiring Soon", value:licenses.filter(l=>{const d=getDaysUntil(l.expDate);return d!==null&&d>=0&&d<=90;}).length, color:T.amber},
+          {label:"Expired",       value:licenses.filter(l=>{const d=getDaysUntil(l.expDate);return d!==null&&d<0;}).length,         color:T.red},
+        ].map(({label,value,color})=>(
+          <div key={label} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:14,padding:14,textAlign:"center",borderTop:`3px solid ${color}`}}>
+            <div style={{fontSize:28,fontWeight:700,color,fontFamily:"'Courier Prime',monospace"}}>{value}</div>
+            <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:0.5,marginTop:2}}>{label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* License list */}
+      <div style={{display:"flex",flexDirection:"column",gap:10}}>
+        {licenses.sort((a,b)=>(getDaysUntil(a.expDate)||999)-(getDaysUntil(b.expDate)||999)).map(lic=>{
+          const statusColor = getStatusColor(lic.expDate);
+          const statusLabel = getStatusLabel(lic.expDate);
+          return (
+            <div key={lic.id} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:14,padding:16,display:"flex",alignItems:"center",gap:14,animation:"fadeUp 0.3s ease"}}>
+              {/* State badge */}
+              <div style={{width:52,height:52,borderRadius:14,background:T.navy,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                <div style={{fontSize:14,fontWeight:700,color:"#fff",fontFamily:"'Lato',sans-serif",textAlign:"center",lineHeight:1.2}}>{lic.state}</div>
+              </div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+                  <div style={{fontSize:15,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif"}}>{lic.line}</div>
+                  <span style={{fontSize:10,background:`${statusColor}18`,color:statusColor,padding:"2px 8px",borderRadius:20,fontFamily:"'Lato',sans-serif",fontWeight:700,border:`1px solid ${statusColor}44`}}>{statusLabel}</span>
+                </div>
+                <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>
+                  {lic.licenseNum&&<div style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>License: <strong>{lic.licenseNum}</strong></div>}
+                  {lic.npn&&<div style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>NPN: <strong>{lic.npn}</strong></div>}
+                  {lic.expDate&&<div style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>Exp: <strong>{new Date(lic.expDate).toLocaleDateString()}</strong></div>}
+                </div>
+                {lic.notes&&<div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:4,fontStyle:"italic"}}>{lic.notes}</div>}
+              </div>
+              <div style={{display:"flex",gap:6,flexShrink:0}}>
+                <button onClick={()=>startEdit(lic)} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:8,padding:"6px 10px",fontSize:12,color:T.muted,cursor:"pointer"}}>✏️</button>
+                <button onClick={()=>setLicenses(licenses.filter(l=>l.id!==lic.id))} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:8,padding:"6px 10px",fontSize:12,color:T.red,cursor:"pointer"}}>✕</button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Add/Edit modal */}
+      {showAdd && (
+        <div style={{position:"fixed",inset:0,background:"rgba(11,31,58,0.6)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShowAdd(false)}>
+          <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:24,padding:28,width:"100%",maxWidth:440,maxHeight:"90vh",overflowY:"auto",animation:"fadeUp 0.3s ease"}}>
+            <h3 style={{fontSize:20,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",marginBottom:18}}>{editId?"Edit License":"Add License"}</h3>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12}}>
+              {[
+                {label:"State",       key:"state",      ph:"e.g. TN"},
+                {label:"License #",   key:"licenseNum", ph:"e.g. 1234567"},
+                {label:"NPN",         key:"npn",        ph:"e.g. 12345678"},
+                {label:"Expiration",  key:"expDate",    ph:"",type:"date"},
+              ].map(({label,key,ph,type})=>(
+                <div key={key}>
+                  <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{label}</div>
+                  <input type={type||"text"} placeholder={ph} value={newLic[key]} onChange={e=>setNewLic({...newLic,[key]:e.target.value})}
+                    style={{width:"100%",padding:"10px 12px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
+                </div>
+              ))}
+            </div>
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Line of Business</div>
+              <select value={newLic.line} onChange={e=>setNewLic({...newLic,line:e.target.value})}
+                style={{width:"100%",padding:"10px 12px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,background:T.bg,outline:"none"}}>
+                {["Life & Health","Property & Casualty","Life Only","Health Only","Variable","All Lines"].map(l=><option key={l}>{l}</option>)}
+              </select>
+            </div>
+            <div style={{marginBottom:20}}>
+              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Notes</div>
+              <input placeholder="CE requirements, renewal notes..." value={newLic.notes} onChange={e=>setNewLic({...newLic,notes:e.target.value})}
+                style={{width:"100%",padding:"10px 12px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
+            </div>
+            <div style={{display:"flex",gap:10}}>
+              <button onClick={()=>{setShowAdd(false);setEditId(null);}} style={{flex:1,padding:"12px",background:T.bg,border:`1px solid ${T.border}`,borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",color:T.sub}}>Cancel</button>
+              <button onClick={saveLicense} style={{flex:2,padding:"12px",background:T.navy,color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",fontSize:14}}>Save License</button>
             </div>
           </div>
         </div>
@@ -1471,11 +2074,14 @@ function AgentProfile({ profile, setProfile, bg = {} }) {
 
 // ── Root App ──────────────────────────────────────────────────
 const TABS = [
-  {id:"dashboard", label:"Dashboard", icon:"⚡"},
-  {id:"carriers",  label:"Carriers",  icon:"🏢"},
-  {id:"quotes",    label:"Quotes",    icon:"📊"},
-  {id:"clients",   label:"Clients",   icon:"👥"},
-  {id:"profile",   label:"Profile",   icon:"👤"},
+  {id:"dashboard",   label:"Dashboard",  icon:"⚡"},
+  {id:"carriers",    label:"Carriers",   icon:"🏢"},
+  {id:"links",       label:"My Links",   icon:"🔗"},
+  {id:"quotes",      label:"Quotes",     icon:"📊"},
+  {id:"clients",     label:"Clients",    icon:"👥"},
+  {id:"commissions", label:"Commissions",icon:"💰"},
+  {id:"licenses",    label:"Licenses",   icon:"🪪"},
+  {id:"profile",     label:"Profile",    icon:"👤"},
 ];
 
 const DEFAULT_PROFILE = {
@@ -1521,13 +2127,13 @@ export default function App() {
             }
           </div>
           <div style={{display:"flex", flexDirection:"column"}}>
-            <span style={{fontSize:12, fontWeight:700, color:profile.navTextColor==="dark"?"#1a1a2e":T.goldLight, fontFamily:"'Playfair Display',serif", lineHeight:1}}>{profile.agencyName||"ACC"}</span>
-            <span style={{fontSize:10, color:profile.navTextColor==="dark"?"rgba(0,0,0,0.5)":"rgba(255,255,255,0.4)", fontFamily:"'Lato',sans-serif"}}>{profile.firstName} {profile.lastName}</span>
+            <span style={{fontSize:12, fontWeight:700, color:T.blueLight, fontFamily:"'Playfair Display',serif", lineHeight:1}}>{profile.agencyName||"ACC"}</span>
+            <span style={{fontSize:10, color:"rgba(255,255,255,0.45)", fontFamily:"'Lato',sans-serif"}}>{profile.firstName} {profile.lastName}</span>
           </div>
         </div>
         <div style={{display:"flex", gap:0, overflowX:"auto", flex:1}}>
           {TABS.map(t=>(
-            <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"16px 12px", background:"none", border:"none", borderBottom:tab===t.id?`3px solid ${profile.navTextColor==="dark"?"#1a1a2e":T.gold}`:"3px solid transparent", color:tab===t.id?(profile.navTextColor==="dark"?"#1a1a2e":T.goldLight):(profile.navTextColor==="dark"?"rgba(0,0,0,0.45)":"rgba(255,255,255,0.5)"), cursor:"pointer", fontSize:12, fontFamily:"'Lato',sans-serif", fontWeight:700, whiteSpace:"nowrap", letterSpacing:0.3, transition:"all 0.15s"}}>
+            <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"16px 12px", background:"none", border:"none", borderBottom:tab===t.id?`3px solid ${T.blue}`:"3px solid transparent", color:tab===t.id?T.blueLight:"rgba(255,255,255,0.55)", cursor:"pointer", fontSize:12, fontFamily:"'Lato',sans-serif", fontWeight:700, whiteSpace:"nowrap", letterSpacing:0.3, transition:"all 0.15s"}}>
               {t.icon} {t.label}
             </button>
           ))}
@@ -1536,11 +2142,672 @@ export default function App() {
 
       {/* Content */}
       <div style={{maxWidth:1100, margin:"0 auto", padding:"24px 20px"}}>
-        {tab==="dashboard" && <Dashboard setTab={setTab} profile={profile} bg={bg}/>}
-        {tab==="carriers"  && <CarrierHub bg={bg}/>}
-        {tab==="quotes"    && <QuoteBuilder profile={profile} bg={bg} initialClient={quoteClient}/>}
-        {tab==="clients"   && <ClientProfiles bg={bg} onQuoteClient={handleQuoteClient} setTab={setTab}/>}
-        {tab==="profile"   && <AgentProfile profile={profile} setProfile={setProfile} bg={bg}/>}
+        {tab==="dashboard"   && <Dashboard setTab={setTab} profile={profile} bg={bg}/>}
+        {tab==="carriers"    && <CarrierHub bg={bg}/>}
+        {tab==="links"       && <CarrierLinks bg={bg}/>}
+        {tab==="quotes"      && <QuoteBuilder profile={profile} bg={bg} initialClient={quoteClient}/>}
+        {tab==="clients"     && <ClientProfiles bg={bg} onQuoteClient={handleQuoteClient} setTab={setTab}/>}
+        {tab==="commissions" && <CommissionLog bg={bg} profile={profile}/>}
+        {tab==="licenses"    && <LicenseTracker bg={bg}/>}
+        {tab==="profile"     && <AgentProfile profile={profile} setProfile={setProfile} bg={bg}/>}
+      </div>
+    </div>
+  );
+}// ── License Tracker ──────────────────────────────────────────
+function LicenseTracker() {
+  const [licenses, setLicenses] = useLocalStorage("acc_licenses", [
+    {id:1, state:"TN", licenseNum:"", npn:"", line:"Life & Health", expDate:"2025-12-31", status:"Active", notes:""},
+    {id:2, state:"AL", licenseNum:"", npn:"", line:"Life & Health", expDate:"2025-12-31", status:"Active", notes:""},
+    {id:3, state:"MS", licenseNum:"", npn:"", line:"Life & Health", expDate:"2025-12-31", status:"Active", notes:""},
+  ]);
+  const [showAdd, setShowAdd] = useState(false);
+  const [newLic, setNewLic] = useState({state:"",licenseNum:"",npn:"",line:"Life & Health",expDate:"",status:"Active",notes:""});
+  const [editId, setEditId] = useState(null);
+
+  const now = new Date();
+
+  const getDaysUntil = (dateStr) => {
+    if (!dateStr) return null;
+    return Math.floor((new Date(dateStr) - now) / (1000*60*60*24));
+  };
+
+  const getStatusColor = (dateStr) => {
+    const days = getDaysUntil(dateStr);
+    if (days === null) return T.muted;
+    if (days < 0)   return T.red;
+    if (days <= 30) return T.red;
+    if (days <= 90) return T.amber;
+    return T.green;
+  };
+
+  const getStatusLabel = (dateStr) => {
+    const days = getDaysUntil(dateStr);
+    if (days === null) return "No expiry";
+    if (days < 0)   return "EXPIRED";
+    if (days <= 30) return `${days}d left`;
+    if (days <= 90) return `${days}d left`;
+    return "Active";
+  };
+
+  const saveLicense = () => {
+    if (!newLic.state) return;
+    if (editId) {
+      setLicenses(licenses.map(l=>l.id===editId?{...newLic,id:editId}:l));
+      setEditId(null);
+    } else {
+      setLicenses([...licenses,{...newLic,id:Date.now()}]);
+    }
+    setNewLic({state:"",licenseNum:"",npn:"",line:"Life & Health",expDate:"",status:"Active",notes:""});
+    setShowAdd(false);
+  };
+
+  const startEdit = (lic) => {
+    setNewLic({...lic});
+    setEditId(lic.id);
+    setShowAdd(true);
+  };
+
+  const expiring = licenses.filter(l=>{
+    const d = getDaysUntil(l.expDate);
+    return d !== null && d >= 0 && d <= 90;
+  });
+
+  return (
+    <div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+        <div>
+          <h2 style={{fontSize:26,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>License Tracker</h2>
+          <p style={{fontSize:13,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>States, license numbers, NPN & expiration dates</p>
+        </div>
+        <button onClick={()=>{setNewLic({state:"",licenseNum:"",npn:"",line:"Life & Health",expDate:"",status:"Active",notes:""});setEditId(null);setShowAdd(true);}}
+          style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>
+          + Add License
+        </button>
+      </div>
+
+      {/* Expiring soon alert */}
+      {expiring.length>0 && (
+        <div style={{background:`${T.amber}15`,border:`1px solid ${T.amber}44`,borderRadius:14,padding:14,marginBottom:16,display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontSize:24}}>⚠️</span>
+          <div>
+            <div style={{fontSize:14,fontWeight:700,color:T.amber,fontFamily:"'Lato',sans-serif"}}>
+              {expiring.length} license{expiring.length!==1?"s":""} expiring within 90 days
+            </div>
+            <div style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>
+              {expiring.map(l=>`${l.state} (${getStatusLabel(l.expDate)})`).join(" · ")}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Stats row */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:20}}>
+        {[
+          {label:"Total States",  value:licenses.length,                                    color:T.blue},
+          {label:"Expiring Soon", value:licenses.filter(l=>{const d=getDaysUntil(l.expDate);return d!==null&&d>=0&&d<=90;}).length, color:T.amber},
+          {label:"Expired",       value:licenses.filter(l=>{const d=getDaysUntil(l.expDate);return d!==null&&d<0;}).length,         color:T.red},
+        ].map(({label,value,color})=>(
+          <div key={label} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:14,padding:14,textAlign:"center",borderTop:`3px solid ${color}`}}>
+            <div style={{fontSize:28,fontWeight:700,color,fontFamily:"'Courier Prime',monospace"}}>{value}</div>
+            <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:0.5,marginTop:2}}>{label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* License list */}
+      <div style={{display:"flex",flexDirection:"column",gap:10}}>
+        {licenses.sort((a,b)=>(getDaysUntil(a.expDate)||999)-(getDaysUntil(b.expDate)||999)).map(lic=>{
+          const statusColor = getStatusColor(lic.expDate);
+          const statusLabel = getStatusLabel(lic.expDate);
+          return (
+            <div key={lic.id} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:14,padding:16,display:"flex",alignItems:"center",gap:14,animation:"fadeUp 0.3s ease"}}>
+              {/* State badge */}
+              <div style={{width:52,height:52,borderRadius:14,background:T.navy,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                <div style={{fontSize:14,fontWeight:700,color:"#fff",fontFamily:"'Lato',sans-serif",textAlign:"center",lineHeight:1.2}}>{lic.state}</div>
+              </div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+                  <div style={{fontSize:15,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif"}}>{lic.line}</div>
+                  <span style={{fontSize:10,background:`${statusColor}18`,color:statusColor,padding:"2px 8px",borderRadius:20,fontFamily:"'Lato',sans-serif",fontWeight:700,border:`1px solid ${statusColor}44`}}>{statusLabel}</span>
+                </div>
+                <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>
+                  {lic.licenseNum&&<div style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>License: <strong>{lic.licenseNum}</strong></div>}
+                  {lic.npn&&<div style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>NPN: <strong>{lic.npn}</strong></div>}
+                  {lic.expDate&&<div style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>Exp: <strong>{new Date(lic.expDate).toLocaleDateString()}</strong></div>}
+                </div>
+                {lic.notes&&<div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:4,fontStyle:"italic"}}>{lic.notes}</div>}
+              </div>
+              <div style={{display:"flex",gap:6,flexShrink:0}}>
+                <button onClick={()=>startEdit(lic)} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:8,padding:"6px 10px",fontSize:12,color:T.muted,cursor:"pointer"}}>✏️</button>
+                <button onClick={()=>setLicenses(licenses.filter(l=>l.id!==lic.id))} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:8,padding:"6px 10px",fontSize:12,color:T.red,cursor:"pointer"}}>✕</button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Add/Edit modal */}
+      {showAdd && (
+        <div style={{position:"fixed",inset:0,background:"rgba(11,31,58,0.6)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShowAdd(false)}>
+          <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:24,padding:28,width:"100%",maxWidth:440,maxHeight:"90vh",overflowY:"auto",animation:"fadeUp 0.3s ease"}}>
+            <h3 style={{fontSize:20,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",marginBottom:18}}>{editId?"Edit License":"Add License"}</h3>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12}}>
+              {[
+                {label:"State",       key:"state",      ph:"e.g. TN"},
+                {label:"License #",   key:"licenseNum", ph:"e.g. 1234567"},
+                {label:"NPN",         key:"npn",        ph:"e.g. 12345678"},
+                {label:"Expiration",  key:"expDate",    ph:"",type:"date"},
+              ].map(({label,key,ph,type})=>(
+                <div key={key}>
+                  <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{label}</div>
+                  <input type={type||"text"} placeholder={ph} value={newLic[key]} onChange={e=>setNewLic({...newLic,[key]:e.target.value})}
+                    style={{width:"100%",padding:"10px 12px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
+                </div>
+              ))}
+            </div>
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Line of Business</div>
+              <select value={newLic.line} onChange={e=>setNewLic({...newLic,line:e.target.value})}
+                style={{width:"100%",padding:"10px 12px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,background:T.bg,outline:"none"}}>
+                {["Life & Health","Property & Casualty","Life Only","Health Only","Variable","All Lines"].map(l=><option key={l}>{l}</option>)}
+              </select>
+            </div>
+            <div style={{marginBottom:20}}>
+              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Notes</div>
+              <input placeholder="CE requirements, renewal notes..." value={newLic.notes} onChange={e=>setNewLic({...newLic,notes:e.target.value})}
+                style={{width:"100%",padding:"10px 12px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
+            </div>
+            <div style={{display:"flex",gap:10}}>
+              <button onClick={()=>{setShowAdd(false);setEditId(null);}} style={{flex:1,padding:"12px",background:T.bg,border:`1px solid ${T.border}`,borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",color:T.sub}}>Cancel</button>
+              <button onClick={saveLicense} style={{flex:2,padding:"12px",background:T.navy,color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",fontSize:14}}>Save License</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Dashboard ─────────────────────────────────────────────────
+function Dashboard({ setTab, profile, bg }) {
+  // Pull live data from localStorage
+  const clients     = JSON.parse(localStorage.getItem("acc_clients")     || "[]");
+  const quotes      = JSON.parse(localStorage.getItem("acc_quotes")      || "[]");
+  const commissions = JSON.parse(localStorage.getItem("acc_commissions") || "[]");
+  const licenses    = JSON.parse(localStorage.getItem("acc_licenses")    || "[]");
+
+  // Calculate daily stats
+  const activeClients   = clients.filter(c=>c.status==="Active").length;
+  const prospects       = clients.filter(c=>c.status==="Prospect").length;
+  const pendingQuotes   = quotes.filter(q=>(q.status||"open")==="pending").length;
+  const closedWon       = quotes.filter(q=>q.status==="closed_won").length;
+  const openQuotes      = quotes.filter(q=>(q.status||"open")==="open").length;
+
+  const now = new Date();
+  const thisMonth = commissions.filter(c=>{
+    const d = new Date(c.date);
+    return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  }).reduce((a,c)=>a+Number(c.amount),0);
+
+  const expiringLicenses = licenses.filter(l=>{
+    if (!l.expDate) return false;
+    const exp = new Date(l.expDate);
+    const diff = (exp-now)/(1000*60*60*24);
+    return diff>=0 && diff<=90;
+  }).length;
+
+  const today = now.toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+
+  const upcoming = [
+    {name:"James Stovall",         action:"T65 Review — Plan G",         date:"Aug 2025", line:"Medicare",        urgent:true},
+    {name:"Derek & Tina Williams", action:"Home + Auto Bundle Quote",    date:"Jun 2025", line:"Homeowners",      urgent:true},
+    {name:"Ripley School District",action:"Open Enrollment Follow-up",   date:"Sep 2025", line:"Supplemental",    urgent:false},
+    {name:"Precision Auto Repair", action:"GL + Workers Comp Quote",     date:"Jul 2025", line:"General Liability",urgent:false},
+    {name:"Maria Gonzalez",        action:"ACA Renewal",                 date:"Nov 2025", line:"Health & ACA",    urgent:false},
+    {name:"Henderson Family",      action:"Preneed Planning Review",     date:"Jul 2025", line:"Preneed / Burial", urgent:false},
+  ];
+
+  return (
+    <div style={{animation:"fadeUp 0.3s ease"}}>
+
+      {/* Welcome header */}
+      <div style={{background:`linear-gradient(135deg, ${T.navy} 0%, #1a3a6b 100%)`,borderRadius:20,padding:"24px 28px",marginBottom:20,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:-30,right:-30,width:160,height:160,borderRadius:"50%",background:"rgba(37,99,235,0.15)"}}/>
+        <div style={{position:"absolute",bottom:-20,right:60,width:80,height:80,borderRadius:"50%",background:"rgba(37,99,235,0.08)"}}/>
+        <div style={{fontSize:12,color:"rgba(255,255,255,0.5)",fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:2,marginBottom:6}}>{today}</div>
+        <div style={{fontSize:28,fontWeight:700,color:"#fff",fontFamily:"'Playfair Display',serif",lineHeight:1.2}}>
+          {profile.firstName||"Agent"} {profile.lastName}
+        </div>
+        <div style={{fontSize:13,color:T.blueLight,fontFamily:"'Lato',sans-serif",marginTop:6}}>
+          {profile.agencyName||"Agent Command Center"} {profile.states?`· ${profile.states}`:""}
+        </div>
+      </div>
+
+      {/* Daily stats grid */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:12,marginBottom:20}}>
+        {[
+          {label:"Active Clients",    value:activeClients,                        icon:"👥", color:T.blue,  tab:"clients"},
+          {label:"Prospects",         value:prospects,                            icon:"🎯", color:T.amber, tab:"clients"},
+          {label:"Open Quotes",       value:openQuotes,                           icon:"📋", color:T.blue,  tab:"quotes"},
+          {label:"Pending",           value:pendingQuotes,                        icon:"⏳", color:T.amber, tab:"quotes"},
+          {label:"Closed Won",        value:closedWon,                            icon:"✅", color:T.green, tab:"quotes"},
+          {label:"This Month",        value:"$"+thisMonth.toLocaleString(),       icon:"💰", color:T.green, tab:"commissions"},
+          {label:"Licenses Expiring", value:expiringLicenses,                    icon:"⚠️", color:expiringLicenses>0?T.red:T.green, tab:"licenses"},
+        ].map(({label,value,icon,color,tab})=>(
+          <div key={label} onClick={()=>setTab(tab)}
+            style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,padding:16,cursor:"pointer",transition:"all 0.15s",borderLeft:`3px solid ${color}`}}
+            onMouseEnter={e=>{e.currentTarget.style.boxShadow=`0 4px 20px rgba(37,99,235,0.1)`;e.currentTarget.style.transform="translateY(-2px)";}}
+            onMouseLeave={e=>{e.currentTarget.style.boxShadow="none";e.currentTarget.style.transform="translateY(0)";}}>
+            <div style={{fontSize:22,marginBottom:6}}>{icon}</div>
+            <div style={{fontSize:24,fontWeight:700,color,fontFamily:"'Courier Prime',monospace"}}>{value}</div>
+            <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2,textTransform:"uppercase",letterSpacing:0.5}}>{label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Quick actions */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:10,marginBottom:20}}>
+        {[
+          {label:"New Quote",       icon:"📊", tab:"quotes",      color:T.blue},
+          {label:"Add Client",      icon:"👤", tab:"clients",     color:T.navy},
+          {label:"Carrier Links",   icon:"🔗", tab:"links",       color:T.green},
+          {label:"Log Commission",  icon:"💰", tab:"commissions", color:T.amber},
+          {label:"Licenses",        icon:"🪪", tab:"licenses",    color:T.navy},
+          {label:"My Profile",      icon:"⚙️", tab:"profile",     color:T.muted},
+        ].map(({label,icon,tab,color})=>(
+          <button key={label} onClick={()=>setTab(tab)}
+            style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:14,padding:"14px 10px",cursor:"pointer",textAlign:"center",transition:"all 0.15s",display:"flex",flexDirection:"column",alignItems:"center",gap:6}}
+            onMouseEnter={e=>{e.currentTarget.style.background=color;e.currentTarget.style.borderColor=color;e.currentTarget.style.color="#fff";}}
+            onMouseLeave={e=>{e.currentTarget.style.background=T.surface;e.currentTarget.style.borderColor=T.border;e.currentTarget.style.color=T.sub;}}>
+            <span style={{fontSize:24}}>{icon}</span>
+            <div style={{fontSize:12,fontWeight:700,fontFamily:"'Lato',sans-serif"}}>{label}</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Upcoming actions */}
+      <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:18,padding:20}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+          <div style={{fontSize:16,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>Upcoming Actions</div>
+          <button onClick={()=>setTab("clients")} style={{background:"none",border:"none",fontSize:12,color:T.blue,cursor:"pointer",fontFamily:"'Lato',sans-serif",fontWeight:600}}>View all →</button>
+        </div>
+        {upcoming.map((u,i)=>(
+          <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 0",borderBottom:i<upcoming.length-1?`1px solid ${T.border}`:"none"}}>
+            <div style={{width:38,height:38,borderRadius:10,background:lineColor(u.line)+"18",border:`1px solid ${lineColor(u.line)}33`,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:11,fontWeight:700,fontFamily:"'Lato',sans-serif",flexShrink:0}}>
+              {u.name.split(" ").map(n=>n[0]).join("").slice(0,2)}
+            </div>
+            <div style={{flex:1}}>
+              <div style={{fontSize:14,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif"}}>{u.name}</div>
+              <div style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>{u.action}</div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontSize:12,color:u.urgent?T.red:T.muted,fontFamily:"'Lato',sans-serif",fontWeight:u.urgent?700:400}}>{u.date}</div>
+              <div style={{fontSize:10,color:"#fff",background:lineColor(u.line),padding:"2px 7px",borderRadius:10,marginTop:3,fontFamily:"'Lato',sans-serif"}}>{u.line}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Agent Profile ─────────────────────────────────────────────
+function AgentProfile({ profile, setProfile, bg = {} }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft]     = useState(profile);
+  const [logoPreview, setLogoPreview] = useState(profile.logoUrl||null);
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setLogoPreview(ev.target.result);
+      setDraft({...draft, logoUrl: ev.target.result});
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const save = () => { setProfile(draft); setEditing(false); };
+  const cancel = () => { setDraft(profile); setLogoPreview(profile.logoUrl||null); setEditing(false); };
+
+  const Field = ({label, value}) => (
+    <div style={{padding:"12px 0",borderBottom:`1px solid ${T.border}`}}>
+      <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1.5,marginBottom:3}}>{label}</div>
+      <div style={{fontSize:15,color:T.navy,fontFamily:"'Lato',sans-serif",fontWeight:600}}>{value||<span style={{color:T.muted,fontStyle:"italic"}}>Not set</span>}</div>
+    </div>
+  );
+
+  return (
+    <div style={{maxWidth:640,margin:"0 auto"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}}>
+        <div>
+          <h2 style={{fontSize:26,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>Agent Profile</h2>
+          <p style={{fontSize:13,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>Your info appears on quotes and client documents</p>
+        </div>
+        {!editing && (
+          <button onClick={()=>{setDraft(profile);setEditing(true);}} style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 20px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>
+            ✏️ Edit Profile
+          </button>
+        )}
+      </div>
+
+      {/* Logo + name hero */}
+      <div style={{background:profile.heroColor||T.navy,borderRadius:20,padding:"28px",marginBottom:20,display:"flex",alignItems:"center",gap:20,position:"relative",overflow:"hidden",transition:"background 0.4s"}}>
+        <div style={{position:"absolute",top:-20,right:-20,width:120,height:120,borderRadius:"50%",background:"rgba(201,168,76,0.12)"}}/>
+        {/* Logo circle */}
+        <div style={{width:80,height:80,borderRadius:20,background:profile.logoUrl?"transparent":T.gold,border:`3px solid ${T.gold}`,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",flexShrink:0}}>
+          {profile.logoUrl
+            ? <img src={profile.logoUrl} alt="logo" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+            : <span style={{fontSize:28,fontWeight:900,color:T.navy,fontFamily:"'Playfair Display',serif"}}>{(profile.agencyName||profile.firstName||"A").charAt(0)}</span>
+          }
+        </div>
+        <div>
+          <div style={{fontSize:22,fontWeight:700,color:profile.heroTextColor==="dark"?"#1a1a2e":"#fff",fontFamily:"'Playfair Display',serif",lineHeight:1.2}}>
+            {profile.firstName||"Your Name"} {profile.lastName}
+          </div>
+          {profile.title && <div style={{fontSize:13,color:profile.heroTextColor==="dark"?"#3a3a3a":T.goldLight,fontFamily:"'Lato',sans-serif",marginTop:3}}>{profile.title}</div>}
+          {profile.agencyName && <div style={{fontSize:14,color:profile.heroTextColor==="dark"?"rgba(0,0,0,0.6)":"rgba(255,255,255,0.7)",fontFamily:"'Lato',sans-serif",marginTop:2}}>{profile.agencyName}</div>}
+          {profile.npn && <div style={{fontSize:12,color:profile.heroTextColor==="dark"?"rgba(0,0,0,0.4)":"rgba(255,255,255,0.4)",fontFamily:"'Courier Prime',monospace",marginTop:4}}>NPN: {profile.npn}</div>}
+        </div>
+      </div>
+
+      {!editing ? (
+        // ── View mode ──────────────────────────────────────────
+        <div style={{background:T.surface,borderRadius:20,padding:24,border:`1px solid ${T.border}`}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 24px"}}>
+            <Field label="First Name"     value={profile.firstName}/>
+            <Field label="Last Name"      value={profile.lastName}/>
+            <Field label="Title / Role"   value={profile.title}/>
+            <Field label="Agency / Firm"  value={profile.agencyName}/>
+            <Field label="Phone"          value={profile.phone}/>
+            <Field label="Email"          value={profile.email}/>
+            <Field label="License #"      value={profile.licenseNum}/>
+            <Field label="NPN"            value={profile.npn}/>
+            <Field label="Website"        value={profile.website}/>
+            <Field label="State(s)"       value={profile.states}/>
+          </div>
+          <div style={{marginTop:4}}>
+            <Field label="Address / Office" value={profile.address}/>
+            <Field label="Tagline / Bio"    value={profile.tagline}/>
+          </div>
+
+          {/* Lines of business badges */}
+          {profile.linesOfBusiness?.length>0 && (
+            <div style={{marginTop:16}}>
+              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1.5,marginBottom:8}}>Licensed Lines</div>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                {profile.linesOfBusiness.map(l=>(
+                  <span key={l} style={{fontSize:11,background:lineColor(l)+"18",color:lineColor(l),border:`1px solid ${lineColor(l)}44`,padding:"3px 12px",borderRadius:20,fontFamily:"'Lato',sans-serif",fontWeight:700}}>{l}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Quote footer preview */}
+          <div style={{marginTop:20,background:T.bg,borderRadius:12,padding:16,border:`1px solid ${T.border}`}}>
+            <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1.5,marginBottom:10}}>Quote Footer Preview</div>
+            <div style={{display:"flex",alignItems:"center",gap:12}}>
+              {profile.logoUrl && <img src={profile.logoUrl} alt="logo" style={{width:36,height:36,borderRadius:8,objectFit:"cover"}}/>}
+              <div>
+                <div style={{fontSize:13,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif"}}>{profile.firstName} {profile.lastName} {profile.title?`· ${profile.title}`:""}</div>
+                <div style={{fontSize:11,color:T.sub,fontFamily:"'Lato',sans-serif"}}>{profile.agencyName} {profile.phone?`· ${profile.phone}`:""} {profile.email?`· ${profile.email}`:""}</div>
+                {profile.tagline && <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",fontStyle:"italic",marginTop:2}}>"{profile.tagline}"</div>}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        // ── Edit mode ──────────────────────────────────────────
+        <div style={{background:T.surface,borderRadius:20,padding:24,border:`1px solid ${T.border}`}}>
+
+          {/* Logo upload */}
+          <div style={{marginBottom:20,display:"flex",alignItems:"center",gap:16}}>
+            <div style={{width:72,height:72,borderRadius:16,background:logoPreview?"transparent":T.bg,border:`2px dashed ${T.border}`,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",flexShrink:0}}>
+              {logoPreview
+                ? <img src={logoPreview} alt="logo" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                : <span style={{fontSize:28}}>🏢</span>
+              }
+            </div>
+            <div>
+              <div style={{fontSize:14,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif",marginBottom:6}}>Agency Logo</div>
+              <label style={{background:T.navy,color:"#fff",padding:"8px 16px",borderRadius:10,fontSize:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer"}}>
+                📁 Upload Logo
+                <input type="file" accept="image/*" onChange={handleLogoUpload} style={{display:"none"}}/>
+              </label>
+              {logoPreview && <button onClick={()=>{setLogoPreview(null);setDraft({...draft,logoUrl:""});}} style={{marginLeft:8,background:"none",border:`1px solid ${T.border}`,borderRadius:8,padding:"7px 12px",fontSize:12,color:T.muted,cursor:"pointer",fontFamily:"'Lato',sans-serif"}}>Remove</button>}
+            </div>
+          </div>
+
+          {/* Fields grid */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+            {[
+              {label:"First Name",   key:"firstName",  ph:"Deidre"},
+              {label:"Last Name",    key:"lastName",   ph:"Jones"},
+              {label:"Title / Role", key:"title",      ph:"Independent Insurance Agent"},
+              {label:"Agency / Firm",key:"agencyName", ph:"The Coverage Firm"},
+              {label:"Phone",        key:"phone",      ph:"901-555-0100"},
+              {label:"Email",        key:"email",      ph:"deidre@thecoveragefirm.com"},
+              {label:"License #",    key:"licenseNum", ph:"TN-12345678"},
+              {label:"NPN",          key:"npn",        ph:"e.g. 12345678"},
+              {label:"Website",      key:"website",    ph:"www.thecoveragefirm.com"},
+              {label:"Licensed States",key:"states",   ph:"TN, AL, MS, KY"},
+            ].map(({label,key,ph})=>(
+              <div key={key}>
+                <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{label}</div>
+                <input placeholder={ph} value={draft[key]||""} onChange={e=>setDraft({...draft,[key]:e.target.value})}
+                  style={{width:"100%",padding:"10px 12px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
+              </div>
+            ))}
+          </div>
+
+          {/* Full width fields */}
+          {[
+            {label:"Office Address",key:"address",ph:"123 Main St, Covington TN 38019"},
+            {label:"Tagline / Bio", key:"tagline", ph:"Protecting families across Tennessee since 2015"},
+          ].map(({label,key,ph})=>(
+            <div key={key} style={{marginTop:12}}>
+              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{label}</div>
+              <input placeholder={ph} value={draft[key]||""} onChange={e=>setDraft({...draft,[key]:e.target.value})}
+                style={{width:"100%",padding:"10px 12px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
+            </div>
+          ))}
+
+          {/* Lines of business */}
+          <div style={{marginTop:16}}>
+            <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Licensed Lines of Business</div>
+            <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
+              {LINES.map(l=>{
+                const active=(draft.linesOfBusiness||[]).includes(l);
+                return (
+                  <button key={l} onClick={()=>{
+                    const cur=draft.linesOfBusiness||[];
+                    setDraft({...draft,linesOfBusiness:active?cur.filter(x=>x!==l):[...cur,l]});
+                  }} style={{padding:"4px 12px",borderRadius:20,border:`1px solid ${active?lineColor(l):T.border}`,background:active?lineColor(l)+"18":T.surface,color:active?lineColor(l):T.muted,fontSize:11,fontFamily:"'Lato',sans-serif",fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>
+                    {active?"✓ ":""}{l}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ── Color Controls ── */}
+          <div style={{marginTop:20,background:T.bg,borderRadius:16,padding:16,border:`1px solid ${T.border}`}}>
+            <div style={{fontSize:13,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",marginBottom:4}}>🎨 Colors & Theme</div>
+            <div style={{fontSize:12,color:T.muted,fontFamily:"'Lato',sans-serif",marginBottom:16}}>Customize your app colors to match your brand.</div>
+
+            {/* Background theme */}
+            <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Page Background</div>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
+              {BG_THEMES.map(b=>{
+                const active = draft.bgTheme===b.name;
+                return (
+                  <button key={b.name} onClick={()=>setDraft({...draft,bgTheme:b.name})}
+                    style={{display:"flex",alignItems:"center",gap:6,padding:"6px 12px",borderRadius:20,border:`2px solid ${active?T.gold:T.border}`,background:b.surface,cursor:"pointer",transition:"all 0.15s"}}>
+                    <div style={{width:14,height:14,borderRadius:"50%",background:b.bg,border:`1px solid ${T.border}`}}/>
+                    <span style={{fontSize:11,fontWeight:700,color:b.text,fontFamily:"'Lato',sans-serif"}}>{b.name}</span>
+                    {active&&<span style={{fontSize:10,color:T.gold}}>✓</span>}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Nav bar color */}
+            <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Nav Bar Color</div>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:8}}>
+              {["#1a2744","#1a3325","#5c1010","#1e0a3c","#0a1f3c","#2b1200","#042a2b","#1c1c1c","#ffffff","#f7f5f0"].map(c=>(
+                <button key={c} onClick={()=>setDraft({...draft,navColor:c})}
+                  style={{width:32,height:32,borderRadius:10,background:c,border:`3px solid ${draft.navColor===c?T.gold:T.border}`,cursor:"pointer",transition:"all 0.15s",boxShadow:draft.navColor===c?`0 0 0 2px ${T.gold}66`:undefined}}/>
+              ))}
+              <div style={{display:"flex",alignItems:"center",gap:6,background:T.surface,borderRadius:10,border:`1px solid ${T.border}`,padding:"4px 10px"}}>
+                <input type="color" value={draft.navColor||"#1a2744"} onChange={e=>setDraft({...draft,navColor:e.target.value})}
+                  style={{width:24,height:24,border:"none",borderRadius:4,cursor:"pointer",padding:0,background:"none"}}/>
+                <span style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif"}}>Custom</span>
+              </div>
+            </div>
+            <div style={{display:"flex",gap:8,marginBottom:16}}>
+              {["white","dark"].map(tc=>(
+                <button key={tc} onClick={()=>setDraft({...draft,navTextColor:tc})}
+                  style={{flex:1,padding:"7px",borderRadius:10,border:`2px solid ${draft.navTextColor===tc?T.gold:T.border}`,background:draft.navColor||T.navy,cursor:"pointer",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:11,color:tc==="white"?"#ffffff":"#1a1a2e",transition:"all 0.15s"}}>
+                  {tc==="white"?"White Text ☀️":"Dark Text 🌑"}
+                </button>
+              ))}
+            </div>
+
+            {/* Hero banner color */}
+            <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Name Banner Color</div>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:8}}>
+              {["#1a2744","#1a3325","#5c1010","#1e0a3c","#0a1f3c","#2b1200","#042a2b","#1c1c1c","#ffffff","#f7f5f0","#fdf6ec","#e8f4fd"].map(c=>(
+                <button key={c} onClick={()=>setDraft({...draft,heroColor:c})}
+                  style={{width:32,height:32,borderRadius:10,background:c,border:`3px solid ${draft.heroColor===c?T.gold:T.border}`,cursor:"pointer",transition:"all 0.15s",boxShadow:draft.heroColor===c?`0 0 0 2px ${T.gold}66`:undefined}}/>
+              ))}
+              <div style={{display:"flex",alignItems:"center",gap:6,background:T.surface,borderRadius:10,border:`1px solid ${T.border}`,padding:"4px 10px"}}>
+                <input type="color" value={draft.heroColor||"#1a2744"} onChange={e=>setDraft({...draft,heroColor:e.target.value})}
+                  style={{width:24,height:24,border:"none",borderRadius:4,cursor:"pointer",padding:0,background:"none"}}/>
+                <span style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif"}}>Custom</span>
+              </div>
+            </div>
+            <div style={{display:"flex",gap:8,marginBottom:4}}>
+              {["white","dark"].map(tc=>(
+                <button key={tc} onClick={()=>setDraft({...draft,heroTextColor:tc})}
+                  style={{flex:1,padding:"7px",borderRadius:10,border:`2px solid ${draft.heroTextColor===tc?T.gold:T.border}`,background:draft.heroColor||T.navy,cursor:"pointer",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:11,color:tc==="white"?"#ffffff":"#1a1a2e",transition:"all 0.15s"}}>
+                  {tc==="white"?"White Text ☀️":"Dark Text 🌑"}
+                </button>
+              ))}
+            </div>
+
+            {/* Live mini preview */}
+            <div style={{marginTop:14,borderRadius:12,overflow:"hidden",border:`1px solid ${T.border}`}}>
+              <div style={{background:draft.navColor||T.navy,padding:"8px 14px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                <span style={{fontSize:12,fontWeight:700,color:draft.navTextColor==="dark"?"#1a1a2e":T.goldLight,fontFamily:"'Playfair Display',serif"}}>{draft.agencyName||"Your Agency"}</span>
+                <div style={{display:"flex",gap:12}}>
+                  {["Dashboard","Carriers","Quotes"].map(t=>(
+                    <span key={t} style={{fontSize:10,color:draft.navTextColor==="dark"?"rgba(0,0,0,0.5)":"rgba(255,255,255,0.5)",fontFamily:"'Lato',sans-serif"}}>{t}</span>
+                  ))}
+                </div>
+              </div>
+              <div style={{background:draft.heroColor||T.navy,padding:"12px 14px"}}>
+                <div style={{fontSize:14,fontWeight:700,color:draft.heroTextColor==="dark"?"#1a1a2e":"#fff",fontFamily:"'Playfair Display',serif"}}>{draft.firstName||"Your Name"} {draft.lastName}</div>
+                <div style={{fontSize:11,color:draft.heroTextColor==="dark"?"rgba(0,0,0,0.5)":T.goldLight,fontFamily:"'Lato',sans-serif",marginTop:2}}>{draft.agencyName||"Your Agency"}</div>
+              </div>
+              <div style={{background:BG_THEMES.find(b=>b.name===draft.bgTheme)?.bg||"#f7f5f0",padding:"10px 14px",display:"flex",gap:8}}>
+                {["Card 1","Card 2","Card 3"].map(c=>(
+                  <div key={c} style={{flex:1,background:BG_THEMES.find(b=>b.name===draft.bgTheme)?.surface||"#fff",borderRadius:8,padding:"6px",border:`1px solid ${BG_THEMES.find(b=>b.name===draft.bgTheme)?.border||"#e8e4dc"}`,textAlign:"center"}}>
+                    <span style={{fontSize:9,color:BG_THEMES.find(b=>b.name===draft.bgTheme)?.sub||"#5a5a7a",fontFamily:"'Lato',sans-serif"}}>{c}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div style={{display:"flex",gap:10,marginTop:24}}>
+            <button onClick={cancel} style={{flex:1,padding:"13px",background:T.bg,border:`1px solid ${T.border}`,borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",color:T.sub}}>Cancel</button>
+            <button onClick={save} style={{flex:2,padding:"13px",background:T.navy,color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",fontSize:14}}>💾 Save Profile</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Root App ──────────────────────────────────────────────────
+const TABS = [
+  {id:"dashboard",   label:"Dashboard",  icon:"⚡"},
+  {id:"carriers",    label:"Carriers",   icon:"🏢"},
+  {id:"links",       label:"My Links",   icon:"🔗"},
+  {id:"quotes",      label:"Quotes",     icon:"📊"},
+  {id:"clients",     label:"Clients",    icon:"👥"},
+  {id:"commissions", label:"Commissions",icon:"💰"},
+  {id:"licenses",    label:"Licenses",   icon:"🪪"},
+  {id:"profile",     label:"Profile",    icon:"👤"},
+];
+
+const DEFAULT_PROFILE = {
+  firstName:"Deidre", lastName:"Jones", title:"Independent Insurance Agent",
+  agencyName:"The Coverage Firm", phone:"", email:"", licenseNum:"",
+  npn:"", website:"", states:"TN, AL, MS", address:"Covington, TN",
+  tagline:"Full-service insurance broker across all lines.",
+  logoUrl:"", linesOfBusiness:["Health & ACA","Medicare","Life & Annuities","Supplemental","Disability"],
+  bgTheme:"Classic Cream",
+  // Color overrides
+  navColor:"#1a2744",
+  heroColor:"#1a2744",
+  navTextColor:"white",   // "white" or "dark"
+  heroTextColor:"white",  // "white" or "dark"
+};
+
+export default function App() {
+  const [tab,          setTab]         = useState("dashboard");
+  const [profile,      setProfile]     = useLocalStorage("acc_profile", DEFAULT_PROFILE);
+  const [quoteClient,  setQuoteClient] = useState(null);
+
+  const handleQuoteClient = (client) => {
+    setQuoteClient(client);
+    setTab("quotes");
+  };
+
+  const bg = BG_THEMES.find(b => b.name === profile.bgTheme) || BG_THEMES[0];
+
+  // Update global T so all components pick up the active bg theme
+  applyBgTheme(bg);
+
+  return (
+    <div style={{background:bg.bg, minHeight:"100vh", fontFamily:"'Lato',sans-serif", transition:"background 0.4s"}}>
+      <style>{GLOBAL_CSS}</style>
+
+      {/* Top nav — color from active bg theme */}
+      <div style={{background:profile.navColor||bg.nav||T.navy, padding:"0 16px", display:"flex", alignItems:"center", position:"sticky", top:0, zIndex:50, boxShadow:"0 2px 20px rgba(0,0,0,0.25)", transition:"background 0.4s"}}>
+        <div onClick={()=>setTab("profile")} style={{display:"flex", alignItems:"center", gap:10, padding:"10px 0", marginRight:16, cursor:"pointer", flexShrink:0}}>
+          <div style={{width:34, height:34, borderRadius:10, background:profile.logoUrl?"transparent":T.gold, border:`2px solid ${T.gold}`, display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden"}}>
+            {profile.logoUrl
+              ? <img src={profile.logoUrl} alt="logo" style={{width:"100%", height:"100%", objectFit:"cover"}}/>
+              : <span style={{fontSize:14, fontWeight:900, color:bg.nav, fontFamily:"'Playfair Display',serif"}}>{(profile.agencyName||profile.firstName||"A").charAt(0)}</span>
+            }
+          </div>
+          <div style={{display:"flex", flexDirection:"column"}}>
+            <span style={{fontSize:12, fontWeight:700, color:T.blueLight, fontFamily:"'Playfair Display',serif", lineHeight:1}}>{profile.agencyName||"ACC"}</span>
+            <span style={{fontSize:10, color:"rgba(255,255,255,0.45)", fontFamily:"'Lato',sans-serif"}}>{profile.firstName} {profile.lastName}</span>
+          </div>
+        </div>
+        <div style={{display:"flex", gap:0, overflowX:"auto", flex:1}}>
+          {TABS.map(t=>(
+            <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"16px 12px", background:"none", border:"none", borderBottom:tab===t.id?`3px solid ${T.blue}`:"3px solid transparent", color:tab===t.id?T.blueLight:"rgba(255,255,255,0.55)", cursor:"pointer", fontSize:12, fontFamily:"'Lato',sans-serif", fontWeight:700, whiteSpace:"nowrap", letterSpacing:0.3, transition:"all 0.15s"}}>
+              {t.icon} {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{maxWidth:1100, margin:"0 auto", padding:"24px 20px"}}>
+        {tab==="dashboard"   && <Dashboard setTab={setTab} profile={profile} bg={bg}/>}
+        {tab==="carriers"    && <CarrierHub bg={bg}/>}
+        {tab==="links"       && <CarrierLinks bg={bg}/>}
+        {tab==="quotes"      && <QuoteBuilder profile={profile} bg={bg} initialClient={quoteClient}/>}
+        {tab==="clients"     && <ClientProfiles bg={bg} onQuoteClient={handleQuoteClient} setTab={setTab}/>}
+        {tab==="commissions" && <CommissionLog bg={bg} profile={profile}/>}
+        {tab==="licenses"    && <LicenseTracker bg={bg}/>}
+        {tab==="profile"     && <AgentProfile profile={profile} setProfile={setProfile} bg={bg}/>}
       </div>
     </div>
   );
