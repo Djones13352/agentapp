@@ -1,4 +1,91 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
+
+const OPTIONS = [
+  { name:"Steel Blue",    nav:"#0369A1", bg:"#F0F9FF", surface:"#ffffff", card:"#E0F2FE", text:"#0C4A6E", muted:"#7DD3FC" },
+  { name:"Deep Navy",     nav:"#0B1F3A", bg:"#F8FAFC", surface:"#ffffff", card:"#F1F5F9", text:"#0F172A", muted:"#94A3B8" },
+  { name:"Electric Blue", nav:"#2563EB", bg:"#EFF6FF", surface:"#ffffff", card:"#DBEAFE", text:"#1E3A8A", muted:"#93C5FD" },
+  { name:"Teal",          nav:"#0D9488", bg:"#F0FDFA", surface:"#ffffff", card:"#CCFBF1", text:"#134E4A", muted:"#5EEAD4" },
+  { name:"Slate",         nav:"#4F46E5", bg:"#EEF2FF", surface:"#ffffff", card:"#E0E7FF", text:"#312E81", muted:"#A5B4FC" },
+  { name:"Forest",        nav:"#166534", bg:"#F0FDF4", surface:"#ffffff", card:"#DCFCE7", text:"#14532D", muted:"#86EFAC" },
+  { name:"Crimson",       nav:"#9F1239", bg:"#FFF1F2", surface:"#ffffff", card:"#FFE4E6", text:"#881337", muted:"#FDA4AF" },
+  { name:"Dark Mode",     nav:"#111827", bg:"#111827", surface:"#1F2937", card:"#374151", text:"#F9FAFB", muted:"#9CA3AF" },
+  { name:"Warm Gold",     nav:"#92400E", bg:"#FFFBEB", surface:"#ffffff", card:"#FEF3C7", text:"#78350F", muted:"#FCD34D" },
+  { name:"Coverage Firm", nav:"#0B3C5D", bg:"#F0F9FF", surface:"#ffffff", card:"#E0F2FE", text:"#0C4A6E", muted:"#7DD3FC" },
+];
+
+export default function App() {
+  const [selected, setSelected] = useState(0);
+  const C = OPTIONS[selected];
+
+  return (
+    <div style={{background:C.bg, minHeight:"100vh", fontFamily:"sans-serif"}}>
+      <style>{`* { box-sizing:border-box; margin:0; padding:0; }`}</style>
+
+      {/* Mock nav bar */}
+      <div style={{background:C.nav, padding:"0 16px", display:"flex", alignItems:"center", gap:0, boxShadow:"0 2px 20px rgba(0,0,0,0.2)"}}>
+        <div style={{display:"flex", alignItems:"center", gap:10, padding:"12px 0", marginRight:16}}>
+          <div style={{width:34, height:34, borderRadius:10, background:"rgba(255,255,255,0.2)", display:"flex", alignItems:"center", justifyContent:"center"}}>
+            <span style={{fontSize:16}}>⚡</span>
+          </div>
+          <div>
+            <div style={{fontSize:12, fontWeight:700, color:"rgba(255,255,255,0.9)", lineHeight:1}}>The Coverage Firm</div>
+            <div style={{fontSize:10, color:"rgba(255,255,255,0.5)"}}>Deidre Jones</div>
+          </div>
+        </div>
+        {["Dashboard","Carriers","Links","Quotes","Clients","Commissions","Licenses","Profile"].map((t,i)=>(
+          <button key={t} style={{padding:"14px 10px", background:"none", border:"none", borderBottom:i===0?"3px solid rgba(255,255,255,0.9)":"3px solid transparent", color:i===0?"rgba(255,255,255,0.95)":"rgba(255,255,255,0.5)", cursor:"pointer", fontSize:11, fontWeight:700, whiteSpace:"nowrap"}}>
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {/* Mock dashboard */}
+      <div style={{maxWidth:900, margin:"0 auto", padding:"24px 20px"}}>
+
+        {/* Welcome banner */}
+        <div style={{background:C.nav, borderRadius:20, padding:"24px 28px", marginBottom:20, position:"relative", overflow:"hidden"}}>
+          <div style={{position:"absolute", top:-30, right:-30, width:160, height:160, borderRadius:"50%", background:"rgba(255,255,255,0.08)"}}/>
+          <div style={{fontSize:11, color:"rgba(255,255,255,0.5)", textTransform:"uppercase", letterSpacing:2, marginBottom:6}}>Monday, June 15, 2026</div>
+          <div style={{fontSize:26, fontWeight:700, color:"#fff", fontFamily:"Georgia,serif"}}>Deidre Jones</div>
+          <div style={{fontSize:13, color:"rgba(255,255,255,0.7)", marginTop:4}}>The Coverage Firm · TN, AL, MS</div>
+        </div>
+
+        {/* Stats */}
+        <div style={{display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:10, marginBottom:16}}>
+          {[{l:"Active Clients",v:4},{l:"Open Quotes",v:2},{l:"This Month",v:"$1,240"},{l:"Licenses",v:"1 ⚠️"}].map(s=>(
+            <div key={s.l} style={{background:C.surface, border:`1px solid ${C.nav}33`, borderRadius:14, padding:14, textAlign:"center", borderTop:`3px solid ${C.nav}`}}>
+              <div style={{fontSize:22, fontWeight:700, color:C.nav, fontFamily:"monospace"}}>{s.v}</div>
+              <div style={{fontSize:10, color:C.text+"88", textTransform:"uppercase", letterSpacing:0.5, marginTop:2}}>{s.l}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Quick actions */}
+        <div style={{display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8, marginBottom:16}}>
+          {["📊 New Quote","👤 Add Client","🔗 Carrier Links","💰 Log Commission","🪪 Licenses","⚙️ Profile"].map(a=>(
+            <button key={a} style={{background:C.surface, border:`1px solid ${C.nav}33`, borderRadius:12, padding:"12px 8px", cursor:"pointer", fontSize:12, fontWeight:700, color:C.nav, transition:"all 0.15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background=C.nav;e.currentTarget.style.color="#fff";}}
+              onMouseLeave={e=>{e.currentTarget.style.background=C.surface;e.currentTarget.style.color=C.nav;}}>
+              {a}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Color picker */}
+      <div style={{position:"fixed", bottom:20, left:"50%", transform:"translateX(-50%)", background:"#fff", borderRadius:20, padding:"14px 20px", boxShadow:"0 8px 40px rgba(0,0,0,0.15)", display:"flex", gap:10, alignItems:"center", flexWrap:"wrap", justifyContent:"center"}}>
+        <span style={{fontSize:12, fontWeight:700, color:"#333", marginRight:4}}>Pick a color:</span>
+        {OPTIONS.map((o,i)=>(
+          <button key={o.name} onClick={()=>setSelected(i)}
+            style={{display:"flex", alignItems:"center", gap:6, padding:"6px 12px", borderRadius:20, border:`2px solid ${selected===i?o.nav:"#e0e0e0"}`, background:selected===i?o.nav+"15":"#fff", cursor:"pointer", fontSize:11, fontWeight:700, color:selected===i?o.nav:"#666"}}>
+            <div style={{width:14, height:14, borderRadius:"50%", background:o.nav}}/>
+            {o.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}import React, { useState, useEffect } from "react";
 
 // ── Persistent state hook — saves to localStorage ─────────────
 function useLocalStorage(key, defaultValue) {
@@ -15,46 +102,49 @@ function useLocalStorage(key, defaultValue) {
   return [value, setValue];
 }
 
-// ── Theme — Navy + Electric Blue Professional ─────────────────
+// ── Theme — Steel Blue Professional (default) ────────────────
 const T_BASE = {
-  navy:      "#0B1F3A",
-  navyMid:   "#0f2847",
-  blue:      "#2563EB",
-  blueLight: "#60A5FA",
-  blueDim:   "#2563EB22",
+  navy:      "#0369A1",
+  navyMid:   "#0284C7",
+  blue:      "#0284C7",
+  blueLight: "#7DD3FC",
+  blueDim:   "#0284C722",
   green:     "#10B981",
   greenDim:  "#10B98122",
   red:       "#EF4444",
   amber:     "#F59E0B",
   white:     "#ffffff",
-  // keep gold as alias for accent
-  gold:      "#2563EB",
-  goldLight: "#60A5FA",
+  gold:      "#0284C7",
+  goldLight: "#7DD3FC",
 };
 
 var T = {
   ...T_BASE,
-  bg:      "#F8FAFC",
+  bg:      "#F0F9FF",
   surface: "#ffffff",
-  card:    "#F1F5F9",
-  border:  "#E2E8F0",
-  text:    "#0F172A",
-  sub:     "#475569",
-  muted:   "#94A3B8",
+  card:    "#E0F2FE",
+  border:  "#BAE6FD",
+  text:    "#0C4A6E",
+  sub:     "#0369A1",
+  muted:   "#7DD3FC",
 };
 
 function applyBgTheme(bg) {
   T = { ...T_BASE, ...bg };
 }
 
-// Background color swatches
+// Color themes agents can pick from
 const BG_THEMES = [
-  { name:"Professional",  nav:"#0B1F3A", navText:"#ffffff", hero:"#0B1F3A", bg:"#F8FAFC", surface:"#ffffff", card:"#F1F5F9", border:"#E2E8F0", text:"#0F172A", sub:"#475569", muted:"#94A3B8" },
-  { name:"Pure White",    nav:"#0B1F3A", navText:"#ffffff", hero:"#0B1F3A", bg:"#ffffff", surface:"#F8FAFC", card:"#F1F5F9", border:"#E2E8F0", text:"#0F172A", sub:"#475569", muted:"#94A3B8" },
-  { name:"Dark Mode",     nav:"#111827", navText:"#ffffff", hero:"#1F2937", bg:"#111827", surface:"#1F2937", card:"#374151", border:"#4B5563", text:"#F9FAFB", sub:"#D1D5DB", muted:"#9CA3AF" },
-  { name:"Deep Navy",     nav:"#0B1F3A", navText:"#ffffff", hero:"#0f2847", bg:"#0B1F3A", surface:"#0f2847", card:"#1a3a5c", border:"#1e4a72", text:"#F8FAFC", sub:"#CBD5E1", muted:"#64748B" },
-  { name:"Soft Gray",     nav:"#0B1F3A", navText:"#ffffff", hero:"#0B1F3A", bg:"#F1F5F9", surface:"#ffffff", card:"#E2E8F0", border:"#CBD5E1", text:"#0F172A", sub:"#475569", muted:"#94A3B8" },
-  { name:"Coverage Firm", nav:"#0B3C5D", navText:"#ffffff", hero:"#0B3C5D", bg:"#F0F9FF", surface:"#ffffff", card:"#E0F2FE", border:"#BAE6FD", text:"#0C4A6E", sub:"#0369A1", muted:"#7DD3FC" },
+  { name:"Steel Blue",    nav:"#0369A1", hero:"#0369A1", bg:"#F0F9FF", surface:"#ffffff", card:"#E0F2FE", border:"#BAE6FD", text:"#0C4A6E", sub:"#0369A1", muted:"#7DD3FC" },
+  { name:"Deep Navy",     nav:"#0B1F3A", hero:"#0B1F3A", bg:"#F8FAFC", surface:"#ffffff", card:"#F1F5F9", border:"#E2E8F0", text:"#0F172A", sub:"#475569", muted:"#94A3B8" },
+  { name:"Electric Blue", nav:"#2563EB", hero:"#2563EB", bg:"#EFF6FF", surface:"#ffffff", card:"#DBEAFE", border:"#BFDBFE", text:"#1E3A8A", sub:"#1D4ED8", muted:"#93C5FD" },
+  { name:"Teal",          nav:"#0D9488", hero:"#0D9488", bg:"#F0FDFA", surface:"#ffffff", card:"#CCFBF1", border:"#99F6E4", text:"#134E4A", sub:"#0F766E", muted:"#5EEAD4" },
+  { name:"Slate",         nav:"#4F46E5", hero:"#4F46E5", bg:"#EEF2FF", surface:"#ffffff", card:"#E0E7FF", border:"#C7D2FE", text:"#312E81", sub:"#4338CA", muted:"#A5B4FC" },
+  { name:"Forest",        nav:"#166534", hero:"#166534", bg:"#F0FDF4", surface:"#ffffff", card:"#DCFCE7", border:"#BBF7D0", text:"#14532D", sub:"#15803D", muted:"#86EFAC" },
+  { name:"Crimson",       nav:"#9F1239", hero:"#9F1239", bg:"#FFF1F2", surface:"#ffffff", card:"#FFE4E6", border:"#FECDD3", text:"#881337", sub:"#BE123C", muted:"#FDA4AF" },
+  { name:"Dark Mode",     nav:"#111827", hero:"#1F2937", bg:"#111827", surface:"#1F2937", card:"#374151", border:"#4B5563", text:"#F9FAFB", sub:"#D1D5DB", muted:"#9CA3AF" },
+  { name:"Warm Gold",     nav:"#92400E", hero:"#92400E", bg:"#FFFBEB", surface:"#ffffff", card:"#FEF3C7", border:"#FDE68A", text:"#78350F", sub:"#B45309", muted:"#FCD34D" },
+  { name:"Coverage Firm", nav:"#0B3C5D", hero:"#0B3C5D", bg:"#F0F9FF", surface:"#ffffff", card:"#E0F2FE", border:"#BAE6FD", text:"#0C4A6E", sub:"#0369A1", muted:"#7DD3FC" },
 ];
 
 // ── All insurance lines including P&C ────────────────────────
@@ -1385,7 +1475,9 @@ function CarrierLinks() {
       )}
     </div>
   );
-}// ── Commission Log ────────────────────────────────────────────
+}
+
+// ── Commission Log ────────────────────────────────────────────
 function CommissionLog({ profile }) {
   const [commissions, setCommissions] = useLocalStorage("acc_commissions", []);
   const [showAdd, setShowAdd] = useState(false);
@@ -1978,15 +2070,26 @@ function AgentProfile({ profile, setProfile, bg = {} }) {
 
             {/* Background theme */}
             <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Page Background</div>
-            <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))",gap:8,marginBottom:16}}>
               {BG_THEMES.map(b=>{
                 const active = draft.bgTheme===b.name;
                 return (
                   <button key={b.name} onClick={()=>setDraft({...draft,bgTheme:b.name})}
-                    style={{display:"flex",alignItems:"center",gap:6,padding:"6px 12px",borderRadius:20,border:`2px solid ${active?T.gold:T.border}`,background:b.surface,cursor:"pointer",transition:"all 0.15s"}}>
-                    <div style={{width:14,height:14,borderRadius:"50%",background:b.bg,border:`1px solid ${T.border}`}}/>
-                    <span style={{fontSize:11,fontWeight:700,color:b.text,fontFamily:"'Lato',sans-serif"}}>{b.name}</span>
-                    {active&&<span style={{fontSize:10,color:T.gold}}>✓</span>}
+                    style={{borderRadius:14,border:`3px solid ${active?b.nav:"transparent"}`,background:b.surface,cursor:"pointer",padding:0,overflow:"hidden",transition:"all 0.2s",boxShadow:active?`0 0 0 2px ${b.nav}44`:"none"}}>
+                    {/* Mini nav preview */}
+                    <div style={{background:b.nav,padding:"6px 10px",display:"flex",alignItems:"center",gap:6}}>
+                      <div style={{width:10,height:10,borderRadius:"50%",background:"rgba(255,255,255,0.4)"}}/>
+                      <div style={{flex:1,height:4,background:"rgba(255,255,255,0.3)",borderRadius:2}}/>
+                      {active&&<span style={{fontSize:10,color:"#fff"}}>✓</span>}
+                    </div>
+                    {/* Mini content preview */}
+                    <div style={{background:b.bg,padding:"6px 10px"}}>
+                      <div style={{height:4,background:b.nav+"33",borderRadius:2,marginBottom:3,width:"70%"}}/>
+                      <div style={{height:3,background:b.muted+"55",borderRadius:2,width:"50%"}}/>
+                    </div>
+                    <div style={{background:b.surface,padding:"4px 10px 8px",textAlign:"center"}}>
+                      <span style={{fontSize:10,fontWeight:700,color:b.sub,fontFamily:"'Lato',sans-serif"}}>{b.name}</span>
+                    </div>
                   </button>
                 );
               })}
@@ -2088,7 +2191,7 @@ const DEFAULT_PROFILE = {
   npn:"", website:"", states:"TN, AL, MS", address:"Covington, TN",
   tagline:"Full-service insurance broker across all lines.",
   logoUrl:"", linesOfBusiness:["Health & ACA","Medicare","Life & Annuities","Supplemental","Disability"],
-  bgTheme:"Classic Cream",
+  bgTheme:"Steel Blue",
   // Color overrides
   navColor:"#1a2744",
   heroColor:"#1a2744",
@@ -2636,15 +2739,26 @@ function AgentProfile({ profile, setProfile, bg = {} }) {
 
             {/* Background theme */}
             <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Page Background</div>
-            <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))",gap:8,marginBottom:16}}>
               {BG_THEMES.map(b=>{
                 const active = draft.bgTheme===b.name;
                 return (
                   <button key={b.name} onClick={()=>setDraft({...draft,bgTheme:b.name})}
-                    style={{display:"flex",alignItems:"center",gap:6,padding:"6px 12px",borderRadius:20,border:`2px solid ${active?T.gold:T.border}`,background:b.surface,cursor:"pointer",transition:"all 0.15s"}}>
-                    <div style={{width:14,height:14,borderRadius:"50%",background:b.bg,border:`1px solid ${T.border}`}}/>
-                    <span style={{fontSize:11,fontWeight:700,color:b.text,fontFamily:"'Lato',sans-serif"}}>{b.name}</span>
-                    {active&&<span style={{fontSize:10,color:T.gold}}>✓</span>}
+                    style={{borderRadius:14,border:`3px solid ${active?b.nav:"transparent"}`,background:b.surface,cursor:"pointer",padding:0,overflow:"hidden",transition:"all 0.2s",boxShadow:active?`0 0 0 2px ${b.nav}44`:"none"}}>
+                    {/* Mini nav preview */}
+                    <div style={{background:b.nav,padding:"6px 10px",display:"flex",alignItems:"center",gap:6}}>
+                      <div style={{width:10,height:10,borderRadius:"50%",background:"rgba(255,255,255,0.4)"}}/>
+                      <div style={{flex:1,height:4,background:"rgba(255,255,255,0.3)",borderRadius:2}}/>
+                      {active&&<span style={{fontSize:10,color:"#fff"}}>✓</span>}
+                    </div>
+                    {/* Mini content preview */}
+                    <div style={{background:b.bg,padding:"6px 10px"}}>
+                      <div style={{height:4,background:b.nav+"33",borderRadius:2,marginBottom:3,width:"70%"}}/>
+                      <div style={{height:3,background:b.muted+"55",borderRadius:2,width:"50%"}}/>
+                    </div>
+                    <div style={{background:b.surface,padding:"4px 10px 8px",textAlign:"center"}}>
+                      <span style={{fontSize:10,fontWeight:700,color:b.sub,fontFamily:"'Lato',sans-serif"}}>{b.name}</span>
+                    </div>
                   </button>
                 );
               })}
@@ -2746,7 +2860,7 @@ const DEFAULT_PROFILE = {
   npn:"", website:"", states:"TN, AL, MS", address:"Covington, TN",
   tagline:"Full-service insurance broker across all lines.",
   logoUrl:"", linesOfBusiness:["Health & ACA","Medicare","Life & Annuities","Supplemental","Disability"],
-  bgTheme:"Classic Cream",
+  bgTheme:"Steel Blue",
   // Color overrides
   navColor:"#1a2744",
   heroColor:"#1a2744",
