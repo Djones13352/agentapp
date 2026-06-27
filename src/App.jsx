@@ -62,7 +62,7 @@ const BG_THEMES = [
 
 // ── All insurance lines including P&C ────────────────────────
 const LINE_GROUPS = {
-  "Life & Health": ["Health & ACA","Medicare","Life & Annuities","Preneed / Burial","Supplemental","Dental & Vision","Disability","Long-Term Care","Critical Illness","Hospital Indemnity"],
+  "Life & Health": ["Health & ACA","Medicare","Life & Annuities","Preneed / Burial","Supplemental","Dental & Vision","Disability","Long-Term Care","Critical Illness","Hospital Indemnity","Employer Benefits"],
   "Property & Casualty": ["Auto","Homeowners","Renters","Commercial Auto","General Liability","Commercial Property","Workers Comp","Umbrella / Excess","Flood","Cyber Liability","Professional Liability (E&O)","Bonds & Surety"],
   "Specialty": ["Pet Insurance","Travel Insurance","Farm & Ranch","Marine","Title Insurance"],
 };
@@ -82,10 +82,10 @@ const LINK_TYPES = [
 
 // ── Quote Status ──────────────────────────────────────────────
 const QUOTE_STATUSES = [
-  {id:"open",       label:"Open",       icon:"📋", color:"#1a2744"},
-  {id:"pending",    label:"Pending",    icon:"⏳", color:"#d4850a"},
-  {id:"closed_won", label:"Closed Won", icon:"✅", color:"#2d7a4f"},
-  {id:"closed_lost",label:"Closed Lost",icon:"❌", color:"#c0392b"},
+  {id:"open",       label:"Open",       icon:"○", color:"#1a2744"},
+  {id:"pending",    label:"Pending",    icon:"◐", color:"#d4850a"},
+  {id:"closed_won", label:"Closed Won", icon:"✓", color:"#2d7a4f"},
+  {id:"closed_lost",label:"Closed Lost",icon:"✕", color:"#c0392b"},
 ];
 const isPCLine = (line) => PC_LINES.includes(line);
 
@@ -193,7 +193,7 @@ function CarrierCard({ carrier, onClick }) {
 }
 
 // ── Carrier Detail Modal ──────────────────────────────────────
-function CarrierModal({ carrier, onClose, onEdit }) {
+function CarrierModal({ carrier, onClose, onEdit, onDeleteRequest }) {
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(26,39,68,0.5)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20,animation:"fadeIn 0.2s ease"}} onClick={onClose}>
       <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:24,padding:28,width:"100%",maxWidth:480,maxHeight:"85vh",overflowY:"auto",animation:"fadeUp 0.3s ease"}}>
@@ -207,11 +207,10 @@ function CarrierModal({ carrier, onClose, onEdit }) {
         </div>
 
         {[
-          {label:"Agent Phone", value:carrier.phone, icon:"📞"},
-          {label:"Licensed States", value:carrier.contracts.join(", "), icon:"📍"},
-        ].map(({label,value,icon})=>(
+          {label:"Agent Phone", value:carrier.phone},
+          {label:"Licensed States", value:carrier.contracts.join(", ")},
+        ].map(({label,value})=>(
           <div key={label} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 0",borderBottom:`1px solid ${T.border}`}}>
-            <span style={{fontSize:20}}>{icon}</span>
             <div>
               <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1}}>{label}</div>
               <div style={{fontSize:15,color:T.navy,fontFamily:"'Lato',sans-serif",fontWeight:600,marginTop:2}}>{value}</div>
@@ -220,10 +219,7 @@ function CarrierModal({ carrier, onClose, onEdit }) {
         ))}
         {/* Commission / Override breakdown */}
         <div style={{padding:"12px 0",borderBottom:`1px solid ${T.border}`}}>
-          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-            <span style={{fontSize:20}}>💰</span>
-            <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1}}>Commission / Override by Product</div>
-          </div>
+          <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>Commission / Override by Product</div>
           {(carrier.overrides||[{product:"All Products",rate:carrier.override}]).map((o,i)=>(
             <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:i%2===0?T.bg:T.surface,borderRadius:8,marginBottom:4}}>
               <span style={{fontSize:13,color:T.sub,fontFamily:"'Lato',sans-serif"}}>{o.product}</span>
@@ -239,12 +235,19 @@ function CarrierModal({ carrier, onClose, onEdit }) {
 
         <div style={{display:"flex",gap:10,marginTop:16}}>
           <a href={carrier.portal} target="_blank" rel="noreferrer" style={{flex:2,display:"block",background:T.navy,color:"#fff",textAlign:"center",padding:"14px",borderRadius:12,textDecoration:"none",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:14,letterSpacing:0.5}}>
-            🔗 Open Agent Portal
+            Open Agent Portal
           </a>
           <button onClick={()=>{onEdit(carrier);onClose();}} style={{flex:1,background:T.bg,border:`1px solid ${T.border}`,borderRadius:12,padding:"14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:14,color:T.sub,cursor:"pointer"}}>
-            ✏️ Edit
+            Edit
           </button>
         </div>
+
+        {/* Delete — visually separated below the primary actions to prevent accidental taps */}
+        {onDeleteRequest && (
+          <button onClick={()=>onDeleteRequest(carrier)} style={{width:"100%",marginTop:12,padding:"11px",background:"transparent",color:T.red,border:`1px solid ${T.red}33`,borderRadius:10,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer"}}>
+            Delete Carrier
+          </button>
+        )}
       </div>
     </div>
   );
@@ -258,8 +261,25 @@ function CarrierHub() {
   const [showAdd, setShowAdd] = useState(false);
   const [editingCarrier, setEditingCarrier] = useState(null);
   const [newCarrier, setNewCarrier] = useState({name:"",line:"Health & ACA",phone:"",portal:"",override:"",overrides:[{product:"",rate:""}],notes:""});
+  const [confirmDelete, setConfirmDelete] = useState(null); // carrier pending delete confirmation
+  const [showDeleted, setShowDeleted] = useState(false);
 
-  const filtered = filterLine==="All" ? carriers : carriers.filter(c=>c.line===filterLine);
+  const deleteCarrier = (carrier) => {
+    // Soft delete — keeps the record (so old quotes referencing this carrier
+    // by name still resolve to something) but removes it from the active
+    // list, filters, and "Add Carrier" autocomplete going forward.
+    setCarriers(carriers.map(c => c.id===carrier.id ? {...c, deleted:true, deletedDate:new Date().toISOString().split("T")[0]} : c));
+    setConfirmDelete(null);
+    setSelected(null);
+  };
+
+  const restoreCarrier = (carrier) => {
+    setCarriers(carriers.map(c => c.id===carrier.id ? {...c, deleted:false, deletedDate:null} : c));
+  };
+
+  const activeCarriers = carriers.filter(c=>!c.deleted);
+  const deletedCarriers = carriers.filter(c=>c.deleted);
+  const filtered = (showDeleted ? deletedCarriers : activeCarriers).filter(c => filterLine==="All" || c.line===filterLine);
 
   const addCarrier = () => {
     if (!newCarrier.name) return;
@@ -277,12 +297,19 @@ function CarrierHub() {
 
   return (
     <div>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:12}}>
         <div>
           <h2 style={{fontSize:26,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>Carrier Hub</h2>
-          <p style={{fontSize:13,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>{carriers.length} carriers · tap to view portal & details</p>
+          <p style={{fontSize:13,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>{activeCarriers.length} active{deletedCarriers.length>0?` · ${deletedCarriers.length} deleted`:""} · tap to view portal & details</p>
         </div>
-        <button onClick={()=>setShowAdd(true)} style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>+ Add Carrier</button>
+        <div style={{display:"flex",gap:8}}>
+          {deletedCarriers.length>0 && (
+            <button onClick={()=>setShowDeleted(!showDeleted)} style={{background: showDeleted ? T.navy : T.card,color: showDeleted ? "#fff" : T.sub,border:`1px solid ${showDeleted ? T.navy : T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer"}}>
+              {showDeleted ? "Viewing Deleted" : "View Deleted"}
+            </button>
+          )}
+          {!showDeleted && <button onClick={()=>setShowAdd(true)} style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>+ Add Carrier</button>}
+        </div>
       </div>
 
       {/* Line filter — grouped */}
@@ -312,13 +339,43 @@ function CarrierHub() {
         </div>
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:14}}>
-        {filtered.map(c=><CarrierCard key={c.id} carrier={c} onClick={()=>setSelected(c)}/>)}
-      </div>
+      {showDeleted ? (
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          {filtered.length===0 && <div style={{textAlign:"center",padding:"40px 20px",color:T.muted,fontFamily:"'Lato',sans-serif",fontSize:13}}>No deleted carriers.</div>}
+          {filtered.map(c=>(
+            <div key={c.id} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:14,padding:14,display:"flex",alignItems:"center",gap:12,opacity:0.75}}>
+              <div style={{width:40,height:40,borderRadius:10,background:T.bg,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:T.muted,fontFamily:"'Playfair Display',serif",fontSize:14,flexShrink:0}}>{c.logo}</div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:14,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>{c.name}</div>
+                <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif"}}>{c.line} · Deleted {c.deletedDate}</div>
+              </div>
+              <button onClick={()=>restoreCarrier(c)} style={{background:T.navy,color:"#fff",border:"none",borderRadius:10,padding:"8px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",flexShrink:0}}>Restore</button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:14}}>
+          {filtered.map(c=><CarrierCard key={c.id} carrier={c} onClick={()=>setSelected(c)}/>)}
+        </div>
+      )}
 
-      {selected && <CarrierModal carrier={selected} onClose={()=>setSelected(null)} onEdit={(c)=>{setNewCarrier({...c,overrides:c.overrides||[{product:'',rate:c.override||''}]});setEditingCarrier(c.id);setShowAdd(true);}}/>}
+      {selected && <CarrierModal carrier={selected} onClose={()=>setSelected(null)} onEdit={(c)=>{setNewCarrier({...c,overrides:c.overrides||[{product:'',rate:c.override||''}]});setEditingCarrier(c.id);setShowAdd(true);}} onDeleteRequest={(c)=>{setSelected(null);setConfirmDelete(c);}}/>}
 
-      {/* Add carrier modal */}
+      {/* Delete confirmation */}
+      {confirmDelete && (
+        <div style={{position:"fixed",inset:0,background:"rgba(26,39,68,0.55)",zIndex:130,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setConfirmDelete(null)}>
+          <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:20,padding:24,width:"100%",maxWidth:400}}>
+            <div style={{fontSize:17,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",marginBottom:8}}>Delete {confirmDelete.name}?</div>
+            <p style={{fontSize:13,color:T.sub,fontFamily:"'Lato',sans-serif",lineHeight:1.6,marginBottom:18}}>
+              This removes {confirmDelete.name} from your active carrier list and portal links. Any past quotes using this carrier are kept and will show as "Deleted Carrier" — nothing about your quote history is lost. You can restore this carrier anytime from the Deleted view.
+            </p>
+            <div style={{display:"flex",gap:10}}>
+              <button onClick={()=>setConfirmDelete(null)} style={{flex:1,padding:"11px",background:T.bg,color:T.sub,border:`1px solid ${T.border}`,borderRadius:10,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>Cancel</button>
+              <button onClick={()=>deleteCarrier(confirmDelete)} style={{flex:1,padding:"11px",background:T.red,color:"#fff",border:"none",borderRadius:10,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
       {showAdd && (
         <div style={{position:"fixed",inset:0,background:"rgba(26,39,68,0.5)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShowAdd(false)}>
           <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:24,padding:28,width:"100%",maxWidth:440,animation:"fadeUp 0.3s ease"}}>
@@ -712,9 +769,405 @@ const LINE_FIELD_TEMPLATES = {
 };
 const DEFAULT_FIELDS = [{l:"Coverage Amount",p:"e.g. $100,000"},{l:"Deductible",p:"e.g. $1,000"},{l:"Coverage Type",p:"e.g. Standard"}];
 
+// ── Smart Intake / Questionnaire ──────────────────────────────────
+// Question bank for the intake step between "Build Quote" and the actual
+// quote/carrier portal. Keyed to the SAME line names already used by
+// LINE_GROUPS/LINES, so intake doesn't introduce a second, conflicting line
+// taxonomy alongside Clients and Quotes.
+
+// Shared across nearly every line — basic identity/eligibility facts an
+// agent needs on file before quoting almost anything.
+const IDENTITY_QUESTIONS = [
+  { key:"dateOfBirth",  label:"Date of Birth",        type:"text", placeholder:"MM/DD/YYYY" },
+  { key:"ssnLast4",     label:"SSN (Last 4)",          type:"text", placeholder:"e.g. 1234" },
+  { key:"address",      label:"Mailing Address",       type:"textarea", placeholder:"Street, City, State, ZIP" },
+  { key:"maritalStatus",label:"Marital Status",        type:"select", options:["Single","Married","Divorced","Widowed"] },
+];
+
+// Shared across every health-related line — providers, meds, pharmacy,
+// hospital. Defined once, attached to many lines, so updating it updates
+// every line at once instead of needing 10 separate edits.
+const HEALTH_QUESTIONS = [
+  { key:"primaryProvider",   label:"Primary Care Provider", type:"text", placeholder:"Dr. name / practice" },
+  { key:"specialists",       label:"Specialists Seen",      type:"textarea", placeholder:"e.g. Cardiologist - Dr. Lee; Endocrinologist - Dr. Patel" },
+  { key:"medications",       label:"Current Medications",   type:"textarea", placeholder:"List medication names" },
+  { key:"dosage",            label:"Dosage",                type:"text", placeholder:"e.g. 10mg, 20mg" },
+  { key:"frequency",         label:"Frequency",             type:"text", placeholder:"e.g. Once daily, twice daily" },
+  { key:"preferredPharmacy", label:"Preferred Pharmacy",    type:"text", placeholder:"e.g. CVS on Main St." },
+  { key:"preferredHospital", label:"Preferred Hospital",    type:"text", placeholder:"e.g. Baptist Memorial" },
+];
+
+// Underwriting / health-history block for life, final expense, disability,
+// critical illness, LTC — the actual conditions carriers underwrite against,
+// not just "family history" in a single text box.
+const UNDERWRITING_QUESTIONS = [
+  { key:"heightWeight",    label:"Height / Weight",         type:"text", placeholder:"e.g. 5'9\" / 210 lbs" },
+  { key:"tobaccoUse",      label:"Tobacco / Nicotine Use",   type:"select", options:["Never","Former — quit 12+ months ago","Former — quit <12 months ago","Current"] },
+  { key:"heartConditions", label:"Heart Disease / Stroke History", type:"select", options:["None","Yes — explain in notes"] },
+  { key:"diabetes",        label:"Diabetes", type:"select", options:["None","Type 1","Type 2 — diet controlled","Type 2 — medication/insulin"] },
+  { key:"cancer",          label:"Cancer History (any type)", type:"select", options:["None","In remission 5+ years","In remission <5 years","Current treatment"] },
+  { key:"copdRespiratory", label:"COPD / Respiratory Conditions", type:"select", options:["None","Yes — explain in notes"] },
+  { key:"kidneyLiver",     label:"Kidney or Liver Disease", type:"select", options:["None","Yes — explain in notes"] },
+  { key:"mentalHealth",    label:"Mental Health / Substance History", type:"select", options:["None","Yes — explain in notes"] },
+  { key:"otherConditions", label:"Other Conditions / Surgeries / Hospitalizations (last 5 years)", type:"textarea", placeholder:"Include dates if known" },
+  { key:"familyHistory",   label:"Immediate Family Health History", type:"textarea", placeholder:"e.g. Father - heart disease at 60; Mother - diabetes" },
+];
+
+// Lines that get the shared health block automatically, in addition to any
+// line-specific questions below.
+const HEALTH_LINES = ["Health & ACA","Medicare","Dental & Vision","Disability","Long-Term Care","Critical Illness","Hospital Indemnity","Supplemental"];
+
+// Lines that get the full underwriting/health-history block — anything
+// medically underwritten, not just lines that happen to involve a doctor visit.
+const UNDERWRITING_LINES = ["Life & Annuities","Preneed / Burial","Disability","Long-Term Care","Critical Illness","Mortgage Protection"];
+
+const INTAKE_QUESTIONS = {
+  "Health & ACA": [
+    { key:"householdSize",     label:"Household Size", type:"text", placeholder:"e.g. 3" },
+    { key:"householdIncome",   label:"Estimated Annual Household Income", type:"text", placeholder:"e.g. $58,000" },
+    { key:"dependentsOnPlan",  label:"Dependents to Include on Plan", type:"textarea", placeholder:"Name & DOB for each" },
+    { key:"currentlyInsured",  label:"Currently Insured?", type:"select", options:["Yes","No"] },
+    { key:"currentCarrierPlan",label:"Current Carrier / Plan (if any)", type:"text", placeholder:"" },
+    { key:"subsidyEligible",   label:"Receiving ACA Subsidy?", type:"select", options:["Unknown","Yes","No"] },
+    { key:"pregnancy",         label:"Pregnancy / Expecting", type:"select", options:["No","Yes"] },
+  ],
+  "Medicare": [
+    { key:"medicareNumber",     label:"Medicare Number (MBI)", type:"text", placeholder:"e.g. 1EG4-TE5-MK72" },
+    { key:"partAEffective",     label:"Part A Effective Date", type:"text", placeholder:"MM/DD/YYYY" },
+    { key:"partBEffective",     label:"Part B Effective Date", type:"text", placeholder:"MM/DD/YYYY" },
+    { key:"hasMedicaid",        label:"Has Medicaid (Dual-Eligible)?", type:"select", options:["No","Yes — Full","Yes — QMB/Partial"] },
+    { key:"currentPlanType",    label:"Current Plan Type (if any)", type:"select", options:["None / Original Medicare only","Medicare Advantage","Medicare Supplement","Both Advantage & Part D"] },
+    { key:"currentCarrierPlan", label:"Current Carrier / Plan Name", type:"text", placeholder:"" },
+    { key:"sepReason",          label:"Enrollment Period / SEP Reason (if applicable)", type:"text", placeholder:"e.g. Turning 65, losing employer coverage, moved" },
+    { key:"lowIncomeSubsidy",   label:"Extra Help / LIS Status", type:"select", options:["Unknown","None","Full","Partial"] },
+  ],
+  "Life & Annuities": [
+    { key:"coverageGoal",       label:"Coverage Goal", type:"select", options:["Final Expense","Income Replacement","Mortgage Protection","Estate Planning","Business/Key Person","Other"] },
+    { key:"desiredFaceAmount",  label:"Desired Face Amount", type:"text", placeholder:"e.g. $250,000" },
+    { key:"termOrPermanent",    label:"Term or Permanent", type:"select", options:["Term","Whole Life","IUL/Universal Life","Not Sure — Recommend"] },
+    { key:"termLength",         label:"Desired Term Length (if Term)", type:"select", options:["N/A","10 yr","15 yr","20 yr","30 yr"] },
+    { key:"occupation",         label:"Occupation", type:"text", placeholder:"" },
+    { key:"hazardousActivities",label:"Hazardous Activities / Occupation Risk", type:"text", placeholder:"e.g. Pilot, scuba diving, racing — or None" },
+    { key:"beneficiaryPrimary", label:"Primary Beneficiary", type:"text", placeholder:"Name & relationship" },
+    { key:"beneficiaryContingent", label:"Contingent Beneficiary", type:"text", placeholder:"Name & relationship" },
+    { key:"existingCoverage",   label:"Existing Life Coverage", type:"text", placeholder:"Carrier & amount, if any" },
+    { key:"replacingCoverage",  label:"Replacing Existing Coverage?", type:"select", options:["No","Yes"] },
+  ],
+  "Preneed / Burial": [
+    { key:"funeralHomePreference", label:"Preferred Funeral Home", type:"text", placeholder:"" },
+    { key:"desiredFaceAmount",     label:"Desired Coverage Amount", type:"text", placeholder:"e.g. $10,000" },
+    { key:"beneficiaryPrimary",    label:"Primary Beneficiary", type:"text", placeholder:"Name & relationship" },
+    { key:"burialOrCremation",     label:"Burial or Cremation Preference", type:"select", options:["Burial","Cremation","Undecided"] },
+    { key:"existingPreneed",       label:"Existing Preneed/Burial Policy?", type:"select", options:["No","Yes"] },
+  ],
+  "Disability": [
+    { key:"occupation",            label:"Occupation", type:"text", placeholder:"" },
+    { key:"employerType",          label:"Employed / Self-Employed", type:"select", options:["W-2 Employed","Self-Employed","1099 Contractor"] },
+    { key:"annualIncome",          label:"Annual Income", type:"text", placeholder:"e.g. $65,000" },
+    { key:"employerCoverage",      label:"Employer-Provided Disability Coverage?", type:"select", options:["No","Yes — Short-Term Only","Yes — Long-Term Only","Yes — Both"] },
+    { key:"monthlyIncomeNeeded",   label:"Monthly Income to Replace", type:"text", placeholder:"e.g. $3,500" },
+    { key:"eliminationPeriod",     label:"Desired Elimination Period", type:"select", options:["Not Sure","7 days","30 days","60 days","90 days"] },
+  ],
+  "Long-Term Care": [
+    { key:"desiredDailyBenefit",   label:"Desired Daily/Monthly Benefit", type:"text", placeholder:"e.g. $150/day" },
+    { key:"benefitPeriod",         label:"Desired Benefit Period", type:"select", options:["Not Sure","2 years","3 years","5 years","Lifetime"] },
+    { key:"currentLivingSituation",label:"Current Living Situation", type:"select", options:["Independent","With Family","Assisted Living","Other"] },
+    { key:"existingLTC",           label:"Existing LTC Coverage?", type:"select", options:["No","Yes"] },
+  ],
+  "Critical Illness": [
+    { key:"desiredFaceAmount",     label:"Desired Coverage Amount", type:"text", placeholder:"e.g. $20,000" },
+    { key:"existingCriticalIllness", label:"Existing Critical Illness Coverage?", type:"select", options:["No","Yes"] },
+  ],
+  "Hospital Indemnity": [
+    { key:"recentHospitalizations",label:"Hospitalizations in Past 2 Years", type:"textarea", placeholder:"Include dates & reason if known" },
+    { key:"desiredDailyBenefit",   label:"Desired Daily Hospital Benefit", type:"text", placeholder:"e.g. $200/day" },
+  ],
+  "Mortgage Protection": [
+    { key:"mortgageBalance",       label:"Mortgage Balance", type:"text", placeholder:"e.g. $185,000" },
+    { key:"mortgageTermRemaining", label:"Years Remaining on Mortgage", type:"text", placeholder:"e.g. 22" },
+    { key:"lender",                label:"Lender / Servicer", type:"text", placeholder:"" },
+    { key:"coOwner",                label:"Co-Borrower / Co-Owner", type:"text", placeholder:"Name, if applicable" },
+  ],
+  "Dental & Vision": [
+    { key:"lastDentalExam",        label:"Last Dental Exam", type:"text", placeholder:"MM/YYYY" },
+    { key:"majorWorkNeeded",       label:"Anticipated Major Work (crowns, dentures, etc.)", type:"textarea", placeholder:"" },
+    { key:"wearsGlassesContacts",  label:"Wears Glasses / Contacts", type:"select", options:["No","Yes"] },
+  ],
+  "Employer Benefits": [
+    { key:"businessName",          label:"Business Name", type:"text", placeholder:"" },
+    { key:"industry",              label:"Industry", type:"text", placeholder:"" },
+    { key:"totalEmployees",        label:"Number of Employees", type:"text", placeholder:"e.g. 24" },
+    { key:"fullTimeEmployees",     label:"Full-Time Employees", type:"text", placeholder:"" },
+    { key:"partTimeEmployees",     label:"Part-Time Employees", type:"text", placeholder:"" },
+    { key:"payrollFrequency",      label:"Payroll Frequency", type:"select", options:["Weekly","Bi-Weekly","Semi-Monthly","Monthly"] },
+    { key:"currentBenefits",       label:"Current Benefits Offered", type:"textarea", placeholder:"" },
+    { key:"currentCarrierBroker",  label:"Current Carrier / Broker", type:"text", placeholder:"" },
+    { key:"renewalDate",           label:"Renewal Date", type:"text", placeholder:"MM/DD/YYYY" },
+    { key:"employerContribution",  label:"Employer Contribution Preference", type:"text", placeholder:"e.g. 50% of employee premium" },
+    { key:"decisionMaker",         label:"Decision Maker", type:"text", placeholder:"Name & title" },
+    { key:"desiredProducts",       label:"Desired Products", type:"textarea", placeholder:"e.g. Group health, dental, vision, life" },
+    { key:"enrollmentTimeline",    label:"Enrollment Timeline", type:"text", placeholder:"" },
+    { key:"painPoints",            label:"Pain Points / Concerns", type:"textarea", placeholder:"" },
+  ],
+  "Auto": [
+    { key:"vehicles",            label:"Vehicles (Year/Make/Model/VIN)", type:"textarea", placeholder:"" },
+    { key:"drivers",             label:"Drivers on Policy (Name/DOB/License #)", type:"textarea", placeholder:"" },
+    { key:"currentCarrier",      label:"Current Carrier", type:"text", placeholder:"" },
+    { key:"currentLiabilityLimits", label:"Current Liability Limits", type:"text", placeholder:"e.g. 100/300/100" },
+    { key:"accidentsViolations", label:"Accidents / Violations (Past 3 Years)", type:"textarea", placeholder:"" },
+    { key:"vehicleUse",          label:"Primary Vehicle Use", type:"select", options:["Commute","Pleasure","Business","Rideshare/Delivery"] },
+  ],
+  "Homeowners": [
+    { key:"propertyAddress",   label:"Property Address", type:"text", placeholder:"" },
+    { key:"yearBuilt",         label:"Year Built", type:"text", placeholder:"" },
+    { key:"squareFootage",     label:"Square Footage", type:"text", placeholder:"" },
+    { key:"constructionType",  label:"Construction Type", type:"select", options:["Frame","Masonry","Brick Veneer","Other"] },
+    { key:"roofAge",           label:"Roof Age / Type", type:"text", placeholder:"e.g. 8 years, architectural shingle" },
+    { key:"currentCarrier",    label:"Current Carrier", type:"text", placeholder:"" },
+    { key:"claimsHistory",     label:"Claims History (Past 5 Years)", type:"textarea", placeholder:"" },
+    { key:"mortgageOnHome",    label:"Mortgage on Home?", type:"select", options:["No","Yes"] },
+  ],
+  "Renters": [
+    { key:"propertyAddress",          label:"Rental Address", type:"text", placeholder:"" },
+    { key:"personalPropertyValue",    label:"Estimated Personal Property Value", type:"text", placeholder:"" },
+    { key:"liabilityCoverageDesired", label:"Desired Liability Coverage", type:"text", placeholder:"e.g. $100,000" },
+  ],
+  "Commercial Auto": [
+    { key:"businessName",  label:"Business Name", type:"text", placeholder:"" },
+    { key:"fleetSize",     label:"Number of Vehicles", type:"text", placeholder:"" },
+    { key:"vehicleUseType",label:"Vehicle Use", type:"select", options:["Local Delivery","Long-Haul","Service/Trade","Passenger Transport","Other"] },
+    { key:"driverList",    label:"Drivers (Name/License #/MVR on file?)", type:"textarea", placeholder:"" },
+    { key:"currentCarrier",label:"Current Carrier", type:"text", placeholder:"" },
+  ],
+  "General Liability": [
+    { key:"businessName",     label:"Business Name", type:"text", placeholder:"" },
+    { key:"industryOperations", label:"Industry / Operations Description", type:"textarea", placeholder:"" },
+    { key:"annualRevenue",    label:"Annual Revenue", type:"text", placeholder:"" },
+    { key:"subcontractorUse", label:"Uses Subcontractors?", type:"select", options:["No","Yes"] },
+    { key:"priorClaims",      label:"Prior Liability Claims", type:"textarea", placeholder:"" },
+  ],
+  "Commercial Property": [
+    { key:"businessName",      label:"Business Name", type:"text", placeholder:"" },
+    { key:"propertyAddress",   label:"Property Address", type:"text", placeholder:"" },
+    { key:"buildingValue",     label:"Building Value", type:"text", placeholder:"" },
+    { key:"contentsValue",     label:"Contents / Business Personal Property Value", type:"text", placeholder:"" },
+    { key:"yearBuilt",         label:"Year Built", type:"text", placeholder:"" },
+    { key:"sprinklered",       label:"Sprinklered?", type:"select", options:["No","Yes"] },
+  ],
+  "Workers Comp": [
+    { key:"businessName",     label:"Business Name", type:"text", placeholder:"" },
+    { key:"employeeCount",    label:"Number of Employees", type:"text", placeholder:"" },
+    { key:"classCodes",       label:"Class Code(s) / Job Duties", type:"textarea", placeholder:"" },
+    { key:"annualPayroll",    label:"Annual Payroll", type:"text", placeholder:"" },
+    { key:"experienceMod",    label:"Experience Mod (if known)", type:"text", placeholder:"" },
+    { key:"priorClaims",      label:"Prior Workers Comp Claims", type:"textarea", placeholder:"" },
+  ],
+  "Pet Insurance": [
+    { key:"petName",      label:"Pet Name", type:"text", placeholder:"" },
+    { key:"petSpeciesBreed", label:"Species / Breed", type:"text", placeholder:"" },
+    { key:"petAge",        label:"Pet Age", type:"text", placeholder:"" },
+    { key:"preExistingConditions", label:"Pre-Existing Conditions", type:"textarea", placeholder:"" },
+  ],
+};
+
+// Returns the merged, de-duplicated question list for one or more selected
+// lines, in a sensible order: identity first, then underwriting/health if
+// applicable, then line-specific questions.
+function getIntakeQuestions(selectedLines) {
+  const questions = [];
+  const seenKeys = new Set();
+  const addAll = (list) => list.forEach(q => { if (!seenKeys.has(q.key)) { seenKeys.add(q.key); questions.push(q); } });
+
+  const needsIdentity = selectedLines.some(l => l !== "" );
+  if (needsIdentity && selectedLines.length>0) addAll(IDENTITY_QUESTIONS);
+
+  selectedLines.forEach(line => {
+    if (HEALTH_LINES.includes(line)) addAll(HEALTH_QUESTIONS);
+    if (UNDERWRITING_LINES.includes(line)) addAll(UNDERWRITING_QUESTIONS);
+    if (INTAKE_QUESTIONS[line]) addAll(INTAKE_QUESTIONS[line]);
+  });
+  return questions;
+}
+
+// ── Quote Readiness Score ──────────────────────────────────────────
+// A REAL completion percentage computed from the client's actual intake
+// answers against the actual question bank for their selected lines — not a
+// fabricated or simulated number. Used by Quinn (AI Discovery & Quote
+// Specialist) so "82% ready, missing: Beneficiary" is always literally true
+// of what's on file, not a plausible-sounding guess.
+function getReadinessScore(client) {
+  const lines = client?.intake?.lines || [];
+  const answers = client?.intake?.answers || {};
+  if (lines.length === 0) {
+    return { percent: 0, missing: [], total: 0, answered: 0, questions: [] };
+  }
+  const questions = getIntakeQuestions(lines);
+  const missing = questions.filter(q => !answers[q.key] || String(answers[q.key]).trim()==="");
+  const answered = questions.length - missing.length;
+  const percent = questions.length ? Math.round((answered/questions.length)*100) : 0;
+  return { percent, missing: missing.map(q=>q.label), total: questions.length, answered, questions };
+}
+
+// ── Smart Intake Modal ────────────────────────────────────────────
+// Flow: pick one or more lines → answer the merged question set → save to
+// the client's profile (acc_clients, under `intake`) → continue to the quote.
+// Built as its own modal rather than folded into QuoteBuilder so it can also
+// be opened directly from ClientProfiles without requiring a quote in progress.
+function SmartIntake({ client, onClose, onComplete }) {
+  const [clients, setClients] = useLocalStorage('acc_clients', SAMPLE_CLIENTS);
+  const [step, setStep] = useState("lines"); // "lines" | "questions"
+  const [selectedLines, setSelectedLines] = useState(client?.intake?.lines || (client?.line ? [client.line] : []));
+  const existingAnswers = client?.intake?.answers || {};
+  const [answers, setAnswers] = useState(existingAnswers);
+
+  const questions = getIntakeQuestions(selectedLines);
+
+  const toggleLine = (line) => {
+    setSelectedLines(prev => prev.includes(line) ? prev.filter(l=>l!==line) : [...prev, line]);
+  };
+
+  const saveAndContinue = () => {
+    const updated = clients.map(c => c.id===client.id
+      ? { ...c, intake: { lines: selectedLines, answers, savedDate: new Date().toISOString().split("T")[0] } }
+      : c
+    );
+    setClients(updated);
+    onComplete(selectedLines);
+  };
+
+  return (
+    <div style={{position:"fixed", inset:0, background:"rgba(26,39,68,0.55)", zIndex:250, display:"flex", alignItems:"center", justifyContent:"center", padding:16}} onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{background:T.surface, borderRadius:24, width:"100%", maxWidth:560, maxHeight:"88vh", overflowY:"auto", padding:26}}>
+
+        <div style={{display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6}}>
+          <div style={{fontSize:11, color:T.muted, fontFamily:"'Lato',sans-serif", textTransform:"uppercase", letterSpacing:1, fontWeight:700}}>
+            Smart Intake — {client?.name}
+          </div>
+          <button onClick={onClose} style={{background:T.bg, border:`1px solid ${T.border}`, borderRadius:10, width:30, height:30, cursor:"pointer", color:T.muted}}>×</button>
+        </div>
+
+        {step === "lines" && (
+          <>
+            <div style={{fontSize:19, fontWeight:700, color:T.navy, fontFamily:"'Playfair Display',serif", marginBottom:4}}>Select Line(s) of Insurance</div>
+            <p style={{fontSize:12.5, color:T.muted, fontFamily:"'Lato',sans-serif", marginBottom:16}}>Choose one or more — the questionnaire below will adjust to cover everything selected.</p>
+
+            {Object.entries(LINE_GROUPS).map(([group, lines]) => (
+              <div key={group} style={{marginBottom:14}}>
+                <div style={{fontSize:10.5, color:T.muted, fontFamily:"'Lato',sans-serif", textTransform:"uppercase", letterSpacing:0.8, fontWeight:700, marginBottom:6}}>{group}</div>
+                <div style={{display:"flex", flexWrap:"wrap", gap:6}}>
+                  {lines.map(line => (
+                    <button key={line} onClick={()=>toggleLine(line)} style={{
+                      padding:"7px 12px", borderRadius:20, fontSize:12.5, fontFamily:"'Lato',sans-serif", fontWeight:600, cursor:"pointer",
+                      background: selectedLines.includes(line) ? T.navy : T.bg,
+                      color: selectedLines.includes(line) ? "#fff" : T.sub,
+                      border: `1px solid ${selectedLines.includes(line) ? T.navy : T.border}`,
+                    }}>{line}</button>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            <button onClick={()=>setStep("questions")} disabled={selectedLines.length===0} style={{
+              width:"100%", marginTop:10, padding:"13px", borderRadius:12, border:"none", fontFamily:"'Lato',sans-serif", fontWeight:700, fontSize:14,
+              background: selectedLines.length===0 ? T.border : T.navy, color:"#fff", cursor: selectedLines.length===0 ? "default" : "pointer",
+            }}>
+              Continue to Questionnaire {selectedLines.length>0 && `(${selectedLines.length} line${selectedLines.length>1?"s":""})`}
+            </button>
+          </>
+        )}
+
+        {step === "questions" && (
+          <>
+            <div style={{fontSize:19, fontWeight:700, color:T.navy, fontFamily:"'Playfair Display',serif", marginBottom:4}}>Intake Questionnaire</div>
+            <p style={{fontSize:12.5, color:T.muted, fontFamily:"'Lato',sans-serif", marginBottom:16}}>
+              {selectedLines.join(", ")} · {questions.length} question{questions.length!==1?"s":""}. Answers save to {client?.name}'s profile for future quotes and reviews.
+            </p>
+
+            {questions.length === 0 ? (
+              <div style={{textAlign:"center", padding:"24px 0", color:T.muted, fontFamily:"'Lato',sans-serif", fontSize:13}}>
+                No additional intake questions for the selected line(s) yet — you can continue straight to the quote.
+              </div>
+            ) : (
+              <div style={{display:"flex", flexDirection:"column", gap:12, marginBottom:18}}>
+                {questions.map(q => (
+                  <div key={q.key}>
+                    <label style={{fontSize:11.5, color:T.sub, fontFamily:"'Lato',sans-serif", fontWeight:700}}>{q.label}</label>
+                    {q.type === "select" ? (
+                      <select value={answers[q.key]||""} onChange={e=>setAnswers({...answers,[q.key]:e.target.value})}
+                        style={{width:"100%", padding:"9px 10px", border:`1px solid ${T.border}`, borderRadius:8, fontSize:13.5, fontFamily:"'Lato',sans-serif", color:T.text, outline:"none", background:T.bg, marginTop:4}}>
+                        <option value="">Select...</option>
+                        {q.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                      </select>
+                    ) : q.type === "textarea" ? (
+                      <textarea value={answers[q.key]||""} onChange={e=>setAnswers({...answers,[q.key]:e.target.value})} placeholder={q.placeholder} rows={2}
+                        style={{width:"100%", padding:"9px 10px", border:`1px solid ${T.border}`, borderRadius:8, fontSize:13.5, fontFamily:"'Lato',sans-serif", color:T.text, outline:"none", background:T.bg, marginTop:4, resize:"vertical"}}/>
+                    ) : (
+                      <input value={answers[q.key]||""} onChange={e=>setAnswers({...answers,[q.key]:e.target.value})} placeholder={q.placeholder}
+                        style={{width:"100%", padding:"9px 10px", border:`1px solid ${T.border}`, borderRadius:8, fontSize:13.5, fontFamily:"'Lato',sans-serif", color:T.text, outline:"none", background:T.bg, marginTop:4}}/>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div style={{display:"flex", gap:10}}>
+              <button onClick={()=>setStep("lines")} style={{flex:1, padding:"13px", borderRadius:12, border:`1px solid ${T.border}`, background:T.bg, color:T.sub, fontFamily:"'Lato',sans-serif", fontWeight:700, fontSize:13, cursor:"pointer"}}>
+                Back
+              </button>
+              <button onClick={saveAndContinue} style={{flex:2, padding:"13px", borderRadius:12, border:"none", background:T.navy, color:"#fff", fontFamily:"'Lato',sans-serif", fontWeight:700, fontSize:14, cursor:"pointer"}}>
+                Save & Continue to Quote →
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Client Picker Modal ───────────────────────────────────────
+// Lets an agent search and select a real client to link a quote comparison
+// to — used by "Save to Client Profile" / "change" in QuoteBuilder.
+function ClientPickerModal({ clients, onClose, onSelect }) {
+  const [search, setSearch] = useState("");
+  const activeClients = clients.filter(c=>!c.archived);
+  const filtered = activeClients.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(26,39,68,0.55)",zIndex:150,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:24,padding:22,width:"100%",maxWidth:420,maxHeight:"75vh",display:"flex",flexDirection:"column"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <div style={{fontSize:18,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>Link to Client</div>
+          <button onClick={onClose} style={{background:T.bg,border:`1px solid ${T.border}`,borderRadius:10,width:30,height:30,cursor:"pointer",color:T.muted}}>×</button>
+        </div>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search clients..." autoFocus
+          style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg,marginBottom:12}}/>
+        <div style={{overflowY:"auto",flex:1,display:"flex",flexDirection:"column",gap:6}}>
+          {filtered.length===0 && (
+            <div style={{textAlign:"center",padding:"24px 0",color:T.muted,fontFamily:"'Lato',sans-serif",fontSize:13}}>
+              No matching clients. Add them from the Clients tab first.
+            </div>
+          )}
+          {filtered.map(c=>(
+            <button key={c.id} onClick={()=>onSelect(c)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:T.bg,border:"none",borderRadius:10,cursor:"pointer",textAlign:"left",fontFamily:"'Lato',sans-serif"}}>
+              <div style={{width:32,height:32,borderRadius:9,background:lineColor(c.line),display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:12,fontWeight:700,flexShrink:0}}>
+                {c.name.split(" ").map(n=>n[0]).join("").slice(0,2)}
+              </div>
+              <div>
+                <div style={{fontSize:13,fontWeight:700,color:T.navy}}>{c.name}</div>
+                <div style={{fontSize:11,color:T.muted}}>{c.line}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Quote Builder ─────────────────────────────────────────────
 function QuoteBuilder({ initialClient }) {
-  const blankQuote = () => ({id:Date.now(),carrier:"",line:"Medicare",plan:"",premium:"",notes:"",customFields:[{l:"OTC Allowance",v:"$500/qtr"},{l:"Dental Included",v:"Yes"},{l:"MOOP",v:"$3,300"}],color:T.navy,status:"open",recommendation:"",bestFor:""});
+  const blankQuote = (clientId=null) => ({id:Date.now(),clientId,carrier:"",line:"Medicare",plan:"",premium:"",notes:"",customFields:[{l:"OTC Allowance",v:"$500/qtr"},{l:"Dental Included",v:"Yes"},{l:"MOOP",v:"$3,300"}],color:T.navy,status:"open",recommendation:"",bestFor:""});
 
   const [quotes, setQuotes] = useLocalStorage('acc_quotes', [
     {id:1,carrier:"Humana",line:"Medicare",plan:"Gold Plus HMO H1036",premium:0,notes:"$0 premium. Strong dental & vision. SilverSneakers included.",color:"#006D9C",
@@ -725,11 +1178,22 @@ function QuoteBuilder({ initialClient }) {
      customFields:[{l:"Plan Type",v:"HMO"},{l:"OTC Allowance",v:"$300/qtr"},{l:"MOOP",v:"$3,900"},{l:"Drug Deductible",v:"$0"},{l:"Dental Included",v:"Yes"},{l:"Vision Included",v:"Yes"},{l:"Gym Benefit",v:"Renew Active"},{l:"Transportation",v:"Yes"}]},
   ]);
 
+  const [clients] = useLocalStorage('acc_clients', SAMPLE_CLIENTS);
   const [clientName, setClientName] = useState(initialClient?.name || "James Stovall");
+  const [linkedClient, setLinkedClient] = useState(initialClient || null); // the real client record this quote set is for, or null if unlinked
+  const [showClientPicker, setShowClientPicker] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState(null); // quote id being edited
-  const [newQ, setNewQ] = useState(blankQuote());
+  const [emailCopied, setEmailCopied] = useState(false);
+  const [newQ, setNewQ] = useState(blankQuote(initialClient?.id||null));
   const [newFieldLabel, setNewFieldLabel] = useState("");
+
+  // Names of carriers that have been deleted from the Carrier Hub — used to
+  // flag historical quotes without needing a live reference/ID on the quote
+  // itself (quotes already only ever stored the carrier name as plain text).
+  const deletedCarrierNames = new Set(
+    JSON.parse(localStorage.getItem("acc_carriers") || "[]").filter(c=>c.deleted).map(c=>c.name)
+  );
 
   const premiums = quotes.map(q=>Number(q.premium)||0);
   const lowest = Math.min(...premiums);
@@ -760,10 +1224,10 @@ function QuoteBuilder({ initialClient }) {
 
   const saveQuote = () => {
     if (!newQ.carrier || !newQ.plan) return;
-    const q = {...newQ, id:editing||Date.now(), premium:Number(newQ.premium)||0, color:lineColor(newQ.line)||T.navy};
+    const q = {...newQ, id:editing||Date.now(), clientId:linkedClient?.id||newQ.clientId||null, premium:Number(newQ.premium)||0, color:lineColor(newQ.line)||T.navy};
     if (editing) setQuotes(quotes.map(x=>x.id===editing?q:x));
     else setQuotes([...quotes,q]);
-    setNewQ(blankQuote());
+    setNewQ(blankQuote(linkedClient?.id||null));
     setEditing(null);
     setShowAdd(false);
   };
@@ -779,7 +1243,11 @@ function QuoteBuilder({ initialClient }) {
   const exportJSON = () => {
     const blob = new Blob([JSON.stringify(quotes, null, 2)],{type:"application/json"});
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href=url; a.download=`quotes-${clientName.replace(/\s+/g,"_")}.json`; a.click();
+    // Strip anything that isn't a letter, number, hyphen, or underscore — not
+    // just whitespace — so client names with slashes, ampersands, or other
+    // filesystem-unsafe characters can't produce a malformed filename.
+    const safeName = clientName.trim().replace(/\s+/g,"_").replace(/[^a-zA-Z0-9_-]/g,"");
+    const a = document.createElement("a"); a.href=url; a.download=`quotes-${safeName||"client"}.json`; a.click();
   };
 
   const printQuote = () => {
@@ -866,9 +1334,9 @@ function QuoteBuilder({ initialClient }) {
     setTimeout(function(){ w.print(); }, 600);
   };
 
-    const emailQuote = () => {
-    const subject = encodeURIComponent(`Insurance Quote Comparison — ${clientName}`);
-    const body = encodeURIComponent(
+  const buildEmailDraft = () => {
+    const subject = `Insurance Quote Comparison — ${clientName}`;
+    const body =
       `Hi ${clientName},\n\nPlease find your personalized insurance quote comparison below.\n\n` +
       quotes.map(q =>
         `${q.carrier} — ${q.plan}\n` +
@@ -876,33 +1344,76 @@ function QuoteBuilder({ initialClient }) {
         (q.customFields||[]).map(f => `${f.l}: ${f.v}`).join("\n") +
         `\nNotes: ${q.notes||""}\n`
       ).join("\n---\n") +
-      `\n\nBest regards,\n${profile?.firstName||""} ${profile?.lastName||""}\n${profile?.agencyName||""}\n${profile?.phone||""}\n${profile?.email||""}`
-    );
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+      `\n\nBest regards,\n${profile?.firstName||""} ${profile?.lastName||""}\n${profile?.agencyName||""}\n${profile?.phone||""}\n${profile?.email||""}`;
+    return { subject, body };
+  };
+
+  // Primary path: copy the draft to clipboard. This always works regardless of
+  // mail client setup, unlike mailto links which silently fail past a certain
+  // length or when no default mail app is configured.
+  const copyEmailDraft = async () => {
+    const { subject, body } = buildEmailDraft();
+    const fullText = `Subject: ${subject}\n\n${body}`;
+    try {
+      await navigator.clipboard.writeText(fullText);
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2500);
+    } catch (err) {
+      // Clipboard API can fail on older browsers or without HTTPS — fall back
+      // to a manual select-and-copy via a temporary textarea.
+      const ta = document.createElement("textarea");
+      ta.value = fullText;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); setEmailCopied(true); setTimeout(()=>setEmailCopied(false),2500); }
+      catch { alert("Couldn't copy automatically — please select and copy the draft manually."); }
+      document.body.removeChild(ta);
+    }
+  };
+
+  // Secondary path: try to open the device's mail client. Works well for short
+  // quotes; for longer ones, the Copy Draft button above is the reliable option.
+  const openMailClient = () => {
+    const { subject, body } = buildEmailDraft();
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   return (
     <div>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20,flexWrap:"wrap",gap:12}}>
         <div>
           <h2 style={{fontSize:26,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>Quote Comparison</h2>
-          <div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginTop:6,flexWrap:"wrap"}}>
             <span style={{fontSize:12,color:T.muted,fontFamily:"'Lato',sans-serif"}}>Client:</span>
             <input value={clientName} onChange={e=>setClientName(e.target.value)}
               style={{fontSize:14,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",border:"none",borderBottom:`2px solid ${T.gold}`,background:"transparent",outline:"none",padding:"2px 4px"}}/>
+            {linkedClient ? (
+              <span style={{display:"flex",alignItems:"center",gap:5,fontSize:10.5,color:T.green,fontFamily:"'Lato',sans-serif",fontWeight:700,background:`${T.green}14`,padding:"3px 9px",borderRadius:20}}>
+                <span style={{width:6,height:6,borderRadius:"50%",background:T.green,display:"inline-block"}}/>
+                Linked to client profile
+                <button onClick={()=>setShowClientPicker(true)} style={{background:"none",border:"none",color:T.green,textDecoration:"underline",cursor:"pointer",fontSize:10.5,fontFamily:"'Lato',sans-serif",fontWeight:700,padding:0,marginLeft:2}}>change</button>
+              </span>
+            ) : (
+              <button onClick={()=>setShowClientPicker(true)} style={{fontSize:10.5,color:T.gold,background:"none",border:`1px solid ${T.gold}55`,borderRadius:20,padding:"3px 9px",cursor:"pointer",fontFamily:"'Lato',sans-serif",fontWeight:700}}>
+                + Save to Client Profile
+              </button>
+            )}
           </div>
         </div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap",justifyContent:"flex-end"}}>
-          <button onClick={emailQuote} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",color:T.sub,display:"flex",alignItems:"center",gap:6}}>
-            ✉️ Email
+          <button onClick={copyEmailDraft} style={{background: emailCopied ? T.green : T.card,border:`1px solid ${emailCopied ? T.green : T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",color: emailCopied ? "#fff" : T.sub,display:"flex",alignItems:"center",gap:6,transition:"all 0.15s"}}>
+            {emailCopied ? "Copied to Clipboard" : "Copy Email Draft"}
+          </button>
+          <button onClick={openMailClient} title="Open your device's mail app with this draft" style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",color:T.sub,display:"flex",alignItems:"center",gap:6}}>
+            Open Mail App
           </button>
           <button onClick={printQuote} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",color:T.sub,display:"flex",alignItems:"center",gap:6}}>
-            🖨️ Print / PDF
+            Print / PDF
           </button>
           {quotes.length>0&&<button onClick={exportJSON} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",color:T.sub,display:"flex",alignItems:"center",gap:6}}>
-            📥 Export Data
+            Export Data
           </button>}
-          <button onClick={()=>{setNewQ(blankQuote());setEditing(null);setShowAdd(true);}} style={{background:T.gold,color:T.navy,border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>+ Add Quote</button>
+          <button onClick={()=>{setNewQ(blankQuote(linkedClient?.id||null));setEditing(null);setShowAdd(true);}} style={{background:T.gold,color:T.navy,border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>+ Add Quote</button>
         </div>
       </div>
 
@@ -930,7 +1441,12 @@ function QuoteBuilder({ initialClient }) {
               <div style={{height:5,background:q.color||lineColor(q.line)}}/>
               <div style={{padding:16}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:2}}>
-                  <div style={{fontSize:17,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>{q.carrier}</div>
+                  <div>
+                    <div style={{fontSize:17,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>{q.carrier}</div>
+                    {deletedCarrierNames.has(q.carrier) && (
+                      <div style={{fontSize:10,color:T.red,fontFamily:"'Lato',sans-serif",fontWeight:700,marginTop:2}}>Deleted Carrier — historical quote preserved</div>
+                    )}
+                  </div>
                   <button onClick={()=>startEdit(q)} style={{background:T.bg,border:`1px solid ${T.border}`,borderRadius:8,padding:"3px 9px",fontSize:11,color:T.muted,cursor:"pointer",fontFamily:"'Lato',sans-serif"}}>Edit</button>
                 </div>
                 {/* Status selector */}
@@ -982,6 +1498,27 @@ function QuoteBuilder({ initialClient }) {
           );
         })}
       </div>
+
+      {/* Client picker — links this entire quote comparison set to a real
+          client profile, retroactively applying to quotes already in this
+          comparison, not just ones added after linking. */}
+      {showClientPicker && (
+        <ClientPickerModal
+          clients={clients}
+          onClose={()=>setShowClientPicker(false)}
+          onSelect={(client)=>{
+            const previousClientId = linkedClient?.id || null;
+            setLinkedClient(client);
+            setClientName(client.name);
+            // Re-link every quote that belonged to the previous link (or had
+            // no link at all) to the newly selected client — this is what
+            // makes "change" actually change the link for quotes already in
+            // this comparison set, not just future ones.
+            setQuotes(quotes.map(q => (q.clientId===previousClientId) ? {...q, clientId:client.id} : q));
+            setShowClientPicker(false);
+          }}
+        />
+      )}
 
       {/* Add / Edit modal */}
       {showAdd && (
@@ -1081,21 +1618,123 @@ function QuoteBuilder({ initialClient }) {
   );
 }
 
+// ── Client Quotes Section ────────────────────────────────────────
+// Shown inside a client's profile. Reads from the same shared acc_quotes
+// store QuoteBuilder writes to, matching by clientId (new quotes) or by name
+// (quotes created before clientId existed, kept working rather than orphaned).
+function ClientQuotesSection({ client }) {
+  const [quotes, setQuotes] = useLocalStorage('acc_quotes', []);
+  const [events, setEvents] = useLocalStorage("acc_calendar_events", []);
+  const [anniversaryPrompt, setAnniversaryPrompt] = useState(null); // quote pending an anniversary-add prompt
+
+  // Quotes created before this clientId linkage existed have no
+  // client-identifying field at all and can't be matched retroactively —
+  // they simply won't appear here. Only quotes saved going forward (via the
+  // "Smart Intake & Build Quote" flow from this client's profile) will show.
+  const clientQuotes = quotes.filter(q => q.clientId === client.id);
+
+  const changeStatus = (quote, newStatus) => {
+    setQuotes(quotes.map(q => q.id===quote.id ? {...q, status:newStatus} : q));
+    if (newStatus === "closed_won" && quote.status !== "closed_won") {
+      setAnniversaryPrompt({...quote, status:newStatus});
+    }
+  };
+
+  const addAnniversaryToCalendar = (quote, oneYearOut) => {
+    const today = new Date();
+    const anniversaryDate = oneYearOut ? new Date(today.getFullYear()+1, today.getMonth(), today.getDate()) : today;
+    setEvents([...events, {
+      id: Date.now(),
+      title: `Policy Anniversary — ${client.name} (${quote.carrier})`,
+      type: "renewal",
+      date: anniversaryDate.toISOString().split("T")[0],
+      time: "",
+      clientId: client.id,
+      notes: `${quote.plan||""} · Closed Won ${today.toISOString().split("T")[0]}`,
+    }]);
+    setAnniversaryPrompt(null);
+  };
+
+  if (clientQuotes.length === 0) return null;
+
+  return (
+    <div style={{marginTop:16}}>
+      <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>
+        Quotes on File ({clientQuotes.length})
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+        {clientQuotes.map(q=>{
+          const statusInfo = QUOTE_STATUSES.find(s=>s.id===(q.status||"open")) || QUOTE_STATUSES[0];
+          return (
+            <div key={q.id} style={{background:T.bg,borderRadius:12,padding:12}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
+                <div>
+                  <div style={{fontSize:13,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif"}}>{q.carrier} — {q.plan}</div>
+                  <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif"}}>{q.line} · ${q.premium}/mo</div>
+                </div>
+              </div>
+              <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                {QUOTE_STATUSES.map(s=>(
+                  <button key={s.id} onClick={()=>changeStatus(q,s.id)}
+                    style={{padding:"3px 9px",borderRadius:20,border:`1px solid ${(q.status||"open")===s.id?s.color:T.border}`,background:(q.status||"open")===s.id?s.color+"18":T.surface,color:(q.status||"open")===s.id?s.color:T.muted,cursor:"pointer",fontSize:10,fontFamily:"'Lato',sans-serif",fontWeight:600,transition:"all 0.15s"}}>
+                    {s.icon} {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Policy anniversary prompt — shown once when a quote is marked Closed Won */}
+      {anniversaryPrompt && (
+        <div style={{position:"fixed",inset:0,background:"rgba(26,39,68,0.55)",zIndex:140,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setAnniversaryPrompt(null)}>
+          <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:20,padding:24,width:"100%",maxWidth:380}}>
+            <div style={{fontSize:17,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",marginBottom:8}}>Policy Closed — Add Anniversary?</div>
+            <p style={{fontSize:13,color:T.sub,fontFamily:"'Lato',sans-serif",lineHeight:1.6,marginBottom:18}}>
+              Add a policy anniversary reminder to the Calendar for {client.name}'s {anniversaryPrompt.carrier} policy, one year from today?
+            </p>
+            <div style={{display:"flex",gap:10}}>
+              <button onClick={()=>setAnniversaryPrompt(null)} style={{flex:1,padding:"11px",background:T.bg,color:T.sub,border:`1px solid ${T.border}`,borderRadius:10,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>Skip</button>
+              <button onClick={()=>addAnniversaryToCalendar(anniversaryPrompt, true)} style={{flex:1,padding:"11px",background:T.navy,color:"#fff",border:"none",borderRadius:10,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>Add to Calendar</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Client Profiles ───────────────────────────────────────────
-function ClientProfiles({ initialClient, onQuoteClient, setTab }) {
+function ClientProfiles({ initialClient, onQuoteClient, onDiscoverClient, setTab }) {
   const [clients, setClients] = useLocalStorage('acc_clients', SAMPLE_CLIENTS);
   const [selected, setSelected] = useState(initialClient||null);
   const [showAdd, setShowAdd] = useState(false);
   const [search, setSearch] = useState("");
-  const [newClient, setNewClient] = useState({name:"",age:"",phone:"",email:"",line:"Health & ACA",status:"Prospect",notes:""});
+  const [newClient, setNewClient] = useState({name:"",age:"",dateOfBirth:"",phone:"",email:"",line:"Health & ACA",status:"Prospect",notes:""});
   const [newNote, setNewNote] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
+  const [confirmArchive, setConfirmArchive] = useState(null); // client pending archive confirmation
+  const [intakeClient, setIntakeClient] = useState(null); // client currently in the Smart Intake flow, or null
 
-  const filtered = clients.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()));
+  const filtered = clients.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()) && !!c.archived===showArchived);
+
+  const archiveClient = (client) => {
+    const updated = clients.map(c=>c.id===client.id?{...c,archived:true,archivedDate:new Date().toISOString().split("T")[0]}:c);
+    setClients(updated);
+    if (selected?.id===client.id) setSelected(null);
+    setConfirmArchive(null);
+  };
+
+  const restoreClient = (client) => {
+    const updated = clients.map(c=>c.id===client.id?{...c,archived:false,archivedDate:null}:c);
+    setClients(updated);
+  };
 
   const addClient = () => {
     if (!newClient.name) return;
     setClients([...clients,{...newClient,id:Date.now(),lastContact:new Date().toISOString().split("T")[0],quotes:[]}]);
-    setNewClient({name:"",age:"",phone:"",email:"",line:"Health & ACA",status:"Prospect",notes:""});
+    setNewClient({name:"",age:"",dateOfBirth:"",phone:"",email:"",line:"Health & ACA",status:"Prospect",notes:""});
     setShowAdd(false);
   };
 
@@ -1120,25 +1759,39 @@ function ClientProfiles({ initialClient, onQuoteClient, setTab }) {
 
   return (
     <div>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:12}}>
         <div>
           <h2 style={{fontSize:26,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>Client Profiles</h2>
-          <p style={{fontSize:13,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>{clients.length} clients · notes, quotes & follow-ups</p>
+          <p style={{fontSize:13,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>{clients.filter(c=>!c.archived).length} active · {clients.filter(c=>c.archived).length} archived</p>
         </div>
-        <div style={{display:"flex",gap:8}}>
-          {clients.length>0&&<button onClick={exportCSV} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",color:T.sub}}>📥 Export CSV</button>}
-          <button onClick={()=>setShowAdd(true)} style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>+ Add Client</button>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <button onClick={()=>setShowArchived(!showArchived)} style={{background: showArchived ? T.navy : T.card,color: showArchived ? "#fff" : T.sub,border:`1px solid ${showArchived ? T.navy : T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer"}}>
+            {showArchived ? "Viewing Archived" : "View Archived"}
+          </button>
+          {clients.length>0&&<button onClick={exportCSV} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",color:T.sub}}>Export CSV</button>}
+          {!showArchived && <button onClick={()=>setShowAdd(true)} style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>+ Add Client</button>}
         </div>
       </div>
 
       {/* Search */}
-      <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍  Search clients..." style={{width:"100%",padding:"12px 16px",border:`1px solid ${T.border}`,borderRadius:12,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.surface,marginBottom:16}}/>
+      <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search clients..." style={{width:"100%",padding:"12px 16px",border:`1px solid ${T.border}`,borderRadius:12,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.surface,marginBottom:16}}/>
+
+      {showArchived && filtered.length>0 && (
+        <div style={{fontSize:12,color:T.muted,fontFamily:"'Lato',sans-serif",marginBottom:12,background:T.bg,padding:"10px 14px",borderRadius:10}}>
+          Archived clients are hidden from quoting and search by default. Restore a client to make them active again.
+        </div>
+      )}
 
       {/* Client list */}
       <div style={{display:"flex",flexDirection:"column",gap:10}}>
+        {filtered.length===0 && (
+          <div style={{textAlign:"center",padding:"40px 20px",color:T.muted,fontFamily:"'Lato',sans-serif",fontSize:13}}>
+            {showArchived ? "No archived clients." : "No clients found."}
+          </div>
+        )}
         {filtered.map(c=>(
-          <div key={c.id} onClick={()=>setSelected(c)} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,padding:16,cursor:"pointer",display:"flex",alignItems:"center",gap:14,transition:"all 0.15s",animation:"fadeUp 0.3s ease"}}
-            onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 4px 20px rgba(26,39,68,0.08)";e.currentTarget.style.borderColor=T.navy;}}
+          <div key={c.id} onClick={()=>!showArchived && setSelected(c)} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,padding:16,cursor: showArchived ? "default" : "pointer",display:"flex",alignItems:"center",gap:14,transition:"all 0.15s",animation:"fadeUp 0.3s ease",opacity: c.archived ? 0.7 : 1}}
+            onMouseEnter={e=>{if(!showArchived){e.currentTarget.style.boxShadow="0 4px 20px rgba(26,39,68,0.08)";e.currentTarget.style.borderColor=T.navy;}}}
             onMouseLeave={e=>{e.currentTarget.style.boxShadow="none";e.currentTarget.style.borderColor=T.border;}}>
             <div style={{width:48,height:48,borderRadius:14,background:lineColor(c.line),display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:18,fontWeight:700,fontFamily:"'Playfair Display',serif",flexShrink:0}}>
               {c.name.split(" ").map(n=>n[0]).join("").slice(0,2)}
@@ -1148,14 +1801,21 @@ function ClientProfiles({ initialClient, onQuoteClient, setTab }) {
               <div style={{fontSize:12,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>
                 {c.line} {c.age?`· Age ${c.age}`:""}
               </div>
-              <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>Last contact: {c.lastContact}</div>
+              <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>
+                {c.archived ? `Archived ${c.archivedDate||""}` : `Last contact: ${c.lastContact}`}
+              </div>
             </div>
-            <div style={{textAlign:"right"}}>
-              <span style={{fontSize:11,background:`${statusColor(c.status)}18`,color:statusColor(c.status),padding:"4px 10px",borderRadius:20,fontFamily:"'Lato',sans-serif",fontWeight:700,border:`1px solid ${statusColor(c.status)}44`}}>{c.status}</span>
-            </div>
+            {showArchived ? (
+              <button onClick={(e)=>{e.stopPropagation();restoreClient(c);}} style={{background:T.navy,color:"#fff",border:"none",borderRadius:10,padding:"8px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",flexShrink:0}}>Restore</button>
+            ) : (
+              <div style={{textAlign:"right"}}>
+                <span style={{fontSize:11,background:`${statusColor(c.status)}18`,color:statusColor(c.status),padding:"4px 10px",borderRadius:20,fontFamily:"'Lato',sans-serif",fontWeight:700,border:`1px solid ${statusColor(c.status)}44`}}>{c.status}</span>
+              </div>
+            )}
           </div>
         ))}
       </div>
+
 
       {/* Client detail modal */}
       {selected && (
@@ -1173,13 +1833,12 @@ function ClientProfiles({ initialClient, onQuoteClient, setTab }) {
             </div>
 
             {[
-              {icon:"📞",label:"Phone",value:selected.phone},
-              {icon:"✉️",label:"Email",value:selected.email},
-              {icon:"📋",label:"Line",value:selected.line},
-              {icon:"🎂",label:"Age",value:selected.age||"N/A"},
-            ].map(({icon,label,value})=>(
+              {label:"Phone",value:selected.phone},
+              {label:"Email",value:selected.email},
+              {label:"Line",value:selected.line},
+              {label:"Age",value:selected.age||"N/A"},
+            ].map(({label,value})=>(
               <div key={label} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 0",borderBottom:`1px solid ${T.border}`}}>
-                <span style={{fontSize:18}}>{icon}</span>
                 <div>
                   <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1}}>{label}</div>
                   <div style={{fontSize:14,color:T.navy,fontFamily:"'Lato',sans-serif",fontWeight:600,marginTop:1}}>{value}</div>
@@ -1193,10 +1852,31 @@ function ClientProfiles({ initialClient, onQuoteClient, setTab }) {
               <div style={{background:T.bg,borderRadius:12,padding:14,fontSize:13,color:T.sub,fontFamily:"'Lato',sans-serif",lineHeight:1.8,minHeight:80,whiteSpace:"pre-line"}}>{selected.notes||"No notes yet."}</div>
             </div>
 
-            {/* Quote this client button */}
-            <button onClick={()=>{ onQuoteClient&&onQuoteClient(selected); setSelected(null); }} 
-              style={{width:"100%",marginTop:14,padding:"13px",background:T.navy,color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-              📊 Build Quote for {selected.name} →
+            {/* Quotes on file for this client — pulled from the shared quotes
+                store by clientId (falling back to a name match for quotes
+                created before this linkage existed). Status can be changed
+                right here; marking a quote Closed Won offers to add the
+                policy anniversary to the Calendar. */}
+            <ClientQuotesSection client={selected}/>
+
+            {/* Discovery with Quinn — conversational alternative/companion to
+                the structured Smart Intake form below. Opens Quinn's chat
+                pre-loaded with this client's real data. */}
+            <button onClick={()=>{onDiscoverClient && onDiscoverClient(selected); setSelected(null);}}
+              style={{width:"100%",marginTop:14,padding:"13px",background:"transparent",color:"#0284C7",border:"2px solid #0284C7",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+              Start Discovery with Quinn for {selected.name} →
+            </button>
+
+            {/* Quote this client — Smart Intake runs first, then continues to the quote */}
+            {selected.intake?.savedDate && (
+              <div style={{fontSize:11, color:T.green, fontFamily:"'Lato',sans-serif", marginTop:14, display:"flex", alignItems:"center", gap:6}}>
+                <span style={{width:6,height:6,borderRadius:"50%",background:T.green,display:"inline-block"}}/>
+                Intake on file ({selected.intake.lines.join(", ")}) — saved {selected.intake.savedDate}
+              </div>
+            )}
+            <button onClick={()=>setIntakeClient(selected)} 
+              style={{width:"100%",marginTop:8,padding:"13px",background:T.navy,color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+              {selected.intake?.savedDate ? "Review Intake & Build Quote" : "Smart Intake & Build Quote"} for {selected.name} →
             </button>
 
             {/* Add note */}
@@ -1204,6 +1884,27 @@ function ClientProfiles({ initialClient, onQuoteClient, setTab }) {
               <input value={newNote} onChange={e=>setNewNote(e.target.value)} placeholder="Add a note..." onKeyDown={e=>e.key==="Enter"&&addNote()}
                 style={{flex:1,padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
               <button onClick={addNote} style={{padding:"10px 16px",background:T.navy,color:"#fff",border:"none",borderRadius:10,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",fontSize:13}}>Save</button>
+            </div>
+
+            {/* Archive — separated visually from primary actions to prevent accidental clicks */}
+            <button onClick={()=>setConfirmArchive(selected)} style={{width:"100%",marginTop:16,padding:"11px",background:"transparent",color:T.red,border:`1px solid ${T.red}33`,borderRadius:10,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer"}}>
+              Archive Client
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Archive confirmation */}
+      {confirmArchive && (
+        <div style={{position:"fixed",inset:0,background:"rgba(26,39,68,0.5)",zIndex:120,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setConfirmArchive(null)}>
+          <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:20,padding:24,width:"100%",maxWidth:380}}>
+            <div style={{fontSize:17,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",marginBottom:8}}>Archive {confirmArchive.name}?</div>
+            <p style={{fontSize:13,color:T.sub,fontFamily:"'Lato',sans-serif",lineHeight:1.6,marginBottom:18}}>
+              This client will be hidden from your active list and search. Their notes, quotes, and history are kept and nothing is permanently deleted — you can restore them anytime from the Archived view.
+            </p>
+            <div style={{display:"flex",gap:10}}>
+              <button onClick={()=>setConfirmArchive(null)} style={{flex:1,padding:"11px",background:T.bg,color:T.sub,border:`1px solid ${T.border}`,borderRadius:10,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>Cancel</button>
+              <button onClick={()=>archiveClient(confirmArchive)} style={{flex:1,padding:"11px",background:T.red,color:"#fff",border:"none",borderRadius:10,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>Archive</button>
             </div>
           </div>
         </div>
@@ -1226,6 +1927,12 @@ function ClientProfiles({ initialClient, onQuoteClient, setTab }) {
                   style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
               </div>
             ))}
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Date of Birth</div>
+              <input type="date" value={newClient.dateOfBirth} onChange={e=>setNewClient({...newClient,dateOfBirth:e.target.value})}
+                style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
+              <div style={{fontSize:10.5,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:4}}>Adds their birthday to the Calendar automatically.</div>
+            </div>
             <div style={{marginBottom:12}}>
               <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Line of Business</div>
               <select value={newClient.line} onChange={e=>setNewClient({...newClient,line:e.target.value})}
@@ -1251,6 +1958,21 @@ function ClientProfiles({ initialClient, onQuoteClient, setTab }) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Smart Intake — opened from "Smart Intake & Build Quote"; saves to this
+          client's profile, then hands off to the Quotes tab via onQuoteClient. */}
+      {intakeClient && (
+        <SmartIntake
+          client={intakeClient}
+          onClose={()=>setIntakeClient(null)}
+          onComplete={()=>{
+            const updatedClient = clients.find(c=>c.id===intakeClient.id) || intakeClient;
+            setIntakeClient(null);
+            setSelected(null);
+            onQuoteClient && onQuoteClient(updatedClient);
+          }}
+        />
       )}
     </div>
   );
@@ -1451,8 +2173,8 @@ function CommissionLog({ profile }) {
   // Export to CSV
   const exportCSV = () => {
     const rows = [["Date","Carrier","Client","Line","Type","Amount","Notes"]];
-    commissions.forEach(c=>rows.push([c.date,c.carrier,c.client,c.line,c.type,"$"+c.amount,c.notes||""]));
-    const csv = rows.map(r=>r.map(v=>'"'+v+'"').join(",")).join("\n");
+    commissions.forEach(c=>rows.push([c.date,c.carrier,c.client,c.line,c.type, c.amount!=null ? "$"+c.amount : "", c.notes||""]));
+    const csv = rows.map(r=>r.map(v=>'"'+(v??"")+'"').join(",")).join("\n");
     const blob = new Blob([csv],{type:"text/csv"});
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href=url; a.download="commissions.csv"; a.click();
@@ -1752,6 +2474,383 @@ function LicenseTracker() {
             <div style={{display:"flex",gap:10}}>
               <button onClick={()=>{setShowAdd(false);setEditId(null);}} style={{flex:1,padding:"12px",background:T.bg,border:`1px solid ${T.border}`,borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",color:T.sub}}>Cancel</button>
               <button onClick={saveLicense} style={{flex:2,padding:"12px",background:T.navy,color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",fontSize:14}}>Save License</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Calendar ──────────────────────────────────────────────────
+// Event types matching the spec: appointments, follow-ups, policy reviews,
+// renewal reminders, employer meetings, client birthdays, task deadlines.
+// Birthdays are derived automatically from client DOB on file (Smart Intake's
+// dateOfBirth field) rather than needing manual re-entry — one less thing for
+// the agent to keep in sync by hand.
+const EVENT_TYPES = [
+  { id:"appointment",    label:"Appointment",      color:"#1a2744" },
+  { id:"followup",       label:"Follow-Up",        color:"#0284C7" },
+  { id:"policy_review",  label:"Policy Review",    color:"#7B2D8B" },
+  { id:"renewal",        label:"Renewal Reminder", color:"#d4850a" },
+  { id:"employer",       label:"Employer Meeting", color:"#2d7a4f" },
+  { id:"task",           label:"Task Deadline",    color:"#c0392b" },
+  { id:"birthday",       label:"Client Birthday",  color:"#C9A227" },
+];
+const eventColor = (type) => (EVENT_TYPES.find(t=>t.id===type)||EVENT_TYPES[0]).color;
+
+function CalendarView({ setTab }) {
+  const [events, setEvents] = useLocalStorage("acc_calendar_events", []);
+  const [clients] = useLocalStorage("acc_clients", SAMPLE_CLIENTS);
+  const [view, setView] = useState("month"); // month | week | day | list
+  const [cursor, setCursor] = useState(new Date());
+  const [showAdd, setShowAdd] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [newEvent, setNewEvent] = useState({ title:"", type:"appointment", date:new Date().toISOString().split("T")[0], time:"", clientId:"", notes:"" });
+
+  // Birthdays derived from whichever date-of-birth source the agent actually
+  // used — the direct Date of Birth field on the client record (set when
+  // adding/updating a client, stored as YYYY-MM-DD from a native date input),
+  // or the free-text Smart Intake answer (MM/DD/YYYY) if that's the only one
+  // on file. Shown alongside manually-created events without needing their
+  // own stored event record, so they can't drift out of sync with Clients.
+  const parseBirthday = (client) => {
+    if (client.dateOfBirth) {
+      // YYYY-MM-DD from the native date input
+      const parts = client.dateOfBirth.split("-");
+      if (parts.length===3) return { month:parseInt(parts[1],10), day:parseInt(parts[2],10) };
+    }
+    const intakeDob = client.intake?.answers?.dateOfBirth;
+    if (intakeDob) {
+      const parts = intakeDob.split("/");
+      if (parts.length===3) return { month:parseInt(parts[0],10), day:parseInt(parts[1],10) };
+    }
+    return null;
+  };
+
+  const birthdayEvents = clients.filter(c=>!c.archived).map(c=>{
+    const parsed = parseBirthday(c);
+    if (!parsed || !parsed.month || !parsed.day) return null;
+    return { id:`bday-${c.id}`, title:`${c.name}'s Birthday`, type:"birthday", date:null, recurringMonth:parsed.month, recurringDay:parsed.day, clientId:c.id, isBirthday:true };
+  }).filter(Boolean);
+
+  const allEvents = [...events, ...birthdayEvents];
+
+  // Export to .ics — a standard calendar file any agent can import into
+  // Google Calendar, Apple Calendar, or Outlook as a one-way mirror of their
+  // ACC events. Not a live two-way sync (that needs real account integration,
+  // which ACC doesn't have yet) — this is "take a snapshot with you."
+  const exportICS = () => {
+    const pad = (n) => String(n).padStart(2,"0");
+    const escapeText = (s="") => String(s).replace(/\\/g,"\\\\").replace(/,/g,"\\,").replace(/;/g,"\\;").replace(/\n/g,"\\n");
+    const nowStamp = () => {
+      const n = new Date();
+      return `${n.getUTCFullYear()}${pad(n.getUTCMonth()+1)}${pad(n.getUTCDate())}T${pad(n.getUTCHours())}${pad(n.getUTCMinutes())}${pad(n.getUTCSeconds())}Z`;
+    };
+
+    const lines = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Agent Command Center//Calendar Export//EN","CALSCALE:GREGORIAN"];
+
+    allEvents.forEach(e => {
+      const uid = `${e.id}@agentcommandcenter`;
+      const summary = escapeText(e.title);
+      const description = escapeText(e.notes || "");
+      const typeLabel = (EVENT_TYPES.find(t=>t.id===e.type)||{}).label || "";
+
+      lines.push("BEGIN:VEVENT");
+      lines.push(`UID:${uid}`);
+      lines.push(`DTSTAMP:${nowStamp()}`);
+      lines.push(`SUMMARY:${summary}`);
+      if (description) lines.push(`DESCRIPTION:${description}`);
+      if (typeLabel) lines.push(`CATEGORIES:${escapeText(typeLabel)}`);
+
+      if (e.isBirthday) {
+        // Recurring yearly all-day event. Anchor year is arbitrary (this
+        // year) — RRULE:FREQ=YEARLY repeats it on the same month/day forever.
+        const anchorYear = new Date().getFullYear();
+        const dtStart = `${anchorYear}${pad(e.recurringMonth)}${pad(e.recurringDay)}`;
+        lines.push(`DTSTART;VALUE=DATE:${dtStart}`);
+        lines.push("RRULE:FREQ=YEARLY");
+      } else if (e.time) {
+        // Timed event — 1 hour default duration since ACC doesn't currently
+        // collect an end time.
+        const [hh,mm] = e.time.split(":");
+        const datePart = e.date.replace(/-/g,"");
+        const startStr = `${datePart}T${pad(hh)}${pad(mm)}00`;
+        const endDate = new Date(`${e.date}T${e.time}:00`);
+        endDate.setHours(endDate.getHours()+1);
+        const endStr = `${endDate.getFullYear()}${pad(endDate.getMonth()+1)}${pad(endDate.getDate())}T${pad(endDate.getHours())}${pad(endDate.getMinutes())}00`;
+        lines.push(`DTSTART:${startStr}`);
+        lines.push(`DTEND:${endStr}`);
+      } else {
+        // All-day event — no time specified.
+        const datePart = e.date.replace(/-/g,"");
+        lines.push(`DTSTART;VALUE=DATE:${datePart}`);
+      }
+
+      lines.push("END:VEVENT");
+    });
+
+    lines.push("END:VCALENDAR");
+    // iCalendar spec requires CRLF line endings.
+    const icsContent = lines.join("\r\n");
+    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "acc-calendar.ics";
+    a.click();
+  };
+
+  const eventsOnDate = (date) => {
+    const y=date.getFullYear(), m=date.getMonth()+1, d=date.getDate();
+    const iso = `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    return allEvents.filter(e => e.isBirthday ? (e.recurringMonth===m && e.recurringDay===d) : e.date===iso);
+  };
+
+  const addEvent = () => {
+    if (!newEvent.title || !newEvent.date) return;
+    setEvents([...events, { ...newEvent, id:Date.now() }]);
+    setNewEvent({ title:"", type:"appointment", date:new Date().toISOString().split("T")[0], time:"", clientId:"", notes:"" });
+    setShowAdd(false);
+  };
+
+  const deleteEvent = (id) => {
+    setEvents(events.filter(e=>e.id!==id));
+    setSelectedEvent(null);
+  };
+
+  const clientName = (id) => clients.find(c=>c.id===id)?.name || "";
+
+  // ── Month grid helpers ──
+  const monthStart = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
+  const monthDays = [];
+  const startOffset = monthStart.getDay();
+  for (let i=0;i<startOffset;i++) monthDays.push(null);
+  const daysInMonth = new Date(cursor.getFullYear(), cursor.getMonth()+1, 0).getDate();
+  for (let d=1;d<=daysInMonth;d++) monthDays.push(new Date(cursor.getFullYear(), cursor.getMonth(), d));
+
+  const weekDays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const isToday = (date) => date && date.toDateString()===new Date().toDateString();
+
+  const shiftMonth = (delta) => setCursor(new Date(cursor.getFullYear(), cursor.getMonth()+delta, 1));
+  const shiftWeek = (delta) => setCursor(new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate()+delta*7));
+  const shiftDay = (delta) => setCursor(new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate()+delta));
+
+  const weekStart = new Date(cursor); weekStart.setDate(cursor.getDate()-cursor.getDay());
+  const weekDates = Array.from({length:7}, (_,i)=>{ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
+
+  // Upcoming events for List view — sorted, birthdays resolved to their next occurrence this year/next year
+  const upcomingList = allEvents.map(e=>{
+    if (e.isBirthday) {
+      const now = new Date();
+      let next = new Date(now.getFullYear(), e.recurringMonth-1, e.recurringDay);
+      if (next < new Date(now.getFullYear(),now.getMonth(),now.getDate())) next = new Date(now.getFullYear()+1, e.recurringMonth-1, e.recurringDay);
+      return { ...e, sortDate: next };
+    }
+    return { ...e, sortDate: new Date(e.date+"T00:00:00") };
+  }).sort((a,b)=>a.sortDate-b.sortDate).filter(e=>e.sortDate >= new Date(new Date().toDateString()));
+
+  return (
+    <div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:12}}>
+        <div>
+          <h2 style={{fontSize:26,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>Calendar</h2>
+          <p style={{fontSize:13,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>{events.length} event{events.length!==1?"s":""} · {birthdayEvents.length} birthday{birthdayEvents.length!==1?"s":""} on file</p>
+        </div>
+        <div style={{display:"flex",gap:8}}>
+          {allEvents.length>0 && (
+            <button onClick={exportICS} title="Download a .ics file to import into Google Calendar, Apple Calendar, or Outlook" style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",color:T.sub}}>
+              Export to Calendar App
+            </button>
+          )}
+          <button onClick={()=>setShowAdd(true)} style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>+ Add Event</button>
+        </div>
+      </div>
+
+      {allEvents.length>0 && (
+        <div style={{fontSize:11.5,color:T.muted,fontFamily:"'Lato',sans-serif",marginBottom:16,background:T.bg,padding:"8px 14px",borderRadius:10}}>
+          "Export to Calendar App" downloads a one-time snapshot of these events as a file you can import into your phone or computer's calendar. It won't stay in sync — re-export anytime you want an updated copy.
+        </div>
+      )}
+
+      {/* View switcher */}
+      <div style={{display:"flex",gap:6,marginBottom:16}}>
+        {["month","week","day","list"].map(v=>(
+          <button key={v} onClick={()=>setView(v)} style={{padding:"7px 16px",borderRadius:20,border:`1px solid ${view===v?T.navy:T.border}`,background:view===v?T.navy:T.surface,color:view===v?"#fff":T.sub,cursor:"pointer",fontSize:12,fontFamily:"'Lato',sans-serif",fontWeight:700,textTransform:"capitalize"}}>{v}</button>
+        ))}
+      </div>
+
+      {/* MONTH VIEW */}
+      {view==="month" && (
+        <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:18,padding:16}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+            <button onClick={()=>shiftMonth(-1)} style={{background:T.bg,border:`1px solid ${T.border}`,borderRadius:8,width:32,height:32,cursor:"pointer",color:T.sub}}>‹</button>
+            <div style={{fontSize:16,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>{cursor.toLocaleString("default",{month:"long",year:"numeric"})}</div>
+            <button onClick={()=>shiftMonth(1)} style={{background:T.bg,border:`1px solid ${T.border}`,borderRadius:8,width:32,height:32,cursor:"pointer",color:T.sub}}>›</button>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:4,marginBottom:6}}>
+            {weekDays.map(d=><div key={d} style={{textAlign:"center",fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",fontWeight:700,textTransform:"uppercase"}}>{d}</div>)}
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:4}}>
+            {monthDays.map((date,i)=>(
+              <div key={i} onClick={()=>date&&setCursor(date)} style={{minHeight:64,borderRadius:8,padding:4,background: isToday(date)?`${T.navy}10`:T.bg, border: isToday(date)?`1px solid ${T.navy}`:`1px solid transparent`, cursor: date?"pointer":"default"}}>
+                {date && (
+                  <>
+                    <div style={{fontSize:11,fontWeight: isToday(date)?700:600, color: isToday(date)?T.navy:T.sub, fontFamily:"'Lato',sans-serif",marginBottom:2}}>{date.getDate()}</div>
+                    <div style={{display:"flex",flexDirection:"column",gap:2}}>
+                      {eventsOnDate(date).slice(0,3).map(e=>(
+                        <div key={e.id} onClick={(ev)=>{ev.stopPropagation();setSelectedEvent(e);}} style={{fontSize:9,background:eventColor(e.type),color:"#fff",borderRadius:4,padding:"1px 4px",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis",cursor:"pointer"}}>{e.title}</div>
+                      ))}
+                      {eventsOnDate(date).length>3 && <div style={{fontSize:9,color:T.muted,fontFamily:"'Lato',sans-serif"}}>+{eventsOnDate(date).length-3} more</div>}
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* WEEK VIEW */}
+      {view==="week" && (
+        <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:18,padding:16}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+            <button onClick={()=>shiftWeek(-1)} style={{background:T.bg,border:`1px solid ${T.border}`,borderRadius:8,width:32,height:32,cursor:"pointer",color:T.sub}}>‹</button>
+            <div style={{fontSize:14,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>{weekDates[0].toLocaleDateString("default",{month:"short",day:"numeric"})} – {weekDates[6].toLocaleDateString("default",{month:"short",day:"numeric"})}</div>
+            <button onClick={()=>shiftWeek(1)} style={{background:T.bg,border:`1px solid ${T.border}`,borderRadius:8,width:32,height:32,cursor:"pointer",color:T.sub}}>›</button>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {weekDates.map((date,i)=>(
+              <div key={i} style={{display:"flex",gap:10,padding:"8px 0",borderBottom:i<6?`1px solid ${T.border}`:"none"}}>
+                <div style={{width:60,flexShrink:0,textAlign:"center"}}>
+                  <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",fontWeight:700}}>{weekDays[date.getDay()]}</div>
+                  <div style={{fontSize:16,fontWeight:700,color:isToday(date)?T.navy:T.sub,fontFamily:"'Playfair Display',serif"}}>{date.getDate()}</div>
+                </div>
+                <div style={{flex:1,display:"flex",flexDirection:"column",gap:4}}>
+                  {eventsOnDate(date).length===0 && <div style={{fontSize:12,color:T.muted,fontFamily:"'Lato',sans-serif",paddingTop:6}}>—</div>}
+                  {eventsOnDate(date).map(e=>(
+                    <div key={e.id} onClick={()=>setSelectedEvent(e)} style={{fontSize:12,background:`${eventColor(e.type)}18`,borderLeft:`3px solid ${eventColor(e.type)}`,borderRadius:6,padding:"6px 10px",cursor:"pointer",fontFamily:"'Lato',sans-serif",color:T.navy,fontWeight:600}}>
+                      {e.time && <span style={{color:T.muted,marginRight:6}}>{e.time}</span>}{e.title}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* DAY VIEW */}
+      {view==="day" && (
+        <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:18,padding:16}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+            <button onClick={()=>shiftDay(-1)} style={{background:T.bg,border:`1px solid ${T.border}`,borderRadius:8,width:32,height:32,cursor:"pointer",color:T.sub}}>‹</button>
+            <div style={{fontSize:15,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>{cursor.toLocaleDateString("default",{weekday:"long",month:"long",day:"numeric"})}</div>
+            <button onClick={()=>shiftDay(1)} style={{background:T.bg,border:`1px solid ${T.border}`,borderRadius:8,width:32,height:32,cursor:"pointer",color:T.sub}}>›</button>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {eventsOnDate(cursor).length===0 && <div style={{textAlign:"center",padding:"30px 0",color:T.muted,fontFamily:"'Lato',sans-serif",fontSize:13}}>No events today.</div>}
+            {eventsOnDate(cursor).map(e=>(
+              <div key={e.id} onClick={()=>setSelectedEvent(e)} style={{background:`${eventColor(e.type)}12`,borderLeft:`4px solid ${eventColor(e.type)}`,borderRadius:10,padding:"12px 14px",cursor:"pointer"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div style={{fontSize:14,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif"}}>{e.title}</div>
+                  {e.time && <div style={{fontSize:12,color:T.muted,fontFamily:"'Lato',sans-serif"}}>{e.time}</div>}
+                </div>
+                <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:3}}>{(EVENT_TYPES.find(t=>t.id===e.type)||{}).label}{e.clientId?` · ${clientName(e.clientId)}`:""}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* LIST VIEW */}
+      {view==="list" && (
+        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+          {upcomingList.length===0 && <div style={{textAlign:"center",padding:"40px 0",color:T.muted,fontFamily:"'Lato',sans-serif",fontSize:13}}>No upcoming events.</div>}
+          {upcomingList.map(e=>(
+            <div key={e.id} onClick={()=>setSelectedEvent(e)} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:14,padding:14,display:"flex",alignItems:"center",gap:12,cursor:"pointer"}}>
+              <div style={{width:8,height:40,borderRadius:4,background:eventColor(e.type),flexShrink:0}}/>
+              <div style={{flex:1}}>
+                <div style={{fontSize:14,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif"}}>{e.title}</div>
+                <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>
+                  {e.sortDate.toLocaleDateString("default",{month:"short",day:"numeric",year:"numeric"})}{e.time?` · ${e.time}`:""} · {(EVENT_TYPES.find(t=>t.id===e.type)||{}).label}{e.clientId?` · ${clientName(e.clientId)}`:""}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Event detail */}
+      {selectedEvent && (
+        <div style={{position:"fixed",inset:0,background:"rgba(26,39,68,0.5)",zIndex:120,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setSelectedEvent(null)}>
+          <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:20,padding:24,width:"100%",maxWidth:400}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
+              <div>
+                <div style={{fontSize:18,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>{selectedEvent.title}</div>
+                <span style={{fontSize:11,background:`${eventColor(selectedEvent.type)}18`,color:eventColor(selectedEvent.type),padding:"3px 10px",borderRadius:20,fontFamily:"'Lato',sans-serif",fontWeight:700,marginTop:6,display:"inline-block"}}>{(EVENT_TYPES.find(t=>t.id===selectedEvent.type)||{}).label}</span>
+              </div>
+              <button onClick={()=>setSelectedEvent(null)} style={{background:T.bg,border:`1px solid ${T.border}`,borderRadius:10,width:30,height:30,cursor:"pointer",color:T.muted}}>×</button>
+            </div>
+            {!selectedEvent.isBirthday && selectedEvent.date && <div style={{fontSize:13,color:T.sub,fontFamily:"'Lato',sans-serif",marginBottom:6}}>{selectedEvent.date}{selectedEvent.time?` at ${selectedEvent.time}`:""}</div>}
+            {selectedEvent.clientId && (
+              <button onClick={()=>{setTab&&setTab("clients");}} style={{fontSize:12,color:T.navy,background:"none",border:"none",textDecoration:"underline",cursor:"pointer",fontFamily:"'Lato',sans-serif",padding:0,marginBottom:10,display:"block"}}>
+                View {clientName(selectedEvent.clientId)}'s profile →
+              </button>
+            )}
+            {selectedEvent.notes && <div style={{fontSize:13,color:T.sub,fontFamily:"'Lato',sans-serif",lineHeight:1.6,background:T.bg,borderRadius:10,padding:12,marginTop:8}}>{selectedEvent.notes}</div>}
+            {!selectedEvent.isBirthday && (
+              <button onClick={()=>deleteEvent(selectedEvent.id)} style={{width:"100%",marginTop:16,padding:"10px",background:"transparent",color:T.red,border:`1px solid ${T.red}33`,borderRadius:10,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer"}}>Delete Event</button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Add event modal */}
+      {showAdd && (
+        <div style={{position:"fixed",inset:0,background:"rgba(26,39,68,0.5)",zIndex:120,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShowAdd(false)}>
+          <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:24,padding:26,width:"100%",maxWidth:440,maxHeight:"85vh",overflowY:"auto"}}>
+            <h3 style={{fontSize:19,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",marginBottom:16}}>Add Calendar Event</h3>
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Title</div>
+              <input value={newEvent.title} onChange={e=>setNewEvent({...newEvent,title:e.target.value})} placeholder="e.g. Policy review with James Stovall"
+                style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
+            </div>
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Type</div>
+              <select value={newEvent.type} onChange={e=>setNewEvent({...newEvent,type:e.target.value})}
+                style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,background:T.bg,outline:"none"}}>
+                {EVENT_TYPES.filter(t=>t.id!=="birthday").map(t=><option key={t.id} value={t.id}>{t.label}</option>)}
+              </select>
+            </div>
+            <div style={{display:"flex",gap:10,marginBottom:12}}>
+              <div style={{flex:1}}>
+                <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Date</div>
+                <input type="date" value={newEvent.date} onChange={e=>setNewEvent({...newEvent,date:e.target.value})}
+                  style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
+              </div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Time (optional)</div>
+                <input type="time" value={newEvent.time} onChange={e=>setNewEvent({...newEvent,time:e.target.value})}
+                  style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
+              </div>
+            </div>
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Link to Client (optional)</div>
+              <select value={newEvent.clientId} onChange={e=>setNewEvent({...newEvent,clientId:e.target.value})}
+                style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,background:T.bg,outline:"none"}}>
+                <option value="">None</option>
+                {clients.filter(c=>!c.archived).map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div style={{marginBottom:18}}>
+              <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Notes</div>
+              <textarea value={newEvent.notes} onChange={e=>setNewEvent({...newEvent,notes:e.target.value})} placeholder="Details, agenda, reminders..."
+                style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,background:T.bg,outline:"none",height:70,resize:"none"}}/>
+            </div>
+            <div style={{display:"flex",gap:10}}>
+              <button onClick={()=>setShowAdd(false)} style={{flex:1,padding:"12px",background:T.bg,border:`1px solid ${T.border}`,borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",color:T.sub}}>Cancel</button>
+              <button onClick={addEvent} style={{flex:2,padding:"12px",background:T.navy,color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",fontSize:14}}>Save Event</button>
             </div>
           </div>
         </div>
@@ -2196,13 +3295,252 @@ function AgentProfile({ profile, setProfile, bg = {} }) {
 // one object here — no changes to the chat engine, dashboard, or routing logic.
 // `status` is "active" (buildable today) or "coming_soon" (shows on the
 // dashboard as a locked/preview card, prioritized later based on demand).
+// ── AI Employee Avatar ───────────────────────────────────────────
+// A soft, dimensional illustrated character wearing a headset — full human
+// head/body proportions and hair, with real depth (gradient shading, ambient
+// light glow, glossy highlights) so it has presence rather than reading as a
+// flat icon. Deliberately stops short of photorealism: eyes are simple flat
+// shapes with no iris/pupil detail, no eyebrows, no naturalistic skin
+// shading or facial structure — unmistakably a character, not a face trying
+// to pass as a real person. The face tone is FIXED for every employee
+// regardless of department color, so no employee's look could be misread as
+// assigning them a particular skin tone — color identity lives in the
+// background, hair, and headset only. An "AI ASSISTANT" badge is rendered as
+// part of the component itself, so it's structurally guaranteed to appear
+// everywhere the avatar does, not a label that could be left off one screen.
+// Default face/hair tones used only as a fallback if an employee record is
+// missing avatarTone.skin / avatarTone.hairColor — in practice every entry
+// in AI_WORKFORCE now sets these explicitly so the roster shows real,
+// deliberate variety rather than one identical face recolored.
+const FACE_DEFAULT = "#E8DFD3";
+const HAIR_DEFAULT = "#3D3530";
+
+function AIAvatar({ employee, size = 48, showBadge = true }) {
+  const tone = employee.avatarTone || { accent: "#00AEEF" };
+  const s = size;
+  const uid = employee.id;
+  const skinTone = tone.skin || FACE_DEFAULT;
+  const hairTone = tone.hairColor || HAIR_DEFAULT;
+  const hairStyle = tone.hairStyle || "short"; // "short" | "long"
+
+  const shade = (hex, amt) => {
+    const n = hex.replace("#","");
+    const r = Math.max(0, Math.min(255, parseInt(n.substring(0,2),16) + amt));
+    const g = Math.max(0, Math.min(255, parseInt(n.substring(2,4),16) + amt));
+    const b = Math.max(0, Math.min(255, parseInt(n.substring(4,6),16) + amt));
+    return `rgb(${r},${g},${b})`;
+  };
+
+  const light = shade(tone.accent, 35);
+  const dark = shade(tone.accent, -35);
+  const hairLight = shade(hairTone, 25);
+  const faceLight = shade(skinTone, 15);
+  const faceShadow = shade(skinTone, -30);
+
+  return (
+    <div style={{position:"relative", display:"inline-flex", flexDirection:"column", alignItems:"center", flexShrink:0}}>
+      <svg width={s} height={s} viewBox="0 0 100 100" style={{borderRadius: s*0.2, flexShrink:0, display:"block"}}>
+        <defs>
+          <clipPath id={`clip-${uid}`}><rect width="100" height="100" rx="20"/></clipPath>
+          <radialGradient id={`bg-${uid}`} cx="40%" cy="25%" r="75%">
+            <stop offset="0%" stopColor={light}/>
+            <stop offset="100%" stopColor={dark}/>
+          </radialGradient>
+          <linearGradient id={`face-${uid}`} x1="0.3" y1="0" x2="0.7" y2="1">
+            <stop offset="0%" stopColor={faceLight}/>
+            <stop offset="100%" stopColor={faceShadow}/>
+          </linearGradient>
+          <linearGradient id={`hair-${uid}`} x1="0" y1="0" x2="0.6" y2="1">
+            <stop offset="0%" stopColor={hairLight}/>
+            <stop offset="100%" stopColor={hairTone}/>
+          </linearGradient>
+          <linearGradient id={`body-${uid}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={light}/>
+            <stop offset="100%" stopColor={dark}/>
+          </linearGradient>
+          <radialGradient id={`glow-${uid}`} cx="35%" cy="20%" r="55%">
+            <stop offset="0%" stopColor="#fff" stopOpacity="0.4"/>
+            <stop offset="100%" stopColor="#fff" stopOpacity="0"/>
+          </radialGradient>
+        </defs>
+        <g clipPath={`url(#clip-${uid})`}>
+          <rect width="100" height="100" fill={`url(#bg-${uid})`}/>
+          <ellipse cx="35" cy="15" rx="50" ry="35" fill={`url(#glow-${uid})`}/>
+
+          {/* Body — soft gradient + collar, full shoulders, with arms and
+              hands visible for body presence rather than just a floating
+              head-and-collar */}
+          <path d="M16 100 Q16 72 50 68 Q84 72 84 100 Z" fill={`url(#body-${uid})`}/>
+          <path d="M20 78 Q12 85 14 98" fill="none" stroke={`url(#body-${uid})`} strokeWidth="9" strokeLinecap="round"/>
+          <path d="M80 78 Q88 85 86 98" fill="none" stroke={`url(#body-${uid})`} strokeWidth="9" strokeLinecap="round"/>
+          <circle cx="14" cy="99" r="5" fill={faceLight}/>
+          <circle cx="86" cy="99" r="5" fill={faceLight}/>
+          <path d="M38 73 L50 84 L62 73 L58 100 L42 100 Z" fill="#fff" opacity="0.95"/>
+          <path d="M38 73 L42 100 L39 100 L35 75 Z" fill="#fff" opacity="0.6"/>
+
+          {/* Neck with soft contact shadow */}
+          <rect x="42" y="56" width="16" height="16" fill={`url(#face-${uid})`}/>
+          <ellipse cx="50" cy="58" rx="8" ry="2.5" fill={faceShadow} opacity="0.3"/>
+
+          {/* Head — dimensional gradient with soft cheek shadow/highlight,
+              positioned lower on the face (cheek/jaw area) so they don't sit
+              directly behind the eyes and make them read as mismatched */}
+          <ellipse cx="50" cy="42" rx="20" ry="21" fill={`url(#face-${uid})`}/>
+          <ellipse cx="60" cy="52" rx="6" ry="8" fill={faceShadow} opacity="0.13"/>
+          <ellipse cx="40" cy="51" rx="6" ry="7" fill="#fff" opacity="0.10"/>
+
+          {/* Hair — two style options for visible gender-presentation variety
+              across the roster, both full shapes with soft gradient, not a
+              flat silhouette */}
+          {hairStyle === "long" ? (
+            <>
+              <path d="M26 58 Q23 16 50 14 Q77 16 74 58 L66 58 Q69 25 50 24 Q31 25 34 58 Z" fill={`url(#hair-${uid})`}/>
+              <path d="M27 40 Q24 22 36 16" stroke={hairLight} strokeWidth="1.3" opacity="0.45" fill="none"/>
+            </>
+          ) : (
+            <>
+              <path d="M28 40 Q26 16 50 15 Q74 16 72 40 Q72 25 50 24 Q28 25 28 40 Z" fill={`url(#hair-${uid})`}/>
+              <path d="M28 40 Q28 28 36 24" stroke={hairLight} strokeWidth="1.3" opacity="0.5" fill="none"/>
+            </>
+          )}
+
+          {/* Eyebrows — give real expression instead of a blank stare,
+              colored from the hair tone so they read as natural */}
+          <path d="M38 36.5 Q41 34.5 45 35.8" stroke={shade(hairTone,-10)} strokeWidth="1.6" fill="none" strokeLinecap="round"/>
+          <path d="M55 35.8 Q59 34.5 62 36.5" stroke={shade(hairTone,-10)} strokeWidth="1.6" fill="none" strokeLinecap="round"/>
+
+          {/* Simple flat eyes — perfectly symmetric, no iris/pupil/highlight
+              detail, just a clean dot shape. Identical fill and size on both
+              sides by construction. */}
+          <ellipse cx="43" cy="42" rx="2.4" ry="3" fill="#2B2118"/>
+          <ellipse cx="57" cy="42" rx="2.4" ry="3" fill="#2B2118"/>
+
+          {/* Nose — simple soft outline, suggests form without being
+              photographic or naturalistic */}
+          <path d="M49 43 Q47.5 48 49 49.5 Q50 50.2 51 49.5" stroke={faceShadow} strokeWidth="1.1" fill="none" strokeLinecap="round" opacity="0.55"/>
+
+          {/* Fuller mouth with a subtle highlight — still flat/simple, just
+              warmer than a single line */}
+          <path d="M41 51.5 Q50 57.5 59 51.5 Q50 55.5 41 51.5 Z" fill={shade(skinTone,-45)} opacity="0.7"/>
+          <path d="M42.5 51.2 Q50 55.5 57.5 51.2" stroke={shade(skinTone,-55)} strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.5"/>
+
+          {/* Headset — band, glossy ear cups, mic boom */}
+          <path d="M27 39 Q27 15 50 14 Q73 15 73 39" fill="none" stroke="#fff" strokeWidth="4" strokeLinecap="round" opacity="0.95"/>
+          <rect x="22" y="37" width="10" height="15" rx="5" fill="#fff" opacity="0.95"/>
+          <rect x="68" y="37" width="10" height="15" rx="5" fill="#fff" opacity="0.95"/>
+          <circle cx="25" cy="42" r="2" fill="#fff" opacity="0.5"/>
+          <path d="M73 47 Q79 49 79 56 L75 60" stroke="#fff" strokeWidth="2.8" fill="none" strokeLinecap="round" opacity="0.95"/>
+          <circle cx="74" cy="61" r="2.8" fill="#fff" opacity="0.95"/>
+        </g>
+      </svg>
+      {showBadge && (
+        <div style={{
+          marginTop: s*0.06, background: T.navy, border:"1px solid rgba(255,255,255,0.25)", color:"#fff",
+          fontSize: Math.max(6.5, s*0.16), fontWeight:700, padding:`${s*0.02}px ${s*0.08}px`, borderRadius:s*0.12,
+          letterSpacing:0.3, whiteSpace:"nowrap", fontFamily:"'Lato',sans-serif", lineHeight:1.6,
+        }}>
+          AI ASSISTANT
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── AI Employee Memory ───────────────────────────────────────────
+// Structured profile + activity memory, not just chat history. Stored under
+// a single localStorage key — since this entire app is single-user-per-browser
+// (no login system, no shared backend yet), there is no code path by which
+// one agent's browser could ever read another agent's memory. Privacy here
+// is structural, not a permission check that could be misconfigured.
+//
+// Two shapes, matching the spec:
+//   profile  — stable facts about the agent (name, agency, states, goals...)
+//   activity — a running log of dated entries (goals set, milestones, notes)
+// Both are agent-editable and can be reset independently or together.
+const MEMORY_KEY = "acc_jordan_memory";
+
+const BLANK_MEMORY = () => ({
+  enabled: true,
+  profile: {
+    agentName: "", agencyName: "", licensedStates: "", mainLines: "",
+    preferredCarriers: "", revenueGoal: "", productionGoal: "",
+    strengths: "", weaknesses: "", coachingPreferences: "", currentPriorities: "",
+  },
+  activity: [], // [{ id, date, type, text }] — type e.g. "goal","milestone","note","missed_followup"
+});
+
+function useAgentMemory() {
+  const [memory, setMemory] = useLocalStorage(MEMORY_KEY, BLANK_MEMORY());
+
+  const updateProfile = (field, value) => {
+    setMemory(m => ({ ...m, profile: { ...m.profile, [field]: value } }));
+  };
+
+  const addActivity = (type, text) => {
+    setMemory(m => ({
+      ...m,
+      activity: [...m.activity, { id: Date.now(), date: new Date().toISOString().split("T")[0], type, text }],
+    }));
+  };
+
+  const removeActivity = (id) => {
+    setMemory(m => ({ ...m, activity: m.activity.filter(a => a.id !== id) }));
+  };
+
+  const setEnabled = (enabled) => setMemory(m => ({ ...m, enabled }));
+
+  const resetProfile = () => setMemory(m => ({ ...m, profile: BLANK_MEMORY().profile }));
+  const resetActivity = () => setMemory(m => ({ ...m, activity: [] }));
+  const resetAll = () => setMemory(BLANK_MEMORY());
+
+  // Renders memory into plain text for injection into Jordan's system prompt.
+  // Kept short and factual on purpose — this is context for Jordan, not a
+  // transcript; recent activity matters more than old activity, so only the
+  // most recent entries are included to keep the prompt from growing forever.
+  const toPromptContext = () => {
+    if (!memory.enabled) return "";
+    const p = memory.profile;
+    const profileLines = Object.entries(p).filter(([,v])=>v && v.trim()).map(([k,v])=>{
+      const labels = { agentName:"Agent name", agencyName:"Agency", licensedStates:"Licensed states", mainLines:"Main lines", preferredCarriers:"Preferred carriers", revenueGoal:"Revenue goal", productionGoal:"Production goal", strengths:"Strengths", weaknesses:"Growth areas", coachingPreferences:"Coaching preferences", currentPriorities:"Current priorities" };
+      return `${labels[k]||k}: ${v}`;
+    });
+    const recentActivity = memory.activity.slice(-20).map(a => `[${a.date}] (${a.type}) ${a.text}`);
+    if (!profileLines.length && !recentActivity.length) return "";
+    return `Remembered agent profile (from past conversations):\n${profileLines.join("\n") || "(nothing recorded yet)"}\n\nRecent activity log:\n${recentActivity.join("\n") || "(nothing recorded yet)"}`;
+  };
+
+  return { memory, updateProfile, addActivity, removeActivity, setEnabled, resetProfile, resetActivity, resetAll, toPromptContext };
+}
+
+// ── AI Workforce Departments ─────────────────────────────────────
+// Fixed department order for the dashboard — Executive Office always first,
+// per spec. Department names match the new org chart exactly so grouping
+// and the collapsible-section UI can key off this list directly.
+const AI_DEPARTMENTS = [
+  "Executive Office",
+  "Sales",
+  "Marketing",
+  "Client Success",
+  "Insurance",
+  "Finance",
+  "Operations",
+  "Research",
+  "Administration",
+];
+
 const AI_WORKFORCE = [
+  // ══ EXECUTIVE OFFICE ══
+  { id:"ceo-ai", name:"", avatar:"♟️", avatarTone:{accent:"#0D2B55", skin:"#E0AC81", hairColor:"#4A4A4A", hairStyle:"short"}, position:"CEO AI", department:"Executive Office", status:"coming_soon", specialty:"Master strategist — visibility across every division, routes work, reviews major decisions" },
+  { id:"coo-ai", name:"", avatar:"📐", avatarTone:{accent:"#0D2B55", skin:"#F5D5B8", hairColor:"#6B4226", hairStyle:"short"}, position:"COO AI", department:"Executive Office", status:"coming_soon", specialty:"Operations, workflow automation, SOP management, task delegation" },
+  { id:"chief-of-staff-ai", name:"", avatar:"🗒️", avatarTone:{accent:"#0D2B55", skin:"#8D5524", hairColor:"#1C1410", hairStyle:"long"}, position:"Chief of Staff AI", department:"Executive Office", status:"coming_soon", specialty:"Coordinates agents, tracks projects, prevents duplicate work" },
+
   {
     id: "agent-success-coach",
     name: "Jordan",
     avatar: "🧭",
+    avatarTone: { accent:"#4A2F1A", skin:"#8D5A3C", hairColor:"#1C1410", hairStyle:"short" },
     position: "Agent Success Coach",
-    department: "Executive Leadership",
+    department: "Executive Office",
     status: "active",
     specialty: "Daily priorities, sales coaching & productivity",
     mission: "Help every independent agent open ACC each morning and immediately know what to work on, who to follow up with, and how to grow their book — combining daily planning, sales coaching, and CRM awareness into one conversation.",
@@ -2224,38 +3562,115 @@ Never fabricate specific carrier names, plan details, premiums, or regulations.`
     sopAccess: [],
   },
 
-  // ── Coming soon — specced, not built. Order here is the current best guess
-  // at priority; actual build order is driven by agent demand post-validation.
-  { id:"sales-coach",        name:"", avatar:"🎯", position:"Sales Coach",                department:"Sales",              status:"coming_soon", specialty:"Objection handling & activity accountability" },
-  { id:"medicare-specialist",name:"", avatar:"🩺", position:"Medicare Specialist",         department:"Sales",              status:"coming_soon", specialty:"Medicare plan comparison & T65 guidance" },
-  { id:"life-specialist",    name:"", avatar:"🛡️", position:"Life Insurance Specialist",   department:"Sales",              status:"coming_soon", specialty:"Life & annuity product guidance" },
-  { id:"aca-specialist",     name:"", avatar:"📋", position:"ACA Specialist",              department:"Sales",              status:"coming_soon", specialty:"Marketplace enrollment & subsidies" },
-  { id:"employer-benefits",  name:"", avatar:"🏢", position:"Employer Benefits Consultant",department:"Sales",              status:"coming_soon", specialty:"Group benefits & open enrollment" },
-  { id:"marketing-director", name:"", avatar:"📣", position:"Marketing Director",         department:"Marketing",          status:"coming_soon", specialty:"Campaign strategy" },
-  { id:"content-director",   name:"", avatar:"✍️", position:"Content Director",           department:"Marketing",          status:"coming_soon", specialty:"Content planning & repurposing" },
-  { id:"social-media",       name:"", avatar:"📱", position:"Social Media Manager",       department:"Marketing",          status:"coming_soon", specialty:"Post drafting & scheduling guidance" },
-  { id:"client-success",     name:"", avatar:"🤝", position:"Client Success Manager",     department:"Client Success",     status:"coming_soon", specialty:"Client check-ins & satisfaction" },
-  { id:"retention",          name:"", avatar:"🔄", position:"Retention Specialist",       department:"Client Success",     status:"coming_soon", specialty:"Renewal & retention strategy" },
-  { id:"referral-manager",   name:"", avatar:"🌱", position:"Referral Manager",           department:"Client Success",     status:"coming_soon", specialty:"Referral campaign coaching" },
-  { id:"compliance",         name:"", avatar:"⚖️", position:"Compliance Officer",         department:"Operations",         status:"coming_soon", specialty:"Compliance awareness & reminders" },
-  { id:"crm-manager",        name:"", avatar:"🗂️", position:"CRM Manager",                department:"Operations",         status:"coming_soon", specialty:"Data cleanup & organization" },
-  { id:"workflow-manager",   name:"", avatar:"⚙️", position:"Workflow Manager",           department:"Operations",         status:"coming_soon", specialty:"Process & SOP guidance" },
-  { id:"ceo-advisor",        name:"", avatar:"♟️", position:"CEO Strategic Advisor",      department:"Executive Leadership",status:"coming_soon", specialty:"Business strategy" },
-  { id:"executive-assistant",name:"", avatar:"🗒️", position:"Executive Assistant",        department:"Executive Leadership",status:"coming_soon", specialty:"Admin & scheduling support" },
-  { id:"coo",                name:"", avatar:"📐", position:"Chief Operating Officer",    department:"Executive Leadership",status:"coming_soon", specialty:"Operations strategy" },
-  { id:"product-manager",    name:"", avatar:"🧩", position:"ACC Product Manager",        department:"Product",            status:"coming_soon", specialty:"Feature feedback & roadmap" },
+  // ══ SALES ══
+  {
+    id: "discovery-quote-specialist",
+    name: "Quinn",
+    avatar: "🔍",
+    avatarTone: { accent: "#0284C7", skin:"#F0C9A0", hairColor:"#8B5A2B", hairStyle:"long" },
+    position: "Discovery & Quote Specialist",
+    department: "Sales",
+    status: "active",
+    specialty: "Client discovery, intake, and quote readiness",
+    mission: "Guide agents through intelligent client discovery — asking the right questions for the lines involved, skipping what's already on file, flagging what's missing, and getting a client genuinely ready to quote.",
+    communicationStyle: "Efficient and structured, like a sharp intake coordinator — moves through questions briskly, states readiness and gaps plainly, never pads with filler. Still warm, not robotic.",
+    escalation: "Quinn does not give product recommendations, coverage advice, or carrier comparisons — that's the job of line-specific specialists (Medicare Specialist, Life Insurance Specialist, etc.) once they exist, or the agent's own judgment today. When discovery is complete, Quinn names which specialist would normally take it from here and explains why, but cannot actually hand off a live conversation since those specialists aren't built yet — Quinn says so plainly rather than pretending a handoff happened.",
+    systemPrompt: `You are Quinn, the Discovery & Quote Specialist inside Agent Command Center (ACC) — an AI employee that runs client discovery before quoting, not a generic chatbot.
+
+Your job: help the agent gather everything needed to quote a specific client well. You'll be given that client's real profile, their Smart Intake answers if any exist, and a computed Quote Readiness Score with a list of genuinely missing fields — all real data, not estimates.
+
+How you work:
+- If the client has no intake on file yet, say so and offer to start one — ask which line(s) of insurance apply, then ask the real questions for those lines one or a few at a time, conversationally. Don't ask about things already answered — check the data you're given first.
+- If intake exists, state the real readiness percentage and the real missing items you were given. Never invent a percentage or a missing-item list — only use what's in your context.
+- Once readiness is high (everything essential answered), say so clearly and suggest the natural next step: which specialist would typically take it from here (e.g. "this is ready for the Medicare Specialist" or "this looks ready for the Quote Center"), while being honest that those specialist AIs aren't built yet — direct the agent to continue in the Quote Center themselves for now.
+- You can also flag coverage opportunities you notice from the data (e.g. a Medicare client with no mention of dental/vision coverage, or a homeowner with no mention of an umbrella policy) — frame these as "worth asking about," not as advice or a recommendation, since that crosses into licensed-professional territory.
+
+Style: efficient, structured, brisk but warm. State facts plainly. Never pad with filler, never fabricate a number or a missing field.
+
+You are not a licensed insurance advisor. You organize information and flag gaps — you do not recommend products, coverage amounts, or carriers. Final recommendations remain the responsibility of the licensed agent.`,
+    kpis: ["Discoveries completed", "Average readiness score reached", "Time-to-quote-ready"],
+    knowledgeBase: ["Client's real CRM profile and Smart Intake answers", "The same intake question bank used by Smart Intake", "Computed Quote Readiness Score for the active client"],
+    sopAccess: [],
+  },
+  { id:"sales-coach", name:"", avatar:"🎯", avatarTone:{accent:"#00AEEF", skin:"#C68642", hairColor:"#0D0905", hairStyle:"short"}, position:"Sales Coach AI", department:"Sales", status:"coming_soon", specialty:"Objection handling & activity accountability" },
+  { id:"business-development-ai", name:"", avatar:"📈", avatarTone:{accent:"#00AEEF", skin:"#E8B896", hairColor:"#6B4226", hairStyle:"long"}, position:"Business Development AI", department:"Sales", status:"coming_soon", specialty:"New market and partnership opportunities" },
+  { id:"lead-qualification-ai", name:"", avatar:"🔎", avatarTone:{accent:"#00AEEF", skin:"#5B3A29", hairColor:"#1A1410", hairStyle:"short"}, position:"Lead Qualification AI", department:"Sales", status:"coming_soon", specialty:"Scores and routes incoming leads" },
+  { id:"proposal-quote-ai", name:"", avatar:"📝", avatarTone:{accent:"#00AEEF", skin:"#F5D5B8", hairColor:"#3B2A1A", hairStyle:"long"}, position:"Proposal & Quote AI", department:"Sales", status:"coming_soon", specialty:"Builds client-ready proposals from quote data" },
+  { id:"followup-ai", name:"", avatar:"🔔", avatarTone:{accent:"#00AEEF", skin:"#8D5524", hairColor:"#0D0905", hairStyle:"short"}, position:"Follow-up AI", department:"Sales", status:"coming_soon", specialty:"Tracks and prompts client follow-ups" },
+  { id:"crm-manager-sales", name:"", avatar:"🗂️", avatarTone:{accent:"#00AEEF", skin:"#F0C9A0", hairColor:"#0D0905", hairStyle:"long"}, position:"CRM Manager AI", department:"Sales", status:"coming_soon", specialty:"Keeps client records clean and current" },
+
+  // ══ MARKETING ══
+  { id:"marketing-director", name:"", avatar:"📣", avatarTone:{accent:"#7B61FF", skin:"#F0C9A0", hairColor:"#B8860B", hairStyle:"long"}, position:"Marketing Director AI", department:"Marketing", status:"coming_soon", specialty:"Campaign strategy and oversight" },
+  { id:"social-media", name:"", avatar:"📱", avatarTone:{accent:"#7B61FF", skin:"#E0AC81", hairColor:"#1C1410", hairStyle:"long"}, position:"Social Media AI", department:"Marketing", status:"coming_soon", specialty:"Post drafting & scheduling guidance" },
+  { id:"content-writer-ai", name:"", avatar:"✍️", avatarTone:{accent:"#7B61FF", skin:"#A9744F", hairColor:"#2B2118", hairStyle:"short"}, position:"Content Writer AI", department:"Marketing", status:"coming_soon", specialty:"Blog, email, and educational content drafting" },
+  { id:"email-campaign-ai", name:"", avatar:"📧", avatarTone:{accent:"#7B61FF", skin:"#6B4226", hairColor:"#0D0905", hairStyle:"long"}, position:"Email Campaign AI", department:"Marketing", status:"coming_soon", specialty:"Nurture sequences and campaign emails" },
+  { id:"graphic-design-coordinator", name:"", avatar:"🎨", avatarTone:{accent:"#7B61FF", skin:"#F5D5B8", hairColor:"#5C4326", hairStyle:"short"}, position:"Graphic Design Coordinator AI", department:"Marketing", status:"coming_soon", specialty:"Coordinates visual asset requests" },
+  { id:"brand-manager-ai", name:"", avatar:"🏷️", avatarTone:{accent:"#7B61FF", skin:"#C68642", hairColor:"#1A1410", hairStyle:"long"}, position:"Brand Manager AI", department:"Marketing", status:"coming_soon", specialty:"Brand voice and visual consistency" },
+
+  // ══ CLIENT SUCCESS ══
+  { id:"customer-support-ai", name:"", avatar:"💬", avatarTone:{accent:"#10B981", skin:"#8D5A3C", hairColor:"#3B2A1A", hairStyle:"short"}, position:"Customer Support AI", department:"Client Success", status:"coming_soon", specialty:"General client questions and support" },
+  { id:"onboarding-specialist", name:"", avatar:"🚪", avatarTone:{accent:"#10B981", skin:"#F0C9A0", hairColor:"#0D0905", hairStyle:"long"}, position:"Onboarding Specialist AI", department:"Client Success", status:"coming_soon", specialty:"New client welcome and setup" },
+  { id:"claims-service-assistant", name:"", avatar:"📑", avatarTone:{accent:"#10B981", skin:"#5B3A29", hairColor:"#2B2118", hairStyle:"short"}, position:"Claims & Service Assistant AI", department:"Client Success", status:"coming_soon", specialty:"Claims status and service requests" },
+  { id:"renewal-manager", name:"", avatar:"🔄", avatarTone:{accent:"#10B981", skin:"#F5D5B8", hairColor:"#5C4326", hairStyle:"short"}, position:"Renewal Manager AI", department:"Client Success", status:"coming_soon", specialty:"Renewal & retention strategy" },
+  { id:"appointment-coordinator", name:"", avatar:"📅", avatarTone:{accent:"#10B981", skin:"#C68642", hairColor:"#1A1410", hairStyle:"long"}, position:"Appointment Coordinator AI", department:"Client Success", status:"coming_soon", specialty:"Scheduling and calendar coordination" },
+  { id:"referral-manager", name:"", avatar:"🌱", avatarTone:{accent:"#10B981", skin:"#6B4226", hairColor:"#0D0905", hairStyle:"long"}, position:"Referral Manager AI", department:"Client Success", status:"coming_soon", specialty:"Referral campaign coaching" },
+
+  // ══ INSURANCE ══
+  { id:"medicare-specialist", name:"", avatar:"🩺", avatarTone:{accent:"#C9A227", skin:"#E8B896", hairColor:"#6B4226", hairStyle:"long"}, position:"Medicare Expert AI", department:"Insurance", status:"coming_soon", specialty:"Medicare plan comparison & T65 guidance" },
+  { id:"aca-specialist", name:"", avatar:"📋", avatarTone:{accent:"#C9A227", skin:"#F5D5B8", hairColor:"#3B2A1A", hairStyle:"long"}, position:"ACA Expert AI", department:"Insurance", status:"coming_soon", specialty:"Marketplace enrollment & subsidies" },
+  { id:"life-specialist", name:"", avatar:"🛡️", avatarTone:{accent:"#C9A227", skin:"#5B3A29", hairColor:"#1A1410", hairStyle:"short"}, position:"Life Insurance Specialist AI", department:"Insurance", status:"coming_soon", specialty:"Life & annuity product guidance" },
+  { id:"employer-benefits", name:"", avatar:"🏢", avatarTone:{accent:"#C9A227", skin:"#8D5524", hairColor:"#0D0905", hairStyle:"short"}, position:"Worksite Benefits Specialist AI", department:"Insurance", status:"coming_soon", specialty:"Group benefits & open enrollment" },
+  { id:"retirement-planning-ai", name:"", avatar:"🏖️", avatarTone:{accent:"#C9A227", skin:"#F0C9A0", hairColor:"#B8860B", hairStyle:"long"}, position:"Retirement Planning Assistant AI", department:"Insurance", status:"coming_soon", specialty:"Retirement product education" },
+  { id:"underwriting-research-ai", name:"", avatar:"🔬", avatarTone:{accent:"#C9A227", skin:"#A9744F", hairColor:"#2B2118", hairStyle:"short"}, position:"Underwriting Research AI", department:"Insurance", status:"coming_soon", specialty:"Carrier underwriting rule lookup" },
+  { id:"compliance", name:"", avatar:"⚖️", avatarTone:{accent:"#C9A227", skin:"#8D5A3C", hairColor:"#3B2A1A", hairStyle:"short"}, position:"Compliance Review AI", department:"Insurance", status:"coming_soon", specialty:"Compliance awareness & reminders" },
+  { id:"carrier-comparison-ai", name:"", avatar:"⚖️", avatarTone:{accent:"#C9A227", skin:"#E0AC81", hairColor:"#4A4A4A", hairStyle:"long"}, position:"Carrier Comparison AI", department:"Insurance", status:"coming_soon", specialty:"Side-by-side carrier plan comparison" },
+
+  // ══ FINANCE ══
+  { id:"commission-tracker-ai", name:"", avatar:"💰", avatarTone:{accent:"#2D7A4F", skin:"#6B4226", hairColor:"#0D0905", hairStyle:"long"}, position:"Commission Tracker AI", department:"Finance", status:"coming_soon", specialty:"Commission tracking and reconciliation" },
+  { id:"expense-manager-ai", name:"", avatar:"🧾", avatarTone:{accent:"#2D7A4F", skin:"#F5D5B8", hairColor:"#5C4326", hairStyle:"short"}, position:"Expense Manager AI", department:"Finance", status:"coming_soon", specialty:"Business expense tracking" },
+  { id:"bookkeeping-assistant-ai", name:"", avatar:"📒", avatarTone:{accent:"#2D7A4F", skin:"#C68642", hairColor:"#1A1410", hairStyle:"long"}, position:"Bookkeeping Assistant AI", department:"Finance", status:"coming_soon", specialty:"Basic bookkeeping support" },
+  { id:"business-analytics-ai", name:"", avatar:"📊", avatarTone:{accent:"#2D7A4F", skin:"#8D5A3C", hairColor:"#3B2A1A", hairStyle:"short"}, position:"Business Analytics AI", department:"Finance", status:"coming_soon", specialty:"Production and performance analytics" },
+  { id:"revenue-forecast-ai", name:"", avatar:"📈", avatarTone:{accent:"#2D7A4F", skin:"#F0C9A0", hairColor:"#0D0905", hairStyle:"long"}, position:"Revenue Forecast AI", department:"Finance", status:"coming_soon", specialty:"Revenue projection and trend analysis" },
+
+  // ══ OPERATIONS ══
+  { id:"workflow-manager", name:"", avatar:"⚙️", avatarTone:{accent:"#0D2B55", skin:"#5B3A29", hairColor:"#2B2118", hairStyle:"short"}, position:"Workflow Manager AI", department:"Operations", status:"coming_soon", specialty:"Process & SOP guidance" },
+  { id:"calendar-manager-ai", name:"", avatar:"📅", avatarTone:{accent:"#0D2B55", skin:"#F5D5B8", hairColor:"#6B4226", hairStyle:"short"}, position:"Calendar Manager AI", department:"Operations", status:"coming_soon", specialty:"Schedule management and conflict checks" },
+  { id:"document-manager-ai", name:"", avatar:"📁", avatarTone:{accent:"#0D2B55", skin:"#8D5524", hairColor:"#1C1410", hairStyle:"long"}, position:"Document Manager AI", department:"Operations", status:"coming_soon", specialty:"Document storage and organization" },
+  { id:"knowledge-base-ai", name:"", avatar:"📚", avatarTone:{accent:"#0D2B55", skin:"#A9744F", hairColor:"#0D0905", hairStyle:"long"}, position:"Knowledge Base AI", department:"Operations", status:"coming_soon", specialty:"Internal SOP and reference lookup" },
+  { id:"training-ai", name:"", avatar:"🎓", avatarTone:{accent:"#0D2B55", skin:"#E0AC81", hairColor:"#4A4A4A", hairStyle:"short"}, position:"Training AI", department:"Operations", status:"coming_soon", specialty:"Agent onboarding and skills training" },
+  { id:"meeting-notes-ai", name:"", avatar:"📝", avatarTone:{accent:"#0D2B55", skin:"#C68642", hairColor:"#1A1410", hairStyle:"long"}, position:"Meeting Notes AI", department:"Operations", status:"coming_soon", specialty:"Meeting summary and action items" },
+  { id:"file-organization-ai", name:"", avatar:"🗃️", avatarTone:{accent:"#0D2B55", skin:"#F0C9A0", hairColor:"#8B5A2B", hairStyle:"short"}, position:"File Organization AI", department:"Operations", status:"coming_soon", specialty:"File naming and structure consistency" },
+
+  // ══ RESEARCH ══
+  { id:"market-research-ai", name:"", avatar:"🔭", avatarTone:{accent:"#5B4636", skin:"#5B3A29", hairColor:"#1A1410", hairStyle:"long"}, position:"Market Research AI", department:"Research", status:"coming_soon", specialty:"Market trends and opportunity sizing" },
+  { id:"competitive-intelligence-ai", name:"", avatar:"🧭", avatarTone:{accent:"#5B4636", skin:"#F5D5B8", hairColor:"#3B2A1A", hairStyle:"short"}, position:"Competitive Intelligence AI", department:"Research", status:"coming_soon", specialty:"Competitor offerings and positioning" },
+  { id:"industry-news-ai", name:"", avatar:"📰", avatarTone:{accent:"#5B4636", skin:"#8D5524", hairColor:"#0D0905", hairStyle:"long"}, position:"Industry News AI", department:"Research", status:"coming_soon", specialty:"Curated insurance industry news" },
+  { id:"legal-compliance-research-ai", name:"", avatar:"⚖️", avatarTone:{accent:"#5B4636", skin:"#E8B896", hairColor:"#6B4226", hairStyle:"short"}, position:"Legal & Compliance Research AI", department:"Research", status:"coming_soon", specialty:"Regulatory research support" },
+  { id:"grant-government-ai", name:"", avatar:"🏛️", avatarTone:{accent:"#5B4636", skin:"#A9744F", hairColor:"#2B2118", hairStyle:"long"}, position:"Grant & Government Opportunity AI", department:"Research", status:"coming_soon", specialty:"Government and grant opportunity research" },
+
+  // ══ ADMINISTRATION ══
+  { id:"executive-assistant", name:"", avatar:"🗒️", avatarTone:{accent:"#7A7A7A", skin:"#F0C9A0", hairColor:"#0D0905", hairStyle:"long"}, position:"Executive Assistant AI", department:"Administration", status:"coming_soon", specialty:"Admin & scheduling support" },
+  { id:"product-manager", name:"", avatar:"🧩", avatarTone:{accent:"#7A7A7A", skin:"#C68642", hairColor:"#1A1410", hairStyle:"short"}, position:"ACC Product Manager AI", department:"Administration", status:"coming_soon", specialty:"Feature feedback & roadmap" },
 ];
 
 // ── AI Employee Chat Engine ─────────────────────────────────────
 // One chat component, reused by every AI employee. Adding a new employee
 // never requires touching this — it just reads systemPrompt + name + avatar
 // from whichever AI_WORKFORCE entry was opened.
-function AIEmployeeChat({ employee, profile, onClose, bg }) {
+function AIEmployeeChat({ employee, profile, onClose, bg, contextClient }) {
   const storageKey = `acc_chat_${employee.id}`;
   const [messages, setMessages] = useLocalStorage(storageKey, []);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showMemoryPanel, setShowMemoryPanel] = useState(false);
+  const [pendingMemory, setPendingMemory] = useState(null); // a detected goal/fact awaiting agent confirmation
   const scrollRef = React.useRef(null);
+
+  // Memory is currently scoped to Jordan (Agent Success Coach) only — the one
+  // employee actually built. The hook itself is generic so any future
+  // employee can adopt the same memory system without changes here.
+  const hasMemory = employee.id === "agent-success-coach";
+  const memoryApi = useAgentMemory();
 
   React.useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -2275,18 +3690,62 @@ function AIEmployeeChat({ employee, profile, onClose, bg }) {
       return diff>=0 && diff<=90;
     });
     const openQuotes = quotes.filter(q=>(q.status||"open")==="open");
-    const prospects = clients.filter(c=>c.status==="Prospect");
-    const renewalDue = clients.filter(c=>c.status==="Renewal Due");
+    const closedWonQuotes = quotes.filter(q=>q.status==="closed_won");
+    const prospects = clients.filter(c=>c.status==="Prospect" && !c.archived);
+    const renewalDue = clients.filter(c=>c.status==="Renewal Due" && !c.archived);
+    const employerProspects = clients.filter(c=>c.line==="Employer Benefits" && !c.archived);
 
-    return `Agent: ${profile.firstName||"Agent"} ${profile.lastName||""} (${profile.agencyName||"Independent Agent"}), licensed in ${profile.states||"unspecified states"}.
+    // "Stalled" / "missed follow-up": active or prospect clients with no
+    // contact in 14+ days — derived from real lastContact dates rather than a
+    // second manually-logged list, so this can't drift out of sync with the
+    // actual Clients tab.
+    const stalled = clients.filter(c=>{
+      if (c.archived || !c.lastContact) return false;
+      const days = (now - new Date(c.lastContact)) / (1000*60*60*24);
+      return days >= 14 && (c.status==="Prospect" || c.status==="Active");
+    });
+
+    const base = `Agent: ${profile.firstName||"Agent"} ${profile.lastName||""} (${profile.agencyName||"Independent Agent"}), licensed in ${profile.states||"unspecified states"}.
 
 Current CRM snapshot:
 - ${clients.length} total clients (${prospects.length} prospects, ${renewalDue.length} renewal due)
-- ${openQuotes.length} open quotes awaiting follow-up
+- ${openQuotes.length} open quotes awaiting follow-up; ${closedWonQuotes.length} closed-won this period
+- ${employerProspects.length} employer/group prospect(s)${employerProspects.length ? ": " + employerProspects.map(c=>c.name).join(", ") : ""}
+- ${stalled.length} client(s) with no contact in 14+ days (possible stalled opportunity / missed follow-up)${stalled.length ? ": " + stalled.map(c=>c.name).join(", ") : ""}
 - ${expiringLicenses.length} license(s) expiring within 90 days${expiringLicenses.length ? ": " + expiringLicenses.map(l=>`${l.state} (${l.expDate})`).join(", ") : ""}
 - Client names on file: ${clients.slice(0,15).map(c=>c.name).join(", ")}${clients.length>15?` and ${clients.length-15} more`:""}
 
 Use this real data naturally when relevant — reference specific clients or numbers instead of speaking generically, but don't recite the whole snapshot back unless asked.`;
+
+    const memoryContext = hasMemory ? memoryApi.toPromptContext() : "";
+
+    // Discovery context — only built when a specific client was passed in
+    // (e.g. Quinn opened from that client's profile). Computed from the
+    // client's REAL intake data via getReadinessScore, never a fabricated
+    // number — if there's no intake yet, this says so plainly instead of
+    // inventing a percentage or a missing-items list.
+    let discoveryContext = "";
+    if (contextClient) {
+      const readiness = getReadinessScore(contextClient);
+      const intakeLines = contextClient.intake?.lines || [];
+      discoveryContext = `\n\nActive discovery client: ${contextClient.name}${contextClient.age?`, age ${contextClient.age}`:""}, line(s) on file: ${contextClient.line||"none set"}.
+${intakeLines.length === 0
+  ? "No Smart Intake has been started for this client yet. Ask which line(s) of insurance to begin discovery for, then ask the real questions for those lines."
+  : `Discovery in progress for: ${intakeLines.join(", ")}. Quote Readiness: ${readiness.percent}% (${readiness.answered} of ${readiness.total} questions answered).${readiness.missing.length ? ` Missing: ${readiness.missing.join(", ")}.` : " Nothing missing — fully ready."}`}
+Client notes on file: ${contextClient.notes || "none"}.`;
+    }
+
+    return (memoryContext ? `${base}\n\n${memoryContext}` : base) + discoveryContext;
+  };
+
+  // Lightweight, local heuristic for goal-like statements — intentionally NOT
+  // an AI call (keeps it instant and free, and avoids silently deciding what's
+  // "important" on the agent's behalf). Just flags a likely-savable sentence
+  // and lets the agent confirm before anything is written to memory.
+  const detectMemorableStatement = (text) => {
+    const goalPatterns = /\b(my goal is|i want to (write|close|hit|reach|sell)|i'm trying to|i need to (write|close|hit))\b/i;
+    if (goalPatterns.test(text)) return { type: "goal", text: text.trim() };
+    return null;
   };
 
   const sendMessage = async () => {
@@ -2294,6 +3753,12 @@ Use this real data naturally when relevant — reference specific clients or num
     const userMsg = { role: "user", content: input.trim() };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
+
+    if (hasMemory && memoryApi.memory.enabled) {
+      const detected = detectMemorableStatement(input.trim());
+      if (detected) setPendingMemory(detected);
+    }
+
     setInput("");
     setLoading(true);
 
@@ -2330,27 +3795,72 @@ Use this real data naturally when relevant — reference specific clients or num
 
         {/* Header */}
         <div style={{background:T.navy, padding:"16px 18px", display:"flex", alignItems:"center", gap:12}}>
-          <div style={{width:42, height:42, borderRadius:12, background:"rgba(255,255,255,0.15)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0}}>{employee.avatar}</div>
+          <AIAvatar employee={employee} size={42} showBadge={false}/>
           <div style={{flex:1, minWidth:0}}>
-            <div style={{fontSize:15, fontWeight:700, color:"#fff", fontFamily:"'Playfair Display',serif"}}>{employee.name}</div>
-            <div style={{fontSize:11, color:"rgba(255,255,255,0.6)", fontFamily:"'Lato',sans-serif"}}>{employee.position}</div>
+            <div style={{display:"flex", alignItems:"center", gap:8}}>
+              <span style={{fontSize:15, fontWeight:700, color:"#fff", fontFamily:"'Playfair Display',serif"}}>{employee.name}</span>
+              <span style={{fontSize:8.5, fontWeight:700, color:"#fff", background:"rgba(255,255,255,0.15)", border:"1px solid rgba(255,255,255,0.3)", padding:"1px 6px", borderRadius:6, letterSpacing:0.3}}>AI ASSISTANT</span>
+            </div>
+            <div style={{fontSize:11, color:"rgba(255,255,255,0.6)", fontFamily:"'Lato',sans-serif", display:"flex", alignItems:"center", gap:6, marginTop:2}}>
+              <span style={{width:6, height:6, borderRadius:"50%", background:T.green, display:"inline-block"}}/>
+              {employee.position} · Available
+            </div>
           </div>
+          {hasMemory && (
+            <button onClick={()=>setShowMemoryPanel(true)} title="What Jordan remembers" style={{background:"rgba(255,255,255,0.12)", border:"none", borderRadius:8, padding:"7px 10px", color:"#fff", fontSize:11, fontFamily:"'Lato',sans-serif", fontWeight:700, cursor:"pointer"}}>
+              Memory
+            </button>
+          )}
           <button onClick={onClose} style={{background:"none", border:"none", color:"rgba(255,255,255,0.7)", fontSize:22, cursor:"pointer", padding:4, lineHeight:1}}>×</button>
         </div>
+
+        {/* Discovery readiness strip — only shown when Quinn is opened with a
+            specific client, computed from real intake data. */}
+        {contextClient && (
+          <div style={{padding:"10px 16px", background:T.card, borderBottom:`1px solid ${T.border}`}}>
+            {(() => {
+              const readiness = getReadinessScore(contextClient);
+              const hasIntake = (contextClient.intake?.lines || []).length > 0;
+              return (
+                <>
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", marginBottom:4}}>
+                    <span style={{fontSize:11.5, fontWeight:700, color:T.navy, fontFamily:"'Lato',sans-serif"}}>{contextClient.name}</span>
+                    <span style={{fontSize:11, color: readiness.percent>=80?T.green:T.gold, fontFamily:"'Lato',sans-serif", fontWeight:700}}>
+                      {hasIntake ? `${readiness.percent}% Ready` : "No Active Discovery"}
+                    </span>
+                  </div>
+                  {hasIntake && (
+                    <>
+                      <div style={{height:5, background:T.border, borderRadius:3, overflow:"hidden"}}>
+                        <div style={{height:"100%", width:`${readiness.percent}%`, background: readiness.percent>=80?T.green:T.gold, transition:"width 0.3s"}}/>
+                      </div>
+                      {readiness.missing.length>0 && (
+                        <div style={{fontSize:10.5, color:T.muted, fontFamily:"'Lato',sans-serif", marginTop:4}}>
+                          Missing: {readiness.missing.slice(0,3).join(", ")}{readiness.missing.length>3?` +${readiness.missing.length-3} more`:""}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        )}
 
         {/* Messages */}
         <div ref={scrollRef} style={{flex:1, overflowY:"auto", padding:16, display:"flex", flexDirection:"column", gap:12, background:T.bg}}>
           {messages.length === 0 && (
             <div style={{textAlign:"center", padding:"32px 16px", color:T.muted, fontFamily:"'Lato',sans-serif", fontSize:13}}>
-              <div style={{fontSize:32, marginBottom:10}}>{employee.avatar}</div>
+              <div style={{display:"flex", justifyContent:"center", marginBottom:10}}><AIAvatar employee={employee} size={56}/></div>
               <div style={{fontWeight:700, color:T.navy, marginBottom:4, fontSize:14}}>{employee.name} here.</div>
               <div>{employee.mission}</div>
             </div>
           )}
           {messages.map((m, i) => (
-            <div key={i} style={{display:"flex", justifyContent: m.role==="user" ? "flex-end" : "flex-start"}}>
+            <div key={i} style={{display:"flex", justifyContent: m.role==="user" ? "flex-end" : "flex-start", alignItems:"flex-end", gap:8}}>
+              {m.role==="assistant" && <AIAvatar employee={employee} size={28} showBadge={false}/>}
               <div style={{
-                maxWidth:"82%", padding:"10px 14px", borderRadius:16,
+                maxWidth:"78%", padding:"10px 14px", borderRadius:16,
                 background: m.role==="user" ? T.navy : T.card,
                 color: m.role==="user" ? "#fff" : T.text,
                 fontSize:13.5, fontFamily:"'Lato',sans-serif", lineHeight:1.5, whiteSpace:"pre-wrap",
@@ -2359,13 +3869,25 @@ Use this real data naturally when relevant — reference specific clients or num
             </div>
           ))}
           {loading && (
-            <div style={{display:"flex", justifyContent:"flex-start"}}>
+            <div style={{display:"flex", justifyContent:"flex-start", alignItems:"flex-end", gap:8}}>
+              <AIAvatar employee={employee} size={28} showBadge={false}/>
               <div style={{padding:"10px 14px", borderRadius:16, background:T.card, border:`1px solid ${T.border}`, fontSize:13, color:T.muted, fontFamily:"'Lato',sans-serif"}}>
                 {employee.name} is thinking...
               </div>
             </div>
           )}
         </div>
+
+        {/* Pending memory confirmation — agent confirms before anything is saved */}
+        {pendingMemory && (
+          <div style={{padding:"10px 14px", background:T.card, borderTop:`1px solid ${T.border}`, display:"flex", alignItems:"center", gap:10}}>
+            <span style={{fontSize:12, color:T.sub, fontFamily:"'Lato',sans-serif", flex:1}}>
+              Remember this as a goal? <em>"{pendingMemory.text.length>60?pendingMemory.text.slice(0,58)+"…":pendingMemory.text}"</em>
+            </span>
+            <button onClick={()=>{ memoryApi.addActivity(pendingMemory.type, pendingMemory.text); setPendingMemory(null); }} style={{background:T.navy, color:"#fff", border:"none", borderRadius:8, padding:"6px 12px", fontSize:11, fontWeight:700, fontFamily:"'Lato',sans-serif", cursor:"pointer", flexShrink:0}}>Save</button>
+            <button onClick={()=>setPendingMemory(null)} style={{background:"none", border:`1px solid ${T.border}`, borderRadius:8, padding:"6px 10px", fontSize:11, color:T.muted, fontFamily:"'Lato',sans-serif", cursor:"pointer", flexShrink:0}}>Dismiss</button>
+          </div>
+        )}
 
         {/* Input */}
         <div style={{padding:12, borderTop:`1px solid ${T.border}`, display:"flex", gap:8, background:T.surface}}>
@@ -2380,84 +3902,233 @@ Use this real data naturally when relevant — reference specific clients or num
           <button onClick={sendMessage} disabled={loading || !input.trim()} style={{background:T.navy, color:"#fff", border:"none", borderRadius:14, padding:"0 18px", fontFamily:"'Lato',sans-serif", fontWeight:700, fontSize:14, cursor: loading||!input.trim() ? "default" : "pointer", opacity: loading||!input.trim() ? 0.5 : 1}}>→</button>
         </div>
       </div>
+
+      {/* Memory management panel */}
+      {showMemoryPanel && (
+        <MemoryPanel memoryApi={memoryApi} onClose={()=>setShowMemoryPanel(false)}/>
+      )}
     </div>
   );
 }
 
-// ── My AI Team — dashboard of all AI employees ──────────────────
+// ── Memory management panel ──────────────────────────────────────
+// View / edit / delete individual facts, turn memory off, full reset.
+// Separate component so AIEmployeeChat doesn't bloat further; takes the same
+// memoryApi instance so edits show up immediately without a second data source.
+function MemoryPanel({ memoryApi, onClose }) {
+  const { memory, updateProfile, removeActivity, setEnabled, resetProfile, resetActivity, resetAll } = memoryApi;
+  const [confirmReset, setConfirmReset] = useState(false);
+
+  const profileFields = [
+    { key:"agentName", label:"Agent Name" }, { key:"agencyName", label:"Agency Name" },
+    { key:"licensedStates", label:"Licensed States" }, { key:"mainLines", label:"Main Insurance Lines" },
+    { key:"preferredCarriers", label:"Preferred Carriers" }, { key:"revenueGoal", label:"Revenue Goal" },
+    { key:"productionGoal", label:"Production Goal" }, { key:"strengths", label:"Strengths" },
+    { key:"weaknesses", label:"Growth Areas" }, { key:"coachingPreferences", label:"Coaching Preferences" },
+    { key:"currentPriorities", label:"Current Priorities" },
+  ];
+
+  return (
+    <div style={{position:"fixed", inset:0, background:"rgba(26,39,68,0.6)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:16}} onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{background:T.surface, borderRadius:24, width:"100%", maxWidth:520, maxHeight:"85vh", overflowY:"auto", padding:24}}>
+        <div style={{display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:18}}>
+          <div>
+            <div style={{fontSize:18, fontWeight:700, color:T.navy, fontFamily:"'Playfair Display',serif"}}>What Jordan Remembers</div>
+            <div style={{fontSize:12, color:T.muted, fontFamily:"'Lato',sans-serif", marginTop:2}}>Stored only on this device, for you alone.</div>
+          </div>
+          <button onClick={onClose} style={{background:T.bg, border:`1px solid ${T.border}`, borderRadius:10, width:32, height:32, cursor:"pointer", color:T.muted}}>×</button>
+        </div>
+
+        {/* Memory on/off */}
+        <div style={{display:"flex", alignItems:"center", justifyContent:"space-between", background:T.bg, borderRadius:12, padding:"12px 14px", marginBottom:18}}>
+          <div>
+            <div style={{fontSize:13, fontWeight:700, color:T.navy, fontFamily:"'Lato',sans-serif"}}>Memory {memory.enabled ? "On" : "Off"}</div>
+            <div style={{fontSize:11, color:T.muted, fontFamily:"'Lato',sans-serif"}}>When off, Jordan won't read or save memory during chats.</div>
+          </div>
+          <button onClick={()=>setEnabled(!memory.enabled)} style={{width:46, height:26, borderRadius:13, background: memory.enabled ? T.green : T.border, border:"none", cursor:"pointer", position:"relative", flexShrink:0}}>
+            <span style={{position:"absolute", top:3, left: memory.enabled ? 23 : 3, width:20, height:20, borderRadius:"50%", background:"#fff", transition:"left 0.15s"}}/>
+          </button>
+        </div>
+
+        {/* Profile facts */}
+        <div style={{fontSize:11, color:T.muted, fontFamily:"'Lato',sans-serif", textTransform:"uppercase", letterSpacing:1, fontWeight:700, marginBottom:10}}>Agent Profile</div>
+        <div style={{display:"flex", flexDirection:"column", gap:8, marginBottom:16}}>
+          {profileFields.map(f => (
+            <div key={f.key}>
+              <label style={{fontSize:10, color:T.muted, fontFamily:"'Lato',sans-serif", textTransform:"uppercase", letterSpacing:0.5}}>{f.label}</label>
+              <input value={memory.profile[f.key]} onChange={e=>updateProfile(f.key, e.target.value)} placeholder="Not set"
+                style={{width:"100%", padding:"8px 10px", border:`1px solid ${T.border}`, borderRadius:8, fontSize:13, fontFamily:"'Lato',sans-serif", color:T.text, outline:"none", background:T.bg, marginTop:2}}/>
+            </div>
+          ))}
+        </div>
+        <button onClick={resetProfile} style={{fontSize:11, color:T.red, background:"none", border:"none", cursor:"pointer", fontFamily:"'Lato',sans-serif", fontWeight:700, marginBottom:20}}>Clear Profile</button>
+
+        {/* Activity log */}
+        <div style={{fontSize:11, color:T.muted, fontFamily:"'Lato',sans-serif", textTransform:"uppercase", letterSpacing:1, fontWeight:700, marginBottom:10}}>Activity Log ({memory.activity.length})</div>
+        <div style={{display:"flex", flexDirection:"column", gap:6, marginBottom:12, maxHeight:200, overflowY:"auto"}}>
+          {memory.activity.length===0 && <div style={{fontSize:12, color:T.muted, fontFamily:"'Lato',sans-serif", fontStyle:"italic"}}>Nothing recorded yet.</div>}
+          {memory.activity.slice().reverse().map(a => (
+            <div key={a.id} style={{display:"flex", alignItems:"flex-start", gap:8, background:T.bg, borderRadius:8, padding:"8px 10px"}}>
+              <div style={{flex:1, fontSize:12, color:T.sub, fontFamily:"'Lato',sans-serif"}}>
+                <span style={{color:T.muted, fontSize:10.5}}>[{a.date}] </span>{a.text}
+              </div>
+              <button onClick={()=>removeActivity(a.id)} style={{background:"none", border:"none", color:T.red, cursor:"pointer", fontSize:11, fontFamily:"'Lato',sans-serif", flexShrink:0}}>Remove</button>
+            </div>
+          ))}
+        </div>
+        {memory.activity.length>0 && <button onClick={resetActivity} style={{fontSize:11, color:T.red, background:"none", border:"none", cursor:"pointer", fontFamily:"'Lato',sans-serif", fontWeight:700, marginBottom:20}}>Clear Activity Log</button>}
+
+        {/* Full reset */}
+        <div style={{borderTop:`1px solid ${T.border}`, paddingTop:16, marginTop:8}}>
+          {!confirmReset ? (
+            <button onClick={()=>setConfirmReset(true)} style={{width:"100%", padding:"11px", background:"transparent", color:T.red, border:`1px solid ${T.red}44`, borderRadius:10, fontFamily:"'Lato',sans-serif", fontWeight:700, fontSize:12, cursor:"pointer"}}>
+              Reset All Memory
+            </button>
+          ) : (
+            <div style={{textAlign:"center"}}>
+              <div style={{fontSize:12, color:T.sub, fontFamily:"'Lato',sans-serif", marginBottom:10}}>This permanently erases everything Jordan remembers. Continue?</div>
+              <div style={{display:"flex", gap:8}}>
+                <button onClick={()=>setConfirmReset(false)} style={{flex:1, padding:"10px", background:T.bg, color:T.sub, border:`1px solid ${T.border}`, borderRadius:10, fontFamily:"'Lato',sans-serif", fontWeight:700, fontSize:12, cursor:"pointer"}}>Cancel</button>
+                <button onClick={()=>{resetAll(); setConfirmReset(false);}} style={{flex:1, padding:"10px", background:T.red, color:"#fff", border:"none", borderRadius:10, fontFamily:"'Lato',sans-serif", fontWeight:700, fontSize:12, cursor:"pointer"}}>Erase Everything</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 // Cards are generated entirely from AI_WORKFORCE. Adding a new active
 // employee to that array gives them a working card here automatically.
-function AITeam({ profile, bg }) {
-  const [openChat, setOpenChat] = useState(null); // the employee object currently in chat, or null
+function AITeam({ profile, bg, initialClient }) {
+  const [openChat, setOpenChat] = useState(initialClient ? AI_WORKFORCE.find(e=>e.id==="discovery-quote-specialist") : null);
+  const [contextClient, setContextClient] = useState(initialClient || null);
 
-  const departments = [...new Set(AI_WORKFORCE.map(e => e.department))];
+  // Collapsed/expanded state per department — Executive Office starts open
+  // (CEO AI lives there and should be the first thing seen), plus any
+  // department containing an active employee, so Jordan/Quinn aren't hidden
+  // behind a closed section on first visit.
+  const deptsWithActive = new Set(AI_WORKFORCE.filter(e=>e.status==="active").map(e=>e.department));
+  const [expanded, setExpanded] = useState(
+    Object.fromEntries(AI_DEPARTMENTS.map(d => [d, d==="Executive Office" || deptsWithActive.has(d)]))
+  );
+  const toggleDept = (dept) => setExpanded(prev => ({ ...prev, [dept]: !prev[dept] }));
 
   return (
     <div>
       <div style={{marginBottom:20}}>
         <h2 style={{fontSize:26, fontWeight:700, color:T.navy, fontFamily:"'Playfair Display',serif"}}>My AI Team</h2>
         <p style={{fontSize:13, color:T.muted, fontFamily:"'Lato',sans-serif", marginTop:2}}>
-          {AI_WORKFORCE.filter(e=>e.status==="active").length} on staff · {AI_WORKFORCE.filter(e=>e.status==="coming_soon").length} coming soon
+          {AI_WORKFORCE.filter(e=>e.status==="active").length} on staff · {AI_WORKFORCE.filter(e=>e.status==="coming_soon").length} coming soon · {AI_DEPARTMENTS.length} departments
         </p>
       </div>
 
-      {departments.map(dept => (
-        <div key={dept} style={{marginBottom:28}}>
-          <div style={{fontSize:11, color:T.muted, fontFamily:"'Lato',sans-serif", textTransform:"uppercase", letterSpacing:1.5, marginBottom:10, fontWeight:700}}>{dept}</div>
-          <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:14}}>
-            {AI_WORKFORCE.filter(e => e.department === dept).map(emp => (
-              <div key={emp.id} style={{
-                background:T.surface, border:`1px solid ${T.border}`, borderRadius:18, padding:18,
-                opacity: emp.status === "coming_soon" ? 0.55 : 1,
-                position:"relative", transition:"all 0.15s",
-              }}>
-                {emp.status === "coming_soon" && (
-                  <div style={{position:"absolute", top:12, right:12, fontSize:9, fontWeight:700, color:T.muted, background:T.bg, padding:"3px 8px", borderRadius:10, letterSpacing:0.5, textTransform:"uppercase"}}>Coming Soon</div>
-                )}
-                <div style={{display:"flex", alignItems:"center", gap:12, marginBottom:10}}>
-                  <div style={{width:48, height:48, borderRadius:14, background: emp.status==="active" ? T.navy : T.bg, display:"flex", alignItems:"center", justifyContent:"center", fontSize:24, flexShrink:0}}>
-                    {emp.avatar}
-                  </div>
-                  <div style={{minWidth:0}}>
-                    <div style={{fontSize:15, fontWeight:700, color:T.navy, fontFamily:"'Playfair Display',serif", lineHeight:1.2}}>
-                      {emp.status==="active" ? emp.name : emp.position}
-                    </div>
-                    {emp.status==="active" && <div style={{fontSize:11, color:T.muted, fontFamily:"'Lato',sans-serif"}}>{emp.position}</div>}
-                  </div>
-                </div>
-                <div style={{fontSize:12, color:T.sub, fontFamily:"'Lato',sans-serif", lineHeight:1.5, marginBottom:14, minHeight:32}}>{emp.specialty}</div>
-                <div style={{display:"flex", alignItems:"center", justifyContent:"space-between"}}>
-                  <span style={{display:"flex", alignItems:"center", gap:5, fontSize:11, fontFamily:"'Lato',sans-serif", color: emp.status==="active" ? T.green : T.muted, fontWeight:700}}>
-                    <span style={{width:7, height:7, borderRadius:"50%", background: emp.status==="active" ? T.green : T.muted, display:"inline-block"}}/>
-                    {emp.status==="active" ? "Available" : "Not yet available"}
-                  </span>
-                  {emp.status==="active" && (
-                    <button onClick={()=>setOpenChat(emp)} style={{background:T.navy, color:"#fff", border:"none", borderRadius:10, padding:"7px 14px", fontFamily:"'Lato',sans-serif", fontWeight:700, fontSize:12, cursor:"pointer"}}>
-                      Open Chat
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+      {AI_DEPARTMENTS.map(dept => {
+        const deptEmployees = AI_WORKFORCE.filter(e => e.department === dept);
+        if (deptEmployees.length === 0) return null;
+        const activeCount = deptEmployees.filter(e=>e.status==="active").length;
+        const isOpen = !!expanded[dept];
 
-      {openChat && <AIEmployeeChat employee={openChat} profile={profile} bg={bg} onClose={()=>setOpenChat(null)}/>}
+        return (
+          <div key={dept} style={{marginBottom:14, background:T.surface, border:`1px solid ${T.border}`, borderRadius:16, overflow:"hidden"}}>
+            <button onClick={()=>toggleDept(dept)} style={{
+              width:"100%", display:"flex", alignItems:"center", justifyContent:"space-between",
+              padding:"14px 18px", background:"none", border:"none", cursor:"pointer", textAlign:"left",
+            }}>
+              <div style={{display:"flex", alignItems:"center", gap:10}}>
+                <span style={{fontSize:13, fontWeight:700, color:T.navy, fontFamily:"'Lato',sans-serif", textTransform:"uppercase", letterSpacing:1}}>{dept}</span>
+                <span style={{fontSize:11, color:T.muted, fontFamily:"'Lato',sans-serif"}}>
+                  {deptEmployees.length} role{deptEmployees.length!==1?"s":""}{activeCount>0?` · ${activeCount} active`:""}
+                </span>
+              </div>
+              <span style={{fontSize:13, color:T.muted, transform: isOpen?"rotate(180deg)":"rotate(0deg)", transition:"transform 0.15s"}}>▾</span>
+            </button>
+
+            {isOpen && (
+              <div style={{padding:"4px 18px 18px", display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:14}}>
+                {deptEmployees.map(emp => (
+                  <div key={emp.id} style={{
+                    background:T.bg, border:`1px solid ${T.border}`, borderRadius:18, padding:18,
+                    opacity: emp.status === "coming_soon" ? 0.6 : 1,
+                    position:"relative", overflow:"hidden", transition:"all 0.15s",
+                  }}>
+                    <div style={{display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8, marginBottom:10}}>
+                      <div style={{display:"flex", alignItems:"center", gap:12, minWidth:0}}>
+                      <AIAvatar employee={emp} size={48} showBadge={false}/>
+                      <div style={{minWidth:0}}>
+                        <div style={{fontSize:15, fontWeight:700, color:T.navy, fontFamily:"'Playfair Display',serif", lineHeight:1.2}}>
+                          {emp.status==="active" ? emp.name : emp.position}
+                        </div>
+                        {emp.status==="active" && <div style={{fontSize:11, color:T.muted, fontFamily:"'Lato',sans-serif"}}>{emp.position}</div>}
+                      </div>
+                      </div>
+                      {emp.status === "coming_soon" && (
+                        <div style={{fontSize:9, fontWeight:700, color:T.muted, background:T.surface, padding:"3px 8px", borderRadius:10, letterSpacing:0.5, textTransform:"uppercase", whiteSpace:"nowrap", flexShrink:0}}>Coming Soon</div>
+                      )}
+                    </div>
+                    <div style={{fontSize:12, color:T.sub, fontFamily:"'Lato',sans-serif", lineHeight:1.5, marginBottom:8, minHeight:32}}>{emp.specialty}</div>
+                    {emp.status==="active" && emp.mission && (
+                      <div style={{fontSize:11.5, color:T.muted, fontFamily:"'Lato',sans-serif", lineHeight:1.5, marginBottom:14, fontStyle:"italic", borderLeft:`2px solid ${T.border}`, paddingLeft:8}}>
+                        {emp.mission.length > 110 ? emp.mission.slice(0,108)+"…" : emp.mission}
+                      </div>
+                    )}
+                    <div style={{display:"flex", alignItems:"center", justifyContent:"space-between", marginTop: emp.status==="active" ? 0 : 14}}>
+                      <span style={{display:"flex", alignItems:"center", gap:5, fontSize:11, fontFamily:"'Lato',sans-serif", color: emp.status==="active" ? T.green : T.muted, fontWeight:700}}>
+                        <span style={{width:7, height:7, borderRadius:"50%", background: emp.status==="active" ? T.green : T.muted, display:"inline-block"}}/>
+                        {emp.status==="active" ? "Available" : "Not yet available"}
+                      </span>
+                      {emp.status==="active" && (
+                        <button onClick={()=>{setOpenChat(emp); setContextClient(emp.id==="discovery-quote-specialist" ? contextClient : null);}} style={{background:T.navy, color:"#fff", border:"none", borderRadius:10, padding:"7px 14px", fontFamily:"'Lato',sans-serif", fontWeight:700, fontSize:12, cursor:"pointer"}}>
+                          Open Chat
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      {openChat && <AIEmployeeChat employee={openChat} profile={profile} bg={bg} contextClient={openChat.id==="discovery-quote-specialist" ? contextClient : null} onClose={()=>{setOpenChat(null); setContextClient(null);}}/>}
     </div>
   );
 }
 
+// ── Nav Icons ────────────────────────────────────────────────────
+// Simple, consistent line icons for the top nav — replaces emoji so the
+// interface reads as professional business software rather than a casual
+// chat app. Inherits color via currentColor so active/inactive states stay
+// in sync with the existing nav button color logic without extra props.
+function NavIcon({ name, size = 15 }) {
+  const common = { width:size, height:size, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:1.8, strokeLinecap:"round", strokeLinejoin:"round" };
+  switch (name) {
+    case "dashboard":   return <svg {...common}><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>;
+    case "ai-team":      return <svg {...common}><circle cx="12" cy="8" r="3.2"/><path d="M5 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/></svg>;
+    case "carriers":     return <svg {...common}><rect x="4" y="9" width="16" height="12"/><path d="M9 21V9M4 9l8-6 8 6"/></svg>;
+    case "links":        return <svg {...common}><path d="M9 12a4 4 0 0 1 0-6l2-2a4 4 0 0 1 6 6l-1 1"/><path d="M15 12a4 4 0 0 1 0 6l-2 2a4 4 0 0 1-6-6l1-1"/></svg>;
+    case "quotes":       return <svg {...common}><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>;
+    case "clients":      return <svg {...common}><circle cx="9" cy="8" r="3.2"/><path d="M2 20v-1.5A4.5 4.5 0 0 1 6.5 14h5A4.5 4.5 0 0 1 16 18.5V20"/><circle cx="17.5" cy="9" r="2.3"/><path d="M22 20v-1a3.5 3.5 0 0 0-3-3.46"/></svg>;
+    case "commissions":  return <svg {...common}><circle cx="12" cy="12" r="9"/><path d="M9 9.5a3 2 0 0 1 3-2c1.7 0 3 1 3 2s-1.3 2-3 2-3 1-3 2 1.3 2 3 2c1.7 0 3-.9 3-2"/><path d="M12 6v1.5M12 16.5V18"/></svg>;
+    case "licenses":     return <svg {...common}><rect x="2.5" y="6" width="19" height="13" rx="2"/><circle cx="8" cy="12.5" r="2"/><path d="M14 10h5M14 14h3"/></svg>;
+    case "calendar":     return <svg {...common}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="8" cy="14.5" r="1"/><circle cx="12" cy="14.5" r="1"/><circle cx="16" cy="14.5" r="1"/></svg>;
+    case "profile":      return <svg {...common}><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20.5v-1A6.5 6.5 0 0 1 11 13h2a6.5 6.5 0 0 1 6.5 6.5v1"/></svg>;
+    default:             return null;
+  }
+}
+
 const TABS = [
-  {id:"dashboard",   label:"Dashboard",  icon:"⚡"},
-  {id:"ai-team",     label:"AI Team",    icon:"🧠"},
-  {id:"carriers",    label:"Carriers",   icon:"🏢"},
-  {id:"links",       label:"My Links",   icon:"🔗"},
-  {id:"quotes",      label:"Quotes",     icon:"📊"},
-  {id:"clients",     label:"Clients",    icon:"👥"},
-  {id:"commissions", label:"Commissions",icon:"💰"},
-  {id:"licenses",    label:"Licenses",   icon:"🪪"},
-  {id:"profile",     label:"Profile",    icon:"👤"},
+  {id:"dashboard",   label:"Dashboard",  icon:"dashboard"},
+  {id:"ai-team",     label:"AI Team",    icon:"ai-team"},
+  {id:"carriers",    label:"Carriers",   icon:"carriers"},
+  {id:"links",       label:"My Links",   icon:"links"},
+  {id:"quotes",      label:"Quotes",     icon:"quotes"},
+  {id:"clients",     label:"Clients",    icon:"clients"},
+  {id:"calendar",    label:"Calendar",   icon:"calendar"},
+  {id:"commissions", label:"Commissions",icon:"commissions"},
+  {id:"licenses",    label:"Licenses",   icon:"licenses"},
+  {id:"profile",     label:"Profile",    icon:"profile"},
 ];
 
 const DEFAULT_PROFILE = {
@@ -2478,10 +4149,16 @@ export default function App() {
   const [tab,          setTab]         = useState("dashboard");
   const [profile,      setProfile]     = useLocalStorage("acc_profile", DEFAULT_PROFILE);
   const [quoteClient,  setQuoteClient] = useState(null);
+  const [discoveryClient, setDiscoveryClient] = useState(null);
 
   const handleQuoteClient = (client) => {
     setQuoteClient(client);
     setTab("quotes");
+  };
+
+  const handleDiscoveryClient = (client) => {
+    setDiscoveryClient(client);
+    setTab("ai-team");
   };
 
   const bg = BG_THEMES.find(b => b.name === profile.bgTheme) || BG_THEMES[0];
@@ -2509,8 +4186,8 @@ export default function App() {
         </div>
         <div style={{display:"flex", gap:0, overflowX:"auto", flex:1}}>
           {TABS.map(t=>(
-            <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"16px 12px", background:"none", border:"none", borderBottom:tab===t.id?`3px solid ${T.blue}`:"3px solid transparent", color:tab===t.id?T.blueLight:"rgba(255,255,255,0.55)", cursor:"pointer", fontSize:12, fontFamily:"'Lato',sans-serif", fontWeight:700, whiteSpace:"nowrap", letterSpacing:0.3, transition:"all 0.15s"}}>
-              {t.icon} {t.label}
+            <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"16px 12px", background:"none", border:"none", borderBottom:tab===t.id?`3px solid ${T.blue}`:"3px solid transparent", color:tab===t.id?T.blueLight:"rgba(255,255,255,0.55)", cursor:"pointer", fontSize:12, fontFamily:"'Lato',sans-serif", fontWeight:700, whiteSpace:"nowrap", letterSpacing:0.3, transition:"all 0.15s", display:"flex", alignItems:"center", gap:6}}>
+              <NavIcon name={t.icon}/> {t.label}
             </button>
           ))}
         </div>
@@ -2519,11 +4196,12 @@ export default function App() {
       {/* Content */}
       <div style={{maxWidth:1100, margin:"0 auto", padding:"24px 20px"}}>
         {tab==="dashboard"   && <Dashboard setTab={setTab} profile={profile} bg={bg}/>}
-        {tab==="ai-team"     && <AITeam profile={profile} bg={bg}/>}
+        {tab==="ai-team"     && <AITeam profile={profile} bg={bg} initialClient={discoveryClient}/>}
         {tab==="carriers"    && <CarrierHub bg={bg}/>}
         {tab==="links"       && <CarrierLinks bg={bg}/>}
         {tab==="quotes"      && <QuoteBuilder profile={profile} bg={bg} initialClient={quoteClient}/>}
-        {tab==="clients"     && <ClientProfiles bg={bg} onQuoteClient={handleQuoteClient} setTab={setTab}/>}
+        {tab==="clients"     && <ClientProfiles bg={bg} onQuoteClient={handleQuoteClient} onDiscoverClient={handleDiscoveryClient} setTab={setTab}/>}
+        {tab==="calendar"    && <CalendarView setTab={setTab}/>}
         {tab==="commissions" && <CommissionLog bg={bg} profile={profile}/>}
         {tab==="licenses"    && <LicenseTracker bg={bg}/>}
         {tab==="profile"     && <AgentProfile profile={profile} setProfile={setProfile} bg={bg}/>}
