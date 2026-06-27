@@ -1413,7 +1413,7 @@ function QuoteBuilder({ initialClient }) {
           {quotes.length>0&&<button onClick={exportJSON} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",color:T.sub,display:"flex",alignItems:"center",gap:6}}>
             Export Data
           </button>}
-          <button onClick={()=>{setNewQ(blankQuote(linkedClient?.id||null));setEditing(null);setShowAdd(true);}} style={{background:T.gold,color:T.navy,border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>+ Add Quote</button>
+          <button onClick={()=>{setNewQ(blankQuote(linkedClient?.id||null));setEditing(null);setShowAdd(true);}} style={{background:T.gold,color:"#fff",border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>+ Add Quote</button>
         </div>
       </div>
 
