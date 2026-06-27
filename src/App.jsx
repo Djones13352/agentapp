@@ -15,46 +15,49 @@ function useLocalStorage(key, defaultValue) {
   return [value, setValue];
 }
 
-// ── Theme — Navy + Electric Blue Professional ─────────────────
+// ── Theme — Steel Blue Professional (default) ────────────────
 const T_BASE = {
-  navy:      "#0B1F3A",
-  navyMid:   "#0f2847",
-  blue:      "#2563EB",
-  blueLight: "#60A5FA",
-  blueDim:   "#2563EB22",
+  navy:      "#0369A1",
+  navyMid:   "#0284C7",
+  blue:      "#0284C7",
+  blueLight: "#7DD3FC",
+  blueDim:   "#0284C722",
   green:     "#10B981",
   greenDim:  "#10B98122",
   red:       "#EF4444",
   amber:     "#F59E0B",
   white:     "#ffffff",
-  // keep gold as alias for accent
-  gold:      "#2563EB",
-  goldLight: "#60A5FA",
+  gold:      "#0284C7",
+  goldLight: "#7DD3FC",
 };
 
 var T = {
   ...T_BASE,
-  bg:      "#F8FAFC",
+  bg:      "#F0F9FF",
   surface: "#ffffff",
-  card:    "#F1F5F9",
-  border:  "#E2E8F0",
-  text:    "#0F172A",
-  sub:     "#475569",
-  muted:   "#94A3B8",
+  card:    "#E0F2FE",
+  border:  "#BAE6FD",
+  text:    "#0C4A6E",
+  sub:     "#0369A1",
+  muted:   "#7DD3FC",
 };
 
 function applyBgTheme(bg) {
   T = { ...T_BASE, ...bg };
 }
 
-// Background color swatches
+// Color themes agents can pick from
 const BG_THEMES = [
-  { name:"Professional",  nav:"#0B1F3A", navText:"#ffffff", hero:"#0B1F3A", bg:"#F8FAFC", surface:"#ffffff", card:"#F1F5F9", border:"#E2E8F0", text:"#0F172A", sub:"#475569", muted:"#94A3B8" },
-  { name:"Pure White",    nav:"#0B1F3A", navText:"#ffffff", hero:"#0B1F3A", bg:"#ffffff", surface:"#F8FAFC", card:"#F1F5F9", border:"#E2E8F0", text:"#0F172A", sub:"#475569", muted:"#94A3B8" },
-  { name:"Dark Mode",     nav:"#111827", navText:"#ffffff", hero:"#1F2937", bg:"#111827", surface:"#1F2937", card:"#374151", border:"#4B5563", text:"#F9FAFB", sub:"#D1D5DB", muted:"#9CA3AF" },
-  { name:"Deep Navy",     nav:"#0B1F3A", navText:"#ffffff", hero:"#0f2847", bg:"#0B1F3A", surface:"#0f2847", card:"#1a3a5c", border:"#1e4a72", text:"#F8FAFC", sub:"#CBD5E1", muted:"#64748B" },
-  { name:"Soft Gray",     nav:"#0B1F3A", navText:"#ffffff", hero:"#0B1F3A", bg:"#F1F5F9", surface:"#ffffff", card:"#E2E8F0", border:"#CBD5E1", text:"#0F172A", sub:"#475569", muted:"#94A3B8" },
-  { name:"Coverage Firm", nav:"#0B3C5D", navText:"#ffffff", hero:"#0B3C5D", bg:"#F0F9FF", surface:"#ffffff", card:"#E0F2FE", border:"#BAE6FD", text:"#0C4A6E", sub:"#0369A1", muted:"#7DD3FC" },
+  { name:"Steel Blue",    nav:"#0369A1", hero:"#0369A1", bg:"#F0F9FF", surface:"#ffffff", card:"#E0F2FE", border:"#BAE6FD", text:"#0C4A6E", sub:"#0369A1", muted:"#7DD3FC" },
+  { name:"Deep Navy",     nav:"#0B1F3A", hero:"#0B1F3A", bg:"#F8FAFC", surface:"#ffffff", card:"#F1F5F9", border:"#E2E8F0", text:"#0F172A", sub:"#475569", muted:"#94A3B8" },
+  { name:"Electric Blue", nav:"#2563EB", hero:"#2563EB", bg:"#EFF6FF", surface:"#ffffff", card:"#DBEAFE", border:"#BFDBFE", text:"#1E3A8A", sub:"#1D4ED8", muted:"#93C5FD" },
+  { name:"Teal",          nav:"#0D9488", hero:"#0D9488", bg:"#F0FDFA", surface:"#ffffff", card:"#CCFBF1", border:"#99F6E4", text:"#134E4A", sub:"#0F766E", muted:"#5EEAD4" },
+  { name:"Slate",         nav:"#4F46E5", hero:"#4F46E5", bg:"#EEF2FF", surface:"#ffffff", card:"#E0E7FF", border:"#C7D2FE", text:"#312E81", sub:"#4338CA", muted:"#A5B4FC" },
+  { name:"Forest",        nav:"#166534", hero:"#166534", bg:"#F0FDF4", surface:"#ffffff", card:"#DCFCE7", border:"#BBF7D0", text:"#14532D", sub:"#15803D", muted:"#86EFAC" },
+  { name:"Crimson",       nav:"#9F1239", hero:"#9F1239", bg:"#FFF1F2", surface:"#ffffff", card:"#FFE4E6", border:"#FECDD3", text:"#881337", sub:"#BE123C", muted:"#FDA4AF" },
+  { name:"Dark Mode",     nav:"#111827", hero:"#1F2937", bg:"#111827", surface:"#1F2937", card:"#374151", border:"#4B5563", text:"#F9FAFB", sub:"#D1D5DB", muted:"#9CA3AF" },
+  { name:"Warm Gold",     nav:"#92400E", hero:"#92400E", bg:"#FFFBEB", surface:"#ffffff", card:"#FEF3C7", border:"#FDE68A", text:"#78350F", sub:"#B45309", muted:"#FCD34D" },
+  { name:"Coverage Firm", nav:"#0B3C5D", hero:"#0B3C5D", bg:"#F0F9FF", surface:"#ffffff", card:"#E0F2FE", border:"#BAE6FD", text:"#0C4A6E", sub:"#0369A1", muted:"#7DD3FC" },
 ];
 
 // ── All insurance lines including P&C ────────────────────────
@@ -771,6 +774,14 @@ function QuoteBuilder({ initialClient }) {
     setShowAdd(true);
   };
 
+  // Export full quote data as JSON — backup/safety net since data only lives in this browser.
+  // JSON (not CSV) because each quote has a variable set of custom fields that CSV can't represent cleanly.
+  const exportJSON = () => {
+    const blob = new Blob([JSON.stringify(quotes, null, 2)],{type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href=url; a.download=`quotes-${clientName.replace(/\s+/g,"_")}.json`; a.click();
+  };
+
   const printQuote = () => {
     const w = window.open("", "_blank");
     if (!w) { alert("Please allow popups for this site to use Print."); return; }
@@ -888,6 +899,9 @@ function QuoteBuilder({ initialClient }) {
           <button onClick={printQuote} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",color:T.sub,display:"flex",alignItems:"center",gap:6}}>
             🖨️ Print / PDF
           </button>
+          {quotes.length>0&&<button onClick={exportJSON} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",color:T.sub,display:"flex",alignItems:"center",gap:6}}>
+            📥 Export Data
+          </button>}
           <button onClick={()=>{setNewQ(blankQuote());setEditing(null);setShowAdd(true);}} style={{background:T.gold,color:T.navy,border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>+ Add Quote</button>
         </div>
       </div>
@@ -1094,6 +1108,16 @@ function ClientProfiles({ initialClient, onQuoteClient, setTab }) {
     setNewNote("");
   };
 
+  // Export to CSV — backup/safety net since data only lives in this browser
+  const exportCSV = () => {
+    const rows = [["Name","Age","Phone","Email","Line","Status","Last Contact","Notes"]];
+    clients.forEach(c=>rows.push([c.name,c.age,c.phone,c.email,c.line,c.status,c.lastContact,(c.notes||"").replace(/\n/g," | ")]));
+    const csv = rows.map(r=>r.map(v=>'"'+(v??"")+'"').join(",")).join("\n");
+    const blob = new Blob([csv],{type:"text/csv"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href=url; a.download="clients.csv"; a.click();
+  };
+
   return (
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
@@ -1101,7 +1125,10 @@ function ClientProfiles({ initialClient, onQuoteClient, setTab }) {
           <h2 style={{fontSize:26,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>Client Profiles</h2>
           <p style={{fontSize:13,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>{clients.length} clients · notes, quotes & follow-ups</p>
         </div>
-        <button onClick={()=>setShowAdd(true)} style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>+ Add Client</button>
+        <div style={{display:"flex",gap:8}}>
+          {clients.length>0&&<button onClick={exportCSV} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",color:T.sub}}>📥 Export CSV</button>}
+          <button onClick={()=>setShowAdd(true)} style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>+ Add Client</button>
+        </div>
       </div>
 
       {/* Search */}
@@ -1385,7 +1412,9 @@ function CarrierLinks() {
       )}
     </div>
   );
-}// ── Commission Log ────────────────────────────────────────────
+}
+
+// ── Commission Log ────────────────────────────────────────────
 function CommissionLog({ profile }) {
   const [commissions, setCommissions] = useLocalStorage("acc_commissions", []);
   const [showAdd, setShowAdd] = useState(false);
@@ -1423,8 +1452,7 @@ function CommissionLog({ profile }) {
   const exportCSV = () => {
     const rows = [["Date","Carrier","Client","Line","Type","Amount","Notes"]];
     commissions.forEach(c=>rows.push([c.date,c.carrier,c.client,c.line,c.type,"$"+c.amount,c.notes||""]));
-    const csv = rows.map(r=>r.map(v=>'"'+v+'"').join(",")).join("
-");
+    const csv = rows.map(r=>r.map(v=>'"'+v+'"').join(",")).join("\n");
     const blob = new Blob([csv],{type:"text/csv"});
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href=url; a.download="commissions.csv"; a.click();
@@ -1603,6 +1631,16 @@ function LicenseTracker() {
     return d !== null && d >= 0 && d <= 90;
   });
 
+  // Export to CSV — backup/safety net since data only lives in this browser
+  const exportCSV = () => {
+    const rows = [["State","License #","NPN","Line","Expiration","Status","Notes"]];
+    licenses.forEach(l=>rows.push([l.state,l.licenseNum,l.npn,l.line,l.expDate,l.status,(l.notes||"").replace(/\n/g," | ")]));
+    const csv = rows.map(r=>r.map(v=>'"'+(v??"")+'"').join(",")).join("\n");
+    const blob = new Blob([csv],{type:"text/csv"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href=url; a.download="licenses.csv"; a.click();
+  };
+
   return (
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
@@ -1610,617 +1648,13 @@ function LicenseTracker() {
           <h2 style={{fontSize:26,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>License Tracker</h2>
           <p style={{fontSize:13,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>States, license numbers, NPN & expiration dates</p>
         </div>
-        <button onClick={()=>{setNewLic({state:"",licenseNum:"",npn:"",line:"Life & Health",expDate:"",status:"Active",notes:""});setEditId(null);setShowAdd(true);}}
-          style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>
-          + Add License
-        </button>
-      </div>
-
-      {/* Expiring soon alert */}
-      {expiring.length>0 && (
-        <div style={{background:`${T.amber}15`,border:`1px solid ${T.amber}44`,borderRadius:14,padding:14,marginBottom:16,display:"flex",alignItems:"center",gap:12}}>
-          <span style={{fontSize:24}}>⚠️</span>
-          <div>
-            <div style={{fontSize:14,fontWeight:700,color:T.amber,fontFamily:"'Lato',sans-serif"}}>
-              {expiring.length} license{expiring.length!==1?"s":""} expiring within 90 days
-            </div>
-            <div style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>
-              {expiring.map(l=>`${l.state} (${getStatusLabel(l.expDate)})`).join(" · ")}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Stats row */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:20}}>
-        {[
-          {label:"Total States",  value:licenses.length,                                    color:T.blue},
-          {label:"Expiring Soon", value:licenses.filter(l=>{const d=getDaysUntil(l.expDate);return d!==null&&d>=0&&d<=90;}).length, color:T.amber},
-          {label:"Expired",       value:licenses.filter(l=>{const d=getDaysUntil(l.expDate);return d!==null&&d<0;}).length,         color:T.red},
-        ].map(({label,value,color})=>(
-          <div key={label} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:14,padding:14,textAlign:"center",borderTop:`3px solid ${color}`}}>
-            <div style={{fontSize:28,fontWeight:700,color,fontFamily:"'Courier Prime',monospace"}}>{value}</div>
-            <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:0.5,marginTop:2}}>{label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* License list */}
-      <div style={{display:"flex",flexDirection:"column",gap:10}}>
-        {licenses.sort((a,b)=>(getDaysUntil(a.expDate)||999)-(getDaysUntil(b.expDate)||999)).map(lic=>{
-          const statusColor = getStatusColor(lic.expDate);
-          const statusLabel = getStatusLabel(lic.expDate);
-          return (
-            <div key={lic.id} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:14,padding:16,display:"flex",alignItems:"center",gap:14,animation:"fadeUp 0.3s ease"}}>
-              {/* State badge */}
-              <div style={{width:52,height:52,borderRadius:14,background:T.navy,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                <div style={{fontSize:14,fontWeight:700,color:"#fff",fontFamily:"'Lato',sans-serif",textAlign:"center",lineHeight:1.2}}>{lic.state}</div>
-              </div>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
-                  <div style={{fontSize:15,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif"}}>{lic.line}</div>
-                  <span style={{fontSize:10,background:`${statusColor}18`,color:statusColor,padding:"2px 8px",borderRadius:20,fontFamily:"'Lato',sans-serif",fontWeight:700,border:`1px solid ${statusColor}44`}}>{statusLabel}</span>
-                </div>
-                <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>
-                  {lic.licenseNum&&<div style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>License: <strong>{lic.licenseNum}</strong></div>}
-                  {lic.npn&&<div style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>NPN: <strong>{lic.npn}</strong></div>}
-                  {lic.expDate&&<div style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>Exp: <strong>{new Date(lic.expDate).toLocaleDateString()}</strong></div>}
-                </div>
-                {lic.notes&&<div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:4,fontStyle:"italic"}}>{lic.notes}</div>}
-              </div>
-              <div style={{display:"flex",gap:6,flexShrink:0}}>
-                <button onClick={()=>startEdit(lic)} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:8,padding:"6px 10px",fontSize:12,color:T.muted,cursor:"pointer"}}>✏️</button>
-                <button onClick={()=>setLicenses(licenses.filter(l=>l.id!==lic.id))} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:8,padding:"6px 10px",fontSize:12,color:T.red,cursor:"pointer"}}>✕</button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Add/Edit modal */}
-      {showAdd && (
-        <div style={{position:"fixed",inset:0,background:"rgba(11,31,58,0.6)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShowAdd(false)}>
-          <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:24,padding:28,width:"100%",maxWidth:440,maxHeight:"90vh",overflowY:"auto",animation:"fadeUp 0.3s ease"}}>
-            <h3 style={{fontSize:20,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",marginBottom:18}}>{editId?"Edit License":"Add License"}</h3>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12}}>
-              {[
-                {label:"State",       key:"state",      ph:"e.g. TN"},
-                {label:"License #",   key:"licenseNum", ph:"e.g. 1234567"},
-                {label:"NPN",         key:"npn",        ph:"e.g. 12345678"},
-                {label:"Expiration",  key:"expDate",    ph:"",type:"date"},
-              ].map(({label,key,ph,type})=>(
-                <div key={key}>
-                  <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{label}</div>
-                  <input type={type||"text"} placeholder={ph} value={newLic[key]} onChange={e=>setNewLic({...newLic,[key]:e.target.value})}
-                    style={{width:"100%",padding:"10px 12px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
-                </div>
-              ))}
-            </div>
-            <div style={{marginBottom:12}}>
-              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Line of Business</div>
-              <select value={newLic.line} onChange={e=>setNewLic({...newLic,line:e.target.value})}
-                style={{width:"100%",padding:"10px 12px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,background:T.bg,outline:"none"}}>
-                {["Life & Health","Property & Casualty","Life Only","Health Only","Variable","All Lines"].map(l=><option key={l}>{l}</option>)}
-              </select>
-            </div>
-            <div style={{marginBottom:20}}>
-              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Notes</div>
-              <input placeholder="CE requirements, renewal notes..." value={newLic.notes} onChange={e=>setNewLic({...newLic,notes:e.target.value})}
-                style={{width:"100%",padding:"10px 12px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
-            </div>
-            <div style={{display:"flex",gap:10}}>
-              <button onClick={()=>{setShowAdd(false);setEditId(null);}} style={{flex:1,padding:"12px",background:T.bg,border:`1px solid ${T.border}`,borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",color:T.sub}}>Cancel</button>
-              <button onClick={saveLicense} style={{flex:2,padding:"12px",background:T.navy,color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",fontSize:14}}>Save License</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── Dashboard ─────────────────────────────────────────────────
-function Dashboard({ setTab, profile, bg = {} }) {
-  const stats = [
-    {label:"Total Carriers",value:SAMPLE_CARRIERS.length,icon:"🏢",tab:"carriers"},
-    {label:"Active Clients",value:SAMPLE_CLIENTS.filter(c=>c.status==="Active").length,icon:"👥",tab:"clients"},
-    {label:"Prospects",value:SAMPLE_CLIENTS.filter(c=>c.status==="Prospect").length,icon:"🎯",tab:"clients"},
-    {label:"Lines Covered",value:LINES.length,icon:"📋",tab:"carriers"},
-    {label:"P&C Carriers",value:SAMPLE_CARRIERS.filter(c=>isPCLine(c.line)).length,icon:"🏠",tab:"carriers"},
-  ];
-
-  const upcoming = [
-    {name:"James Stovall",action:"T65 Review — Plan G",date:"Aug 2025",line:"Medicare",urgent:true},
-    {name:"Derek & Tina Williams",action:"Home + Auto Bundle Quote",date:"Jun 2025",line:"Homeowners",urgent:true},
-    {name:"Ripley School District",action:"Open Enrollment Follow-up",date:"Sep 2025",line:"Supplemental",urgent:false},
-    {name:"Precision Auto Repair",action:"GL + Workers Comp Quote",date:"Jul 2025",line:"General Liability",urgent:false},
-    {name:"Maria Gonzalez",action:"ACA Renewal",date:"Nov 2025",line:"Health & ACA",urgent:false},
-    {name:"Henderson Family",action:"Preneed Planning Review",date:"Jul 2025",line:"Preneed / Burial",urgent:false},
-  ];
-
-  return (
-    <div style={{animation:"fadeUp 0.3s ease"}}>
-      {/* Welcome */}
-      <div style={{background:profile.heroColor||T.navy,borderRadius:20,padding:"24px 28px",marginBottom:22,position:"relative",overflow:"hidden",transition:"background 0.4s"}}>
-        <div style={{position:"absolute",top:-20,right:-20,width:120,height:120,borderRadius:"50%",background:`rgba(201,168,76,0.15)`}}/>
-        <div style={{position:"absolute",bottom:-30,right:40,width:80,height:80,borderRadius:"50%",background:`rgba(201,168,76,0.08)`}}/>
-        {(()=>{
-          const tc = profile.heroTextColor==="dark";
-          return (<>
-            <div style={{fontSize:12,color:tc?"rgba(0,0,0,0.5)":"rgba(255,255,255,0.5)",fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:2,marginBottom:6}}>Welcome back</div>
-            <div style={{fontSize:28,fontWeight:700,color:tc?"#1a1a2e":"#fff",fontFamily:"'Playfair Display',serif",lineHeight:1.2}}>{profile.firstName||"Agent"} {profile.lastName}</div>
-            <div style={{fontSize:13,color:tc?"#3a3a3a":T.goldLight,fontFamily:"'Lato',sans-serif",marginTop:6}}>{profile.agencyName||"Agent Command Center"} {profile.states?`· ${profile.states}`:""}</div>
-            {profile.tagline&&<div style={{fontSize:12,color:tc?"rgba(0,0,0,0.35)":"rgba(255,255,255,0.4)",fontFamily:"'Lato',sans-serif",marginTop:4,fontStyle:"italic"}}>"{profile.tagline}"</div>}
-          </>);
-        })()}
-      </div>
-
-      {/* Stats */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:12,marginBottom:22,gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))"}}>
-        {stats.map(({label,value,icon,tab})=>(
-          <div key={label} onClick={()=>setTab(tab)} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,padding:16,cursor:"pointer",transition:"all 0.15s"}}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor=T.navy;e.currentTarget.style.boxShadow="0 4px 16px rgba(26,39,68,0.1)";}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor=T.border;e.currentTarget.style.boxShadow="none";}}>
-            <div style={{fontSize:28,marginBottom:6}}>{icon}</div>
-            <div style={{fontSize:28,fontWeight:700,color:T.navy,fontFamily:"'Courier Prime',monospace"}}>{value}</div>
-            <div style={{fontSize:12,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>{label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Upcoming actions */}
-      <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:18,padding:20}}>
-        <div style={{fontSize:16,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",marginBottom:14}}>Upcoming Actions</div>
-        {upcoming.map((u,i)=>(
-          <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 0",borderBottom:i<upcoming.length-1?`1px solid ${T.border}`:"none"}}>
-            <div style={{width:36,height:36,borderRadius:10,background:lineColor(u.line),display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:11,fontWeight:700,fontFamily:"'Lato',sans-serif",flexShrink:0}}>
-              {u.name.split(" ").map(n=>n[0]).join("").slice(0,2)}
-            </div>
-            <div style={{flex:1}}>
-              <div style={{fontSize:14,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif"}}>{u.name}</div>
-              <div style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>{u.action}</div>
-            </div>
-            <div style={{textAlign:"right"}}>
-              <div style={{fontSize:12,color:u.urgent?T.red:T.muted,fontFamily:"'Lato',sans-serif",fontWeight:u.urgent?700:400}}>{u.date}</div>
-              <div style={{fontSize:10,color:"#fff",background:lineColor(u.line),padding:"2px 7px",borderRadius:10,marginTop:3,fontFamily:"'Lato',sans-serif"}}>{u.line}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ── Agent Profile ─────────────────────────────────────────────
-function AgentProfile({ profile, setProfile, bg = {} }) {
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft]     = useState(profile);
-  const [logoPreview, setLogoPreview] = useState(profile.logoUrl||null);
-
-  const handleLogoUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setLogoPreview(ev.target.result);
-      setDraft({...draft, logoUrl: ev.target.result});
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const save = () => { setProfile(draft); setEditing(false); };
-  const cancel = () => { setDraft(profile); setLogoPreview(profile.logoUrl||null); setEditing(false); };
-
-  const Field = ({label, value}) => (
-    <div style={{padding:"12px 0",borderBottom:`1px solid ${T.border}`}}>
-      <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1.5,marginBottom:3}}>{label}</div>
-      <div style={{fontSize:15,color:T.navy,fontFamily:"'Lato',sans-serif",fontWeight:600}}>{value||<span style={{color:T.muted,fontStyle:"italic"}}>Not set</span>}</div>
-    </div>
-  );
-
-  return (
-    <div style={{maxWidth:640,margin:"0 auto"}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}}>
-        <div>
-          <h2 style={{fontSize:26,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>Agent Profile</h2>
-          <p style={{fontSize:13,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>Your info appears on quotes and client documents</p>
-        </div>
-        {!editing && (
-          <button onClick={()=>{setDraft(profile);setEditing(true);}} style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 20px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>
-            ✏️ Edit Profile
+        <div style={{display:"flex",gap:8}}>
+          {licenses.length>0&&<button onClick={exportCSV} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer",color:T.sub}}>📥 Export CSV</button>}
+          <button onClick={()=>{setNewLic({state:"",licenseNum:"",npn:"",line:"Life & Health",expDate:"",status:"Active",notes:""});setEditId(null);setShowAdd(true);}}
+            style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>
+            + Add License
           </button>
-        )}
-      </div>
-
-      {/* Logo + name hero */}
-      <div style={{background:profile.heroColor||T.navy,borderRadius:20,padding:"28px",marginBottom:20,display:"flex",alignItems:"center",gap:20,position:"relative",overflow:"hidden",transition:"background 0.4s"}}>
-        <div style={{position:"absolute",top:-20,right:-20,width:120,height:120,borderRadius:"50%",background:"rgba(201,168,76,0.12)"}}/>
-        {/* Logo circle */}
-        <div style={{width:80,height:80,borderRadius:20,background:profile.logoUrl?"transparent":T.gold,border:`3px solid ${T.gold}`,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",flexShrink:0}}>
-          {profile.logoUrl
-            ? <img src={profile.logoUrl} alt="logo" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
-            : <span style={{fontSize:28,fontWeight:900,color:T.navy,fontFamily:"'Playfair Display',serif"}}>{(profile.agencyName||profile.firstName||"A").charAt(0)}</span>
-          }
         </div>
-        <div>
-          <div style={{fontSize:22,fontWeight:700,color:profile.heroTextColor==="dark"?"#1a1a2e":"#fff",fontFamily:"'Playfair Display',serif",lineHeight:1.2}}>
-            {profile.firstName||"Your Name"} {profile.lastName}
-          </div>
-          {profile.title && <div style={{fontSize:13,color:profile.heroTextColor==="dark"?"#3a3a3a":T.goldLight,fontFamily:"'Lato',sans-serif",marginTop:3}}>{profile.title}</div>}
-          {profile.agencyName && <div style={{fontSize:14,color:profile.heroTextColor==="dark"?"rgba(0,0,0,0.6)":"rgba(255,255,255,0.7)",fontFamily:"'Lato',sans-serif",marginTop:2}}>{profile.agencyName}</div>}
-          {profile.npn && <div style={{fontSize:12,color:profile.heroTextColor==="dark"?"rgba(0,0,0,0.4)":"rgba(255,255,255,0.4)",fontFamily:"'Courier Prime',monospace",marginTop:4}}>NPN: {profile.npn}</div>}
-        </div>
-      </div>
-
-      {!editing ? (
-        // ── View mode ──────────────────────────────────────────
-        <div style={{background:T.surface,borderRadius:20,padding:24,border:`1px solid ${T.border}`}}>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 24px"}}>
-            <Field label="First Name"     value={profile.firstName}/>
-            <Field label="Last Name"      value={profile.lastName}/>
-            <Field label="Title / Role"   value={profile.title}/>
-            <Field label="Agency / Firm"  value={profile.agencyName}/>
-            <Field label="Phone"          value={profile.phone}/>
-            <Field label="Email"          value={profile.email}/>
-            <Field label="License #"      value={profile.licenseNum}/>
-            <Field label="NPN"            value={profile.npn}/>
-            <Field label="Website"        value={profile.website}/>
-            <Field label="State(s)"       value={profile.states}/>
-          </div>
-          <div style={{marginTop:4}}>
-            <Field label="Address / Office" value={profile.address}/>
-            <Field label="Tagline / Bio"    value={profile.tagline}/>
-          </div>
-
-          {/* Lines of business badges */}
-          {profile.linesOfBusiness?.length>0 && (
-            <div style={{marginTop:16}}>
-              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1.5,marginBottom:8}}>Licensed Lines</div>
-              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-                {profile.linesOfBusiness.map(l=>(
-                  <span key={l} style={{fontSize:11,background:lineColor(l)+"18",color:lineColor(l),border:`1px solid ${lineColor(l)}44`,padding:"3px 12px",borderRadius:20,fontFamily:"'Lato',sans-serif",fontWeight:700}}>{l}</span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Quote footer preview */}
-          <div style={{marginTop:20,background:T.bg,borderRadius:12,padding:16,border:`1px solid ${T.border}`}}>
-            <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1.5,marginBottom:10}}>Quote Footer Preview</div>
-            <div style={{display:"flex",alignItems:"center",gap:12}}>
-              {profile.logoUrl && <img src={profile.logoUrl} alt="logo" style={{width:36,height:36,borderRadius:8,objectFit:"cover"}}/>}
-              <div>
-                <div style={{fontSize:13,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif"}}>{profile.firstName} {profile.lastName} {profile.title?`· ${profile.title}`:""}</div>
-                <div style={{fontSize:11,color:T.sub,fontFamily:"'Lato',sans-serif"}}>{profile.agencyName} {profile.phone?`· ${profile.phone}`:""} {profile.email?`· ${profile.email}`:""}</div>
-                {profile.tagline && <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",fontStyle:"italic",marginTop:2}}>"{profile.tagline}"</div>}
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        // ── Edit mode ──────────────────────────────────────────
-        <div style={{background:T.surface,borderRadius:20,padding:24,border:`1px solid ${T.border}`}}>
-
-          {/* Logo upload */}
-          <div style={{marginBottom:20,display:"flex",alignItems:"center",gap:16}}>
-            <div style={{width:72,height:72,borderRadius:16,background:logoPreview?"transparent":T.bg,border:`2px dashed ${T.border}`,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",flexShrink:0}}>
-              {logoPreview
-                ? <img src={logoPreview} alt="logo" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
-                : <span style={{fontSize:28}}>🏢</span>
-              }
-            </div>
-            <div>
-              <div style={{fontSize:14,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif",marginBottom:6}}>Agency Logo</div>
-              <label style={{background:T.navy,color:"#fff",padding:"8px 16px",borderRadius:10,fontSize:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer"}}>
-                📁 Upload Logo
-                <input type="file" accept="image/*" onChange={handleLogoUpload} style={{display:"none"}}/>
-              </label>
-              {logoPreview && <button onClick={()=>{setLogoPreview(null);setDraft({...draft,logoUrl:""});}} style={{marginLeft:8,background:"none",border:`1px solid ${T.border}`,borderRadius:8,padding:"7px 12px",fontSize:12,color:T.muted,cursor:"pointer",fontFamily:"'Lato',sans-serif"}}>Remove</button>}
-            </div>
-          </div>
-
-          {/* Fields grid */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-            {[
-              {label:"First Name",   key:"firstName",  ph:"Deidre"},
-              {label:"Last Name",    key:"lastName",   ph:"Jones"},
-              {label:"Title / Role", key:"title",      ph:"Independent Insurance Agent"},
-              {label:"Agency / Firm",key:"agencyName", ph:"The Coverage Firm"},
-              {label:"Phone",        key:"phone",      ph:"901-555-0100"},
-              {label:"Email",        key:"email",      ph:"deidre@thecoveragefirm.com"},
-              {label:"License #",    key:"licenseNum", ph:"TN-12345678"},
-              {label:"NPN",          key:"npn",        ph:"e.g. 12345678"},
-              {label:"Website",      key:"website",    ph:"www.thecoveragefirm.com"},
-              {label:"Licensed States",key:"states",   ph:"TN, AL, MS, KY"},
-            ].map(({label,key,ph})=>(
-              <div key={key}>
-                <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{label}</div>
-                <input placeholder={ph} value={draft[key]||""} onChange={e=>setDraft({...draft,[key]:e.target.value})}
-                  style={{width:"100%",padding:"10px 12px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
-              </div>
-            ))}
-          </div>
-
-          {/* Full width fields */}
-          {[
-            {label:"Office Address",key:"address",ph:"123 Main St, Covington TN 38019"},
-            {label:"Tagline / Bio", key:"tagline", ph:"Protecting families across Tennessee since 2015"},
-          ].map(({label,key,ph})=>(
-            <div key={key} style={{marginTop:12}}>
-              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{label}</div>
-              <input placeholder={ph} value={draft[key]||""} onChange={e=>setDraft({...draft,[key]:e.target.value})}
-                style={{width:"100%",padding:"10px 12px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
-            </div>
-          ))}
-
-          {/* Lines of business */}
-          <div style={{marginTop:16}}>
-            <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Licensed Lines of Business</div>
-            <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
-              {LINES.map(l=>{
-                const active=(draft.linesOfBusiness||[]).includes(l);
-                return (
-                  <button key={l} onClick={()=>{
-                    const cur=draft.linesOfBusiness||[];
-                    setDraft({...draft,linesOfBusiness:active?cur.filter(x=>x!==l):[...cur,l]});
-                  }} style={{padding:"4px 12px",borderRadius:20,border:`1px solid ${active?lineColor(l):T.border}`,background:active?lineColor(l)+"18":T.surface,color:active?lineColor(l):T.muted,fontSize:11,fontFamily:"'Lato',sans-serif",fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>
-                    {active?"✓ ":""}{l}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* ── Color Controls ── */}
-          <div style={{marginTop:20,background:T.bg,borderRadius:16,padding:16,border:`1px solid ${T.border}`}}>
-            <div style={{fontSize:13,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",marginBottom:4}}>🎨 Colors & Theme</div>
-            <div style={{fontSize:12,color:T.muted,fontFamily:"'Lato',sans-serif",marginBottom:16}}>Customize your app colors to match your brand.</div>
-
-            {/* Background theme */}
-            <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Page Background</div>
-            <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
-              {BG_THEMES.map(b=>{
-                const active = draft.bgTheme===b.name;
-                return (
-                  <button key={b.name} onClick={()=>setDraft({...draft,bgTheme:b.name})}
-                    style={{display:"flex",alignItems:"center",gap:6,padding:"6px 12px",borderRadius:20,border:`2px solid ${active?T.gold:T.border}`,background:b.surface,cursor:"pointer",transition:"all 0.15s"}}>
-                    <div style={{width:14,height:14,borderRadius:"50%",background:b.bg,border:`1px solid ${T.border}`}}/>
-                    <span style={{fontSize:11,fontWeight:700,color:b.text,fontFamily:"'Lato',sans-serif"}}>{b.name}</span>
-                    {active&&<span style={{fontSize:10,color:T.gold}}>✓</span>}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Nav bar color */}
-            <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Nav Bar Color</div>
-            <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:8}}>
-              {["#1a2744","#1a3325","#5c1010","#1e0a3c","#0a1f3c","#2b1200","#042a2b","#1c1c1c","#ffffff","#f7f5f0"].map(c=>(
-                <button key={c} onClick={()=>setDraft({...draft,navColor:c})}
-                  style={{width:32,height:32,borderRadius:10,background:c,border:`3px solid ${draft.navColor===c?T.gold:T.border}`,cursor:"pointer",transition:"all 0.15s",boxShadow:draft.navColor===c?`0 0 0 2px ${T.gold}66`:undefined}}/>
-              ))}
-              <div style={{display:"flex",alignItems:"center",gap:6,background:T.surface,borderRadius:10,border:`1px solid ${T.border}`,padding:"4px 10px"}}>
-                <input type="color" value={draft.navColor||"#1a2744"} onChange={e=>setDraft({...draft,navColor:e.target.value})}
-                  style={{width:24,height:24,border:"none",borderRadius:4,cursor:"pointer",padding:0,background:"none"}}/>
-                <span style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif"}}>Custom</span>
-              </div>
-            </div>
-            <div style={{display:"flex",gap:8,marginBottom:16}}>
-              {["white","dark"].map(tc=>(
-                <button key={tc} onClick={()=>setDraft({...draft,navTextColor:tc})}
-                  style={{flex:1,padding:"7px",borderRadius:10,border:`2px solid ${draft.navTextColor===tc?T.gold:T.border}`,background:draft.navColor||T.navy,cursor:"pointer",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:11,color:tc==="white"?"#ffffff":"#1a1a2e",transition:"all 0.15s"}}>
-                  {tc==="white"?"White Text ☀️":"Dark Text 🌑"}
-                </button>
-              ))}
-            </div>
-
-            {/* Hero banner color */}
-            <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Name Banner Color</div>
-            <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:8}}>
-              {["#1a2744","#1a3325","#5c1010","#1e0a3c","#0a1f3c","#2b1200","#042a2b","#1c1c1c","#ffffff","#f7f5f0","#fdf6ec","#e8f4fd"].map(c=>(
-                <button key={c} onClick={()=>setDraft({...draft,heroColor:c})}
-                  style={{width:32,height:32,borderRadius:10,background:c,border:`3px solid ${draft.heroColor===c?T.gold:T.border}`,cursor:"pointer",transition:"all 0.15s",boxShadow:draft.heroColor===c?`0 0 0 2px ${T.gold}66`:undefined}}/>
-              ))}
-              <div style={{display:"flex",alignItems:"center",gap:6,background:T.surface,borderRadius:10,border:`1px solid ${T.border}`,padding:"4px 10px"}}>
-                <input type="color" value={draft.heroColor||"#1a2744"} onChange={e=>setDraft({...draft,heroColor:e.target.value})}
-                  style={{width:24,height:24,border:"none",borderRadius:4,cursor:"pointer",padding:0,background:"none"}}/>
-                <span style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif"}}>Custom</span>
-              </div>
-            </div>
-            <div style={{display:"flex",gap:8,marginBottom:4}}>
-              {["white","dark"].map(tc=>(
-                <button key={tc} onClick={()=>setDraft({...draft,heroTextColor:tc})}
-                  style={{flex:1,padding:"7px",borderRadius:10,border:`2px solid ${draft.heroTextColor===tc?T.gold:T.border}`,background:draft.heroColor||T.navy,cursor:"pointer",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:11,color:tc==="white"?"#ffffff":"#1a1a2e",transition:"all 0.15s"}}>
-                  {tc==="white"?"White Text ☀️":"Dark Text 🌑"}
-                </button>
-              ))}
-            </div>
-
-            {/* Live mini preview */}
-            <div style={{marginTop:14,borderRadius:12,overflow:"hidden",border:`1px solid ${T.border}`}}>
-              <div style={{background:draft.navColor||T.navy,padding:"8px 14px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                <span style={{fontSize:12,fontWeight:700,color:draft.navTextColor==="dark"?"#1a1a2e":T.goldLight,fontFamily:"'Playfair Display',serif"}}>{draft.agencyName||"Your Agency"}</span>
-                <div style={{display:"flex",gap:12}}>
-                  {["Dashboard","Carriers","Quotes"].map(t=>(
-                    <span key={t} style={{fontSize:10,color:draft.navTextColor==="dark"?"rgba(0,0,0,0.5)":"rgba(255,255,255,0.5)",fontFamily:"'Lato',sans-serif"}}>{t}</span>
-                  ))}
-                </div>
-              </div>
-              <div style={{background:draft.heroColor||T.navy,padding:"12px 14px"}}>
-                <div style={{fontSize:14,fontWeight:700,color:draft.heroTextColor==="dark"?"#1a1a2e":"#fff",fontFamily:"'Playfair Display',serif"}}>{draft.firstName||"Your Name"} {draft.lastName}</div>
-                <div style={{fontSize:11,color:draft.heroTextColor==="dark"?"rgba(0,0,0,0.5)":T.goldLight,fontFamily:"'Lato',sans-serif",marginTop:2}}>{draft.agencyName||"Your Agency"}</div>
-              </div>
-              <div style={{background:BG_THEMES.find(b=>b.name===draft.bgTheme)?.bg||"#f7f5f0",padding:"10px 14px",display:"flex",gap:8}}>
-                {["Card 1","Card 2","Card 3"].map(c=>(
-                  <div key={c} style={{flex:1,background:BG_THEMES.find(b=>b.name===draft.bgTheme)?.surface||"#fff",borderRadius:8,padding:"6px",border:`1px solid ${BG_THEMES.find(b=>b.name===draft.bgTheme)?.border||"#e8e4dc"}`,textAlign:"center"}}>
-                    <span style={{fontSize:9,color:BG_THEMES.find(b=>b.name===draft.bgTheme)?.sub||"#5a5a7a",fontFamily:"'Lato',sans-serif"}}>{c}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div style={{display:"flex",gap:10,marginTop:24}}>
-            <button onClick={cancel} style={{flex:1,padding:"13px",background:T.bg,border:`1px solid ${T.border}`,borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",color:T.sub}}>Cancel</button>
-            <button onClick={save} style={{flex:2,padding:"13px",background:T.navy,color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,cursor:"pointer",fontSize:14}}>💾 Save Profile</button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── Root App ──────────────────────────────────────────────────
-const TABS = [
-  {id:"dashboard",   label:"Dashboard",  icon:"⚡"},
-  {id:"carriers",    label:"Carriers",   icon:"🏢"},
-  {id:"links",       label:"My Links",   icon:"🔗"},
-  {id:"quotes",      label:"Quotes",     icon:"📊"},
-  {id:"clients",     label:"Clients",    icon:"👥"},
-  {id:"commissions", label:"Commissions",icon:"💰"},
-  {id:"licenses",    label:"Licenses",   icon:"🪪"},
-  {id:"profile",     label:"Profile",    icon:"👤"},
-];
-
-const DEFAULT_PROFILE = {
-  firstName:"Deidre", lastName:"Jones", title:"Independent Insurance Agent",
-  agencyName:"The Coverage Firm", phone:"", email:"", licenseNum:"",
-  npn:"", website:"", states:"TN, AL, MS", address:"Covington, TN",
-  tagline:"Full-service insurance broker across all lines.",
-  logoUrl:"", linesOfBusiness:["Health & ACA","Medicare","Life & Annuities","Supplemental","Disability"],
-  bgTheme:"Classic Cream",
-  // Color overrides
-  navColor:"#1a2744",
-  heroColor:"#1a2744",
-  navTextColor:"white",   // "white" or "dark"
-  heroTextColor:"white",  // "white" or "dark"
-};
-
-export default function App() {
-  const [tab,          setTab]         = useState("dashboard");
-  const [profile,      setProfile]     = useLocalStorage("acc_profile", DEFAULT_PROFILE);
-  const [quoteClient,  setQuoteClient] = useState(null);
-
-  const handleQuoteClient = (client) => {
-    setQuoteClient(client);
-    setTab("quotes");
-  };
-
-  const bg = BG_THEMES.find(b => b.name === profile.bgTheme) || BG_THEMES[0];
-
-  // Update global T so all components pick up the active bg theme
-  applyBgTheme(bg);
-
-  return (
-    <div style={{background:bg.bg, minHeight:"100vh", fontFamily:"'Lato',sans-serif", transition:"background 0.4s"}}>
-      <style>{GLOBAL_CSS}</style>
-
-      {/* Top nav — color from active bg theme */}
-      <div style={{background:profile.navColor||bg.nav||T.navy, padding:"0 16px", display:"flex", alignItems:"center", position:"sticky", top:0, zIndex:50, boxShadow:"0 2px 20px rgba(0,0,0,0.25)", transition:"background 0.4s"}}>
-        <div onClick={()=>setTab("profile")} style={{display:"flex", alignItems:"center", gap:10, padding:"10px 0", marginRight:16, cursor:"pointer", flexShrink:0}}>
-          <div style={{width:34, height:34, borderRadius:10, background:profile.logoUrl?"transparent":T.gold, border:`2px solid ${T.gold}`, display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden"}}>
-            {profile.logoUrl
-              ? <img src={profile.logoUrl} alt="logo" style={{width:"100%", height:"100%", objectFit:"cover"}}/>
-              : <span style={{fontSize:14, fontWeight:900, color:bg.nav, fontFamily:"'Playfair Display',serif"}}>{(profile.agencyName||profile.firstName||"A").charAt(0)}</span>
-            }
-          </div>
-          <div style={{display:"flex", flexDirection:"column"}}>
-            <span style={{fontSize:12, fontWeight:700, color:T.blueLight, fontFamily:"'Playfair Display',serif", lineHeight:1}}>{profile.agencyName||"ACC"}</span>
-            <span style={{fontSize:10, color:"rgba(255,255,255,0.45)", fontFamily:"'Lato',sans-serif"}}>{profile.firstName} {profile.lastName}</span>
-          </div>
-        </div>
-        <div style={{display:"flex", gap:0, overflowX:"auto", flex:1}}>
-          {TABS.map(t=>(
-            <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"16px 12px", background:"none", border:"none", borderBottom:tab===t.id?`3px solid ${T.blue}`:"3px solid transparent", color:tab===t.id?T.blueLight:"rgba(255,255,255,0.55)", cursor:"pointer", fontSize:12, fontFamily:"'Lato',sans-serif", fontWeight:700, whiteSpace:"nowrap", letterSpacing:0.3, transition:"all 0.15s"}}>
-              {t.icon} {t.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Content */}
-      <div style={{maxWidth:1100, margin:"0 auto", padding:"24px 20px"}}>
-        {tab==="dashboard"   && <Dashboard setTab={setTab} profile={profile} bg={bg}/>}
-        {tab==="carriers"    && <CarrierHub bg={bg}/>}
-        {tab==="links"       && <CarrierLinks bg={bg}/>}
-        {tab==="quotes"      && <QuoteBuilder profile={profile} bg={bg} initialClient={quoteClient}/>}
-        {tab==="clients"     && <ClientProfiles bg={bg} onQuoteClient={handleQuoteClient} setTab={setTab}/>}
-        {tab==="commissions" && <CommissionLog bg={bg} profile={profile}/>}
-        {tab==="licenses"    && <LicenseTracker bg={bg}/>}
-        {tab==="profile"     && <AgentProfile profile={profile} setProfile={setProfile} bg={bg}/>}
-      </div>
-    </div>
-  );
-}// ── License Tracker ──────────────────────────────────────────
-function LicenseTracker() {
-  const [licenses, setLicenses] = useLocalStorage("acc_licenses", [
-    {id:1, state:"TN", licenseNum:"", npn:"", line:"Life & Health", expDate:"2025-12-31", status:"Active", notes:""},
-    {id:2, state:"AL", licenseNum:"", npn:"", line:"Life & Health", expDate:"2025-12-31", status:"Active", notes:""},
-    {id:3, state:"MS", licenseNum:"", npn:"", line:"Life & Health", expDate:"2025-12-31", status:"Active", notes:""},
-  ]);
-  const [showAdd, setShowAdd] = useState(false);
-  const [newLic, setNewLic] = useState({state:"",licenseNum:"",npn:"",line:"Life & Health",expDate:"",status:"Active",notes:""});
-  const [editId, setEditId] = useState(null);
-
-  const now = new Date();
-
-  const getDaysUntil = (dateStr) => {
-    if (!dateStr) return null;
-    return Math.floor((new Date(dateStr) - now) / (1000*60*60*24));
-  };
-
-  const getStatusColor = (dateStr) => {
-    const days = getDaysUntil(dateStr);
-    if (days === null) return T.muted;
-    if (days < 0)   return T.red;
-    if (days <= 30) return T.red;
-    if (days <= 90) return T.amber;
-    return T.green;
-  };
-
-  const getStatusLabel = (dateStr) => {
-    const days = getDaysUntil(dateStr);
-    if (days === null) return "No expiry";
-    if (days < 0)   return "EXPIRED";
-    if (days <= 30) return `${days}d left`;
-    if (days <= 90) return `${days}d left`;
-    return "Active";
-  };
-
-  const saveLicense = () => {
-    if (!newLic.state) return;
-    if (editId) {
-      setLicenses(licenses.map(l=>l.id===editId?{...newLic,id:editId}:l));
-      setEditId(null);
-    } else {
-      setLicenses([...licenses,{...newLic,id:Date.now()}]);
-    }
-    setNewLic({state:"",licenseNum:"",npn:"",line:"Life & Health",expDate:"",status:"Active",notes:""});
-    setShowAdd(false);
-  };
-
-  const startEdit = (lic) => {
-    setNewLic({...lic});
-    setEditId(lic.id);
-    setShowAdd(true);
-  };
-
-  const expiring = licenses.filter(l=>{
-    const d = getDaysUntil(l.expDate);
-    return d !== null && d >= 0 && d <= 90;
-  });
-
-  return (
-    <div>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-        <div>
-          <h2 style={{fontSize:26,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>License Tracker</h2>
-          <p style={{fontSize:13,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:2}}>States, license numbers, NPN & expiration dates</p>
-        </div>
-        <button onClick={()=>{setNewLic({state:"",licenseNum:"",npn:"",line:"Life & Health",expDate:"",status:"Active",notes:""});setEditId(null);setShowAdd(true);}}
-          style={{background:T.navy,color:"#fff",border:"none",borderRadius:12,padding:"10px 18px",fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>
-          + Add License
-        </button>
       </div>
 
       {/* Expiring soon alert */}
@@ -2334,6 +1768,8 @@ function Dashboard({ setTab, profile, bg }) {
   const commissions = JSON.parse(localStorage.getItem("acc_commissions") || "[]");
   const licenses    = JSON.parse(localStorage.getItem("acc_licenses")    || "[]");
 
+  const [noticeDismissed, setNoticeDismissed] = useLocalStorage("acc_storage_notice_dismissed", false);
+
   // Calculate daily stats
   const activeClients   = clients.filter(c=>c.status==="Active").length;
   const prospects       = clients.filter(c=>c.status==="Prospect").length;
@@ -2380,6 +1816,20 @@ function Dashboard({ setTab, profile, bg }) {
           {profile.agencyName||"Agent Command Center"} {profile.states?`· ${profile.states}`:""}
         </div>
       </div>
+
+      {/* Data storage notice — dismissable, re-appears in a new browser/device since it's per-browser */}
+      {!noticeDismissed && (
+        <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,padding:"12px 16px",marginBottom:20,display:"flex",alignItems:"flex-start",gap:10}}>
+          <span style={{fontSize:16,flexShrink:0}}>ℹ️</span>
+          <div style={{flex:1}}>
+            <div style={{fontSize:13,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif"}}>Your data is saved on this device only</div>
+            <div style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif",marginTop:2,lineHeight:1.5}}>
+              Clients, quotes, commissions, and licenses are stored in this browser — there's no cloud account yet. Use the <strong>Export</strong> button on each tab regularly so you never lose your work, especially before clearing browser data or switching devices.
+            </div>
+          </div>
+          <button onClick={()=>setNoticeDismissed(true)} style={{background:"none",border:"none",color:T.muted,cursor:"pointer",fontSize:18,lineHeight:1,padding:0,flexShrink:0}}>×</button>
+        </div>
+      )}
 
       {/* Daily stats grid */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:12,marginBottom:20}}>
@@ -2636,15 +2086,26 @@ function AgentProfile({ profile, setProfile, bg = {} }) {
 
             {/* Background theme */}
             <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Page Background</div>
-            <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))",gap:8,marginBottom:16}}>
               {BG_THEMES.map(b=>{
                 const active = draft.bgTheme===b.name;
                 return (
                   <button key={b.name} onClick={()=>setDraft({...draft,bgTheme:b.name})}
-                    style={{display:"flex",alignItems:"center",gap:6,padding:"6px 12px",borderRadius:20,border:`2px solid ${active?T.gold:T.border}`,background:b.surface,cursor:"pointer",transition:"all 0.15s"}}>
-                    <div style={{width:14,height:14,borderRadius:"50%",background:b.bg,border:`1px solid ${T.border}`}}/>
-                    <span style={{fontSize:11,fontWeight:700,color:b.text,fontFamily:"'Lato',sans-serif"}}>{b.name}</span>
-                    {active&&<span style={{fontSize:10,color:T.gold}}>✓</span>}
+                    style={{borderRadius:14,border:`3px solid ${active?b.nav:"transparent"}`,background:b.surface,cursor:"pointer",padding:0,overflow:"hidden",transition:"all 0.2s",boxShadow:active?`0 0 0 2px ${b.nav}44`:"none"}}>
+                    {/* Mini nav preview */}
+                    <div style={{background:b.nav,padding:"6px 10px",display:"flex",alignItems:"center",gap:6}}>
+                      <div style={{width:10,height:10,borderRadius:"50%",background:"rgba(255,255,255,0.4)"}}/>
+                      <div style={{flex:1,height:4,background:"rgba(255,255,255,0.3)",borderRadius:2}}/>
+                      {active&&<span style={{fontSize:10,color:"#fff"}}>✓</span>}
+                    </div>
+                    {/* Mini content preview */}
+                    <div style={{background:b.bg,padding:"6px 10px"}}>
+                      <div style={{height:4,background:b.nav+"33",borderRadius:2,marginBottom:3,width:"70%"}}/>
+                      <div style={{height:3,background:b.muted+"55",borderRadius:2,width:"50%"}}/>
+                    </div>
+                    <div style={{background:b.surface,padding:"4px 10px 8px",textAlign:"center"}}>
+                      <span style={{fontSize:10,fontWeight:700,color:b.sub,fontFamily:"'Lato',sans-serif"}}>{b.name}</span>
+                    </div>
                   </button>
                 );
               })}
@@ -2729,8 +2190,267 @@ function AgentProfile({ profile, setProfile, bg = {} }) {
 }
 
 // ── Root App ──────────────────────────────────────────────────
+// ── AI Workforce — employee registry ───────────────────────────
+// Architecture note: every AI employee is one object in this array. Adding a
+// new specialist later (Medicare Specialist, Sales Coach, etc.) means adding
+// one object here — no changes to the chat engine, dashboard, or routing logic.
+// `status` is "active" (buildable today) or "coming_soon" (shows on the
+// dashboard as a locked/preview card, prioritized later based on demand).
+const AI_WORKFORCE = [
+  {
+    id: "agent-success-coach",
+    name: "Jordan",
+    avatar: "🧭",
+    position: "Agent Success Coach",
+    department: "Executive Leadership",
+    status: "active",
+    specialty: "Daily priorities, sales coaching & productivity",
+    mission: "Help every independent agent open ACC each morning and immediately know what to work on, who to follow up with, and how to grow their book — combining daily planning, sales coaching, and CRM awareness into one conversation.",
+    communicationStyle: "Direct, warm, encouraging — talks like a seasoned agency owner who's coaching a teammate, not a corporate assistant. Keeps answers short and actionable on mobile; expands when asked.",
+    escalation: "When a question needs deep product-specific expertise (e.g. exact Medicare plan comparisons, ACA subsidy calculations, specific carrier underwriting rules), Jordan should say so plainly and note that a specialist for that line is coming — never invent specific plan details, rates, or regulations it doesn't have grounded data for.",
+    systemPrompt: `You are Jordan, the Agent Success Coach inside Agent Command Center (ACC) — an AI employee built specifically for independent insurance agents, not a generic assistant.
+
+Your job: help the agent using ACC right now figure out what to prioritize today, coach them on sales activity and follow-ups, and keep them organized — combining the role of a sales coach, daily planner, and productivity coach in one conversation.
+
+You have visibility into this agent's real CRM data from ACC (clients, quotes, commissions, licenses) when it's provided to you in context — use it specifically. Reference real client names, real quote statuses, real upcoming license expirations when they're relevant. Don't speak in generalities if specific data is available.
+
+Style: direct, warm, encouraging — like a seasoned agency owner coaching a teammate, not corporate or scripted. Keep responses short and scannable by default (this is used on mobile); give more detail only when asked.
+
+You are not a licensed insurance advisor and do not give specific product recommendations, rates, underwriting answers, or compliance/regulatory guidance — if asked something that needs that level of specific expertise, say plainly that it's outside what you can confidently answer and that a line-specific specialist is coming to ACC, then redirect to what you can help with (prioritization, follow-up strategy, activity coaching, organization).
+
+Never fabricate specific carrier names, plan details, premiums, or regulations.`,
+    kpis: ["Daily active usage", "Follow-ups suggested vs. completed", "Agent-reported usefulness"],
+    knowledgeBase: ["Agent's own CRM data (clients, quotes, commissions, licenses)", "General sales activity & productivity best practices"],
+    sopAccess: [],
+  },
+
+  // ── Coming soon — specced, not built. Order here is the current best guess
+  // at priority; actual build order is driven by agent demand post-validation.
+  { id:"sales-coach",        name:"", avatar:"🎯", position:"Sales Coach",                department:"Sales",              status:"coming_soon", specialty:"Objection handling & activity accountability" },
+  { id:"medicare-specialist",name:"", avatar:"🩺", position:"Medicare Specialist",         department:"Sales",              status:"coming_soon", specialty:"Medicare plan comparison & T65 guidance" },
+  { id:"life-specialist",    name:"", avatar:"🛡️", position:"Life Insurance Specialist",   department:"Sales",              status:"coming_soon", specialty:"Life & annuity product guidance" },
+  { id:"aca-specialist",     name:"", avatar:"📋", position:"ACA Specialist",              department:"Sales",              status:"coming_soon", specialty:"Marketplace enrollment & subsidies" },
+  { id:"employer-benefits",  name:"", avatar:"🏢", position:"Employer Benefits Consultant",department:"Sales",              status:"coming_soon", specialty:"Group benefits & open enrollment" },
+  { id:"marketing-director", name:"", avatar:"📣", position:"Marketing Director",         department:"Marketing",          status:"coming_soon", specialty:"Campaign strategy" },
+  { id:"content-director",   name:"", avatar:"✍️", position:"Content Director",           department:"Marketing",          status:"coming_soon", specialty:"Content planning & repurposing" },
+  { id:"social-media",       name:"", avatar:"📱", position:"Social Media Manager",       department:"Marketing",          status:"coming_soon", specialty:"Post drafting & scheduling guidance" },
+  { id:"client-success",     name:"", avatar:"🤝", position:"Client Success Manager",     department:"Client Success",     status:"coming_soon", specialty:"Client check-ins & satisfaction" },
+  { id:"retention",          name:"", avatar:"🔄", position:"Retention Specialist",       department:"Client Success",     status:"coming_soon", specialty:"Renewal & retention strategy" },
+  { id:"referral-manager",   name:"", avatar:"🌱", position:"Referral Manager",           department:"Client Success",     status:"coming_soon", specialty:"Referral campaign coaching" },
+  { id:"compliance",         name:"", avatar:"⚖️", position:"Compliance Officer",         department:"Operations",         status:"coming_soon", specialty:"Compliance awareness & reminders" },
+  { id:"crm-manager",        name:"", avatar:"🗂️", position:"CRM Manager",                department:"Operations",         status:"coming_soon", specialty:"Data cleanup & organization" },
+  { id:"workflow-manager",   name:"", avatar:"⚙️", position:"Workflow Manager",           department:"Operations",         status:"coming_soon", specialty:"Process & SOP guidance" },
+  { id:"ceo-advisor",        name:"", avatar:"♟️", position:"CEO Strategic Advisor",      department:"Executive Leadership",status:"coming_soon", specialty:"Business strategy" },
+  { id:"executive-assistant",name:"", avatar:"🗒️", position:"Executive Assistant",        department:"Executive Leadership",status:"coming_soon", specialty:"Admin & scheduling support" },
+  { id:"coo",                name:"", avatar:"📐", position:"Chief Operating Officer",    department:"Executive Leadership",status:"coming_soon", specialty:"Operations strategy" },
+  { id:"product-manager",    name:"", avatar:"🧩", position:"ACC Product Manager",        department:"Product",            status:"coming_soon", specialty:"Feature feedback & roadmap" },
+];
+
+// ── AI Employee Chat Engine ─────────────────────────────────────
+// One chat component, reused by every AI employee. Adding a new employee
+// never requires touching this — it just reads systemPrompt + name + avatar
+// from whichever AI_WORKFORCE entry was opened.
+function AIEmployeeChat({ employee, profile, onClose, bg }) {
+  const storageKey = `acc_chat_${employee.id}`;
+  const [messages, setMessages] = useLocalStorage(storageKey, []);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const scrollRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages, loading]);
+
+  // Pulls the agent's real CRM data so the employee can reference it by name —
+  // this is what makes Jordan feel like a teammate instead of a generic chatbot.
+  const buildContext = () => {
+    const clients     = JSON.parse(localStorage.getItem("acc_clients")     || "[]");
+    const quotes       = JSON.parse(localStorage.getItem("acc_quotes")      || "[]");
+    const commissions = JSON.parse(localStorage.getItem("acc_commissions") || "[]");
+    const licenses     = JSON.parse(localStorage.getItem("acc_licenses")    || "[]");
+    const now = new Date();
+    const expiringLicenses = licenses.filter(l=>{
+      if (!l.expDate) return false;
+      const diff = (new Date(l.expDate)-now)/(1000*60*60*24);
+      return diff>=0 && diff<=90;
+    });
+    const openQuotes = quotes.filter(q=>(q.status||"open")==="open");
+    const prospects = clients.filter(c=>c.status==="Prospect");
+    const renewalDue = clients.filter(c=>c.status==="Renewal Due");
+
+    return `Agent: ${profile.firstName||"Agent"} ${profile.lastName||""} (${profile.agencyName||"Independent Agent"}), licensed in ${profile.states||"unspecified states"}.
+
+Current CRM snapshot:
+- ${clients.length} total clients (${prospects.length} prospects, ${renewalDue.length} renewal due)
+- ${openQuotes.length} open quotes awaiting follow-up
+- ${expiringLicenses.length} license(s) expiring within 90 days${expiringLicenses.length ? ": " + expiringLicenses.map(l=>`${l.state} (${l.expDate})`).join(", ") : ""}
+- Client names on file: ${clients.slice(0,15).map(c=>c.name).join(", ")}${clients.length>15?` and ${clients.length-15} more`:""}
+
+Use this real data naturally when relevant — reference specific clients or numbers instead of speaking generically, but don't recite the whole snapshot back unless asked.`;
+  };
+
+  const sendMessage = async () => {
+    if (!input.trim() || loading) return;
+    const userMsg = { role: "user", content: input.trim() };
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
+    setInput("");
+    setLoading(true);
+
+    try {
+      // Calls our own Vercel serverless function (/api/chat), not Anthropic
+      // directly — this keeps the API key on the server, never in the browser.
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          max_tokens: 1000,
+          system: employee.systemPrompt + "\n\n" + buildContext(),
+          messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setMessages([...newMessages, { role: "assistant", content: `Something went wrong: ${data.error || "unknown error"}. Try again in a moment.` }]);
+        return;
+      }
+      const textBlock = (data.content || []).find(b => b.type === "text");
+      const replyText = textBlock ? textBlock.text : "Sorry, I had trouble responding — try asking again.";
+      setMessages([...newMessages, { role: "assistant", content: replyText }]);
+    } catch (err) {
+      setMessages([...newMessages, { role: "assistant", content: "I'm having trouble connecting right now. Please try again in a moment." }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{position:"fixed", inset:0, background:"rgba(26,39,68,0.5)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:16}} onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{background:T.surface, borderRadius:24, width:"100%", maxWidth:480, height:"min(640px, 88vh)", display:"flex", flexDirection:"column", overflow:"hidden", animation:"fadeUp 0.25s ease"}}>
+
+        {/* Header */}
+        <div style={{background:T.navy, padding:"16px 18px", display:"flex", alignItems:"center", gap:12}}>
+          <div style={{width:42, height:42, borderRadius:12, background:"rgba(255,255,255,0.15)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0}}>{employee.avatar}</div>
+          <div style={{flex:1, minWidth:0}}>
+            <div style={{fontSize:15, fontWeight:700, color:"#fff", fontFamily:"'Playfair Display',serif"}}>{employee.name}</div>
+            <div style={{fontSize:11, color:"rgba(255,255,255,0.6)", fontFamily:"'Lato',sans-serif"}}>{employee.position}</div>
+          </div>
+          <button onClick={onClose} style={{background:"none", border:"none", color:"rgba(255,255,255,0.7)", fontSize:22, cursor:"pointer", padding:4, lineHeight:1}}>×</button>
+        </div>
+
+        {/* Messages */}
+        <div ref={scrollRef} style={{flex:1, overflowY:"auto", padding:16, display:"flex", flexDirection:"column", gap:12, background:T.bg}}>
+          {messages.length === 0 && (
+            <div style={{textAlign:"center", padding:"32px 16px", color:T.muted, fontFamily:"'Lato',sans-serif", fontSize:13}}>
+              <div style={{fontSize:32, marginBottom:10}}>{employee.avatar}</div>
+              <div style={{fontWeight:700, color:T.navy, marginBottom:4, fontSize:14}}>{employee.name} here.</div>
+              <div>{employee.mission}</div>
+            </div>
+          )}
+          {messages.map((m, i) => (
+            <div key={i} style={{display:"flex", justifyContent: m.role==="user" ? "flex-end" : "flex-start"}}>
+              <div style={{
+                maxWidth:"82%", padding:"10px 14px", borderRadius:16,
+                background: m.role==="user" ? T.navy : T.card,
+                color: m.role==="user" ? "#fff" : T.text,
+                fontSize:13.5, fontFamily:"'Lato',sans-serif", lineHeight:1.5, whiteSpace:"pre-wrap",
+                border: m.role==="user" ? "none" : `1px solid ${T.border}`,
+              }}>{m.content}</div>
+            </div>
+          ))}
+          {loading && (
+            <div style={{display:"flex", justifyContent:"flex-start"}}>
+              <div style={{padding:"10px 14px", borderRadius:16, background:T.card, border:`1px solid ${T.border}`, fontSize:13, color:T.muted, fontFamily:"'Lato',sans-serif"}}>
+                {employee.name} is thinking...
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Input */}
+        <div style={{padding:12, borderTop:`1px solid ${T.border}`, display:"flex", gap:8, background:T.surface}}>
+          <input
+            value={input}
+            onChange={e=>setInput(e.target.value)}
+            onKeyDown={e=>{ if (e.key==="Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+            placeholder={`Ask ${employee.name} anything...`}
+            disabled={loading}
+            style={{flex:1, padding:"12px 14px", border:`1px solid ${T.border}`, borderRadius:14, fontSize:14, fontFamily:"'Lato',sans-serif", color:T.text, outline:"none", background:T.bg}}
+          />
+          <button onClick={sendMessage} disabled={loading || !input.trim()} style={{background:T.navy, color:"#fff", border:"none", borderRadius:14, padding:"0 18px", fontFamily:"'Lato',sans-serif", fontWeight:700, fontSize:14, cursor: loading||!input.trim() ? "default" : "pointer", opacity: loading||!input.trim() ? 0.5 : 1}}>→</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── My AI Team — dashboard of all AI employees ──────────────────
+// Cards are generated entirely from AI_WORKFORCE. Adding a new active
+// employee to that array gives them a working card here automatically.
+function AITeam({ profile, bg }) {
+  const [openChat, setOpenChat] = useState(null); // the employee object currently in chat, or null
+
+  const departments = [...new Set(AI_WORKFORCE.map(e => e.department))];
+
+  return (
+    <div>
+      <div style={{marginBottom:20}}>
+        <h2 style={{fontSize:26, fontWeight:700, color:T.navy, fontFamily:"'Playfair Display',serif"}}>My AI Team</h2>
+        <p style={{fontSize:13, color:T.muted, fontFamily:"'Lato',sans-serif", marginTop:2}}>
+          {AI_WORKFORCE.filter(e=>e.status==="active").length} on staff · {AI_WORKFORCE.filter(e=>e.status==="coming_soon").length} coming soon
+        </p>
+      </div>
+
+      {departments.map(dept => (
+        <div key={dept} style={{marginBottom:28}}>
+          <div style={{fontSize:11, color:T.muted, fontFamily:"'Lato',sans-serif", textTransform:"uppercase", letterSpacing:1.5, marginBottom:10, fontWeight:700}}>{dept}</div>
+          <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:14}}>
+            {AI_WORKFORCE.filter(e => e.department === dept).map(emp => (
+              <div key={emp.id} style={{
+                background:T.surface, border:`1px solid ${T.border}`, borderRadius:18, padding:18,
+                opacity: emp.status === "coming_soon" ? 0.55 : 1,
+                position:"relative", transition:"all 0.15s",
+              }}>
+                {emp.status === "coming_soon" && (
+                  <div style={{position:"absolute", top:12, right:12, fontSize:9, fontWeight:700, color:T.muted, background:T.bg, padding:"3px 8px", borderRadius:10, letterSpacing:0.5, textTransform:"uppercase"}}>Coming Soon</div>
+                )}
+                <div style={{display:"flex", alignItems:"center", gap:12, marginBottom:10}}>
+                  <div style={{width:48, height:48, borderRadius:14, background: emp.status==="active" ? T.navy : T.bg, display:"flex", alignItems:"center", justifyContent:"center", fontSize:24, flexShrink:0}}>
+                    {emp.avatar}
+                  </div>
+                  <div style={{minWidth:0}}>
+                    <div style={{fontSize:15, fontWeight:700, color:T.navy, fontFamily:"'Playfair Display',serif", lineHeight:1.2}}>
+                      {emp.status==="active" ? emp.name : emp.position}
+                    </div>
+                    {emp.status==="active" && <div style={{fontSize:11, color:T.muted, fontFamily:"'Lato',sans-serif"}}>{emp.position}</div>}
+                  </div>
+                </div>
+                <div style={{fontSize:12, color:T.sub, fontFamily:"'Lato',sans-serif", lineHeight:1.5, marginBottom:14, minHeight:32}}>{emp.specialty}</div>
+                <div style={{display:"flex", alignItems:"center", justifyContent:"space-between"}}>
+                  <span style={{display:"flex", alignItems:"center", gap:5, fontSize:11, fontFamily:"'Lato',sans-serif", color: emp.status==="active" ? T.green : T.muted, fontWeight:700}}>
+                    <span style={{width:7, height:7, borderRadius:"50%", background: emp.status==="active" ? T.green : T.muted, display:"inline-block"}}/>
+                    {emp.status==="active" ? "Available" : "Not yet available"}
+                  </span>
+                  {emp.status==="active" && (
+                    <button onClick={()=>setOpenChat(emp)} style={{background:T.navy, color:"#fff", border:"none", borderRadius:10, padding:"7px 14px", fontFamily:"'Lato',sans-serif", fontWeight:700, fontSize:12, cursor:"pointer"}}>
+                      Open Chat
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {openChat && <AIEmployeeChat employee={openChat} profile={profile} bg={bg} onClose={()=>setOpenChat(null)}/>}
+    </div>
+  );
+}
+
 const TABS = [
   {id:"dashboard",   label:"Dashboard",  icon:"⚡"},
+  {id:"ai-team",     label:"AI Team",    icon:"🧠"},
   {id:"carriers",    label:"Carriers",   icon:"🏢"},
   {id:"links",       label:"My Links",   icon:"🔗"},
   {id:"quotes",      label:"Quotes",     icon:"📊"},
@@ -2746,7 +2466,7 @@ const DEFAULT_PROFILE = {
   npn:"", website:"", states:"TN, AL, MS", address:"Covington, TN",
   tagline:"Full-service insurance broker across all lines.",
   logoUrl:"", linesOfBusiness:["Health & ACA","Medicare","Life & Annuities","Supplemental","Disability"],
-  bgTheme:"Classic Cream",
+  bgTheme:"Steel Blue",
   // Color overrides
   navColor:"#1a2744",
   heroColor:"#1a2744",
@@ -2799,6 +2519,7 @@ export default function App() {
       {/* Content */}
       <div style={{maxWidth:1100, margin:"0 auto", padding:"24px 20px"}}>
         {tab==="dashboard"   && <Dashboard setTab={setTab} profile={profile} bg={bg}/>}
+        {tab==="ai-team"     && <AITeam profile={profile} bg={bg}/>}
         {tab==="carriers"    && <CarrierHub bg={bg}/>}
         {tab==="links"       && <CarrierLinks bg={bg}/>}
         {tab==="quotes"      && <QuoteBuilder profile={profile} bg={bg} initialClient={quoteClient}/>}
