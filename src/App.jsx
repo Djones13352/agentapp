@@ -62,7 +62,7 @@ const BG_THEMES = [
 
 // ── All insurance lines including P&C ────────────────────────
 const LINE_GROUPS = {
-  "Life & Health": ["Health & ACA","Medicare","Life & Annuities","Preneed / Burial","Supplemental","Dental & Vision","Disability","Long-Term Care","Critical Illness","Hospital Indemnity","Employer Benefits"],
+  "Life & Health": ["Health & ACA","Medicare","Life & Annuities","Final Expense","Preneed / Burial","Supplemental","Dental & Vision","Disability","Long-Term Care","Critical Illness","Hospital Indemnity","Employer Benefits"],
   "Property & Casualty": ["Auto","Homeowners","Renters","Commercial Auto","General Liability","Commercial Property","Workers Comp","Umbrella / Excess","Flood","Cyber Liability","Professional Liability (E&O)","Bonds & Surety"],
   "Specialty": ["Pet Insurance","Travel Insurance","Farm & Ranch","Marine","Title Insurance"],
 };
@@ -141,7 +141,7 @@ const lineColor = l => {
     // Life & Health
     "Health & ACA":"#7B2D8B","Medicare":"#003087","Life & Annuities":"#00558C",
     "Supplemental":"#C8102E","Dental & Vision":"#2E7D32","Disability":"#C8630A",
-    "Long-Term Care":"#5B2C6F","Critical Illness":"#AD1457","Hospital Indemnity":"#6A1B9A","Preneed / Burial":"#4E342E",
+    "Long-Term Care":"#5B2C6F","Critical Illness":"#AD1457","Hospital Indemnity":"#6A1B9A","Final Expense":"#795548","Preneed / Burial":"#4E342E",
     // Property & Casualty
     "Auto":"#1565C0","Homeowners":"#BF360C","Renters":"#E65100",
     "Commercial Auto":"#0D47A1","General Liability":"#1B5E20","Commercial Property":"#33691E",
@@ -542,6 +542,14 @@ const LINE_FIELD_TEMPLATES = {
     {l:"Roll-Up Rate",            p:"e.g. 7% simple / 6% compound"},
   ],
 
+  "Final Expense": [
+    {l:"Face Amount",        p:"e.g. $10,000"},
+    {l:"Plan Tier",          p:"Level / Graded / Guaranteed Issue"},
+    {l:"Beneficiary",        p:"Name & relationship"},
+    {l:"Waiting Period",     p:"e.g. 2 years / None"},
+    {l:"Level Premium",      p:"Yes / No"},
+    {l:"Riders Available",   p:"e.g. Accidental Death"},
+  ],
   "Preneed / Burial": [
     {l:"Plan Type",          p:"Preneed / Final Expense / At-need"},
     {l:"Face Amount",        p:"e.g. $10,000"},
@@ -819,7 +827,7 @@ const HEALTH_LINES = ["Health & ACA","Medicare","Dental & Vision","Disability","
 
 // Lines that get the full underwriting/health-history block — anything
 // medically underwritten, not just lines that happen to involve a doctor visit.
-const UNDERWRITING_LINES = ["Life & Annuities","Preneed / Burial","Disability","Long-Term Care","Critical Illness","Mortgage Protection"];
+const UNDERWRITING_LINES = ["Life & Annuities","Final Expense","Preneed / Burial","Disability","Long-Term Care","Critical Illness","Mortgage Protection"];
 
 const INTAKE_QUESTIONS = {
   "Health & ACA": [
@@ -852,6 +860,12 @@ const INTAKE_QUESTIONS = {
     { key:"beneficiaryContingent", label:"Contingent Beneficiary", type:"text", placeholder:"Name & relationship" },
     { key:"existingCoverage",   label:"Existing Life Coverage", type:"text", placeholder:"Carrier & amount, if any" },
     { key:"replacingCoverage",  label:"Replacing Existing Coverage?", type:"select", options:["No","Yes"] },
+  ],
+  "Final Expense": [
+    { key:"desiredFaceAmount",     label:"Desired Coverage Amount", type:"text", placeholder:"e.g. $10,000" },
+    { key:"beneficiaryPrimary",    label:"Primary Beneficiary", type:"text", placeholder:"Name & relationship" },
+    { key:"existingFinalExpense",  label:"Existing Final Expense Coverage?", type:"select", options:["No","Yes"] },
+    { key:"planTierPreference",    label:"Plan Tier Preference", type:"select", options:["Not Sure — Recommend","Level (best health)","Graded","Guaranteed Issue"] },
   ],
   "Preneed / Burial": [
     { key:"funeralHomePreference", label:"Preferred Funeral Home", type:"text", placeholder:"" },
@@ -1384,7 +1398,7 @@ function QuoteBuilder({ initialClient }) {
         <div>
           <h2 style={{fontSize:26,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>Quote Comparison</h2>
           <div style={{display:"flex",alignItems:"center",gap:8,marginTop:6,flexWrap:"wrap"}}>
-            <span style={{fontSize:12,color:T.muted,fontFamily:"'Lato',sans-serif"}}>Client:</span>
+            <span style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>Client:</span>
             <input value={clientName} onChange={e=>setClientName(e.target.value)}
               style={{fontSize:14,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",border:"none",borderBottom:`2px solid ${T.gold}`,background:"transparent",outline:"none",padding:"2px 4px"}}/>
             {linkedClient ? (
@@ -1426,7 +1440,7 @@ function QuoteBuilder({ initialClient }) {
         ].map(({label,value})=>(
           <div key={label}>
             <div style={{fontSize:10,color:"rgba(255,255,255,0.5)",fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1}}>{label}</div>
-            <div style={{fontSize:16,fontWeight:700,color:T.goldLight,fontFamily:"'Courier Prime',monospace",marginTop:2}}>{value}</div>
+            <div style={{fontSize:16,fontWeight:700,color:"#fff",fontFamily:"'Courier Prime',monospace",marginTop:2}}>{value}</div>
           </div>
         ))}
       </div>
@@ -1437,7 +1451,7 @@ function QuoteBuilder({ initialClient }) {
           const isLowest = (Number(q.premium)||0)===lowest;
           return (
             <div key={q.id} style={{background:T.surface,border:`2px solid ${isLowest?T.gold:T.border}`,borderRadius:18,overflow:"hidden",animation:"fadeUp 0.3s ease"}}>
-              {isLowest && <div style={{background:T.gold,color:T.navy,fontSize:10,fontWeight:700,fontFamily:"'Lato',sans-serif",textAlign:"center",padding:"4px",letterSpacing:1}}>⭐ LOWEST PREMIUM</div>}
+              {isLowest && <div style={{background:T.gold,color:"#fff",fontSize:10,fontWeight:700,fontFamily:"'Lato',sans-serif",textAlign:"center",padding:"4px",letterSpacing:1}}>⭐ LOWEST PREMIUM</div>}
               <div style={{height:5,background:q.color||lineColor(q.line)}}/>
               <div style={{padding:16}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:2}}>
@@ -1447,13 +1461,13 @@ function QuoteBuilder({ initialClient }) {
                       <div style={{fontSize:10,color:T.red,fontFamily:"'Lato',sans-serif",fontWeight:700,marginTop:2}}>Deleted Carrier — historical quote preserved</div>
                     )}
                   </div>
-                  <button onClick={()=>startEdit(q)} style={{background:T.bg,border:`1px solid ${T.border}`,borderRadius:8,padding:"3px 9px",fontSize:11,color:T.muted,cursor:"pointer",fontFamily:"'Lato',sans-serif"}}>Edit</button>
+                  <button onClick={()=>startEdit(q)} style={{background:T.bg,border:`1px solid ${T.border}`,borderRadius:8,padding:"3px 9px",fontSize:11,color:T.sub,cursor:"pointer",fontFamily:"'Lato',sans-serif"}}>Edit</button>
                 </div>
                 {/* Status selector */}
                 <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:8}}>
                   {QUOTE_STATUSES.map(s=>(
                     <button key={s.id} onClick={()=>setQuotes(quotes.map(x=>x.id===q.id?{...x,status:s.id}:x))}
-                      style={{padding:"3px 9px",borderRadius:20,border:`1px solid ${(q.status||"open")===s.id?s.color:T.border}`,background:(q.status||"open")===s.id?s.color+"18":T.surface,color:(q.status||"open")===s.id?s.color:T.muted,cursor:"pointer",fontSize:10,fontFamily:"'Lato',sans-serif",fontWeight:600,transition:"all 0.15s"}}>
+                      style={{padding:"3px 9px",borderRadius:20,border:`1px solid ${(q.status||"open")===s.id?s.color:T.border}`,background:(q.status||"open")===s.id?s.color+"18":T.surface,color:(q.status||"open")===s.id?s.color:T.sub,cursor:"pointer",fontSize:10,fontFamily:"'Lato',sans-serif",fontWeight:600,transition:"all 0.15s"}}>
                       {s.icon} {s.label}
                     </button>
                   ))}
@@ -1463,7 +1477,7 @@ function QuoteBuilder({ initialClient }) {
 
                 {/* Premium */}
                 <div style={{background:T.bg,borderRadius:12,padding:"10px 14px",marginBottom:12,textAlign:"center"}}>
-                  <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1}}>Monthly Premium</div>
+                  <div style={{fontSize:10,color:T.sub,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1}}>Monthly Premium</div>
                   <div style={{fontSize:30,fontWeight:700,color:isLowest?T.green:T.navy,fontFamily:"'Courier Prime',monospace",marginTop:2}}>
                     {Number(q.premium)===0?"$0":` $${q.premium}`}
                   </div>
@@ -1473,7 +1487,7 @@ function QuoteBuilder({ initialClient }) {
                 {/* Custom fields */}
                 {(q.customFields||[]).map((f,i)=>(
                   <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:`1px solid ${T.border}`}}>
-                    <span style={{fontSize:12,color:T.muted,fontFamily:"'Lato',sans-serif"}}>{f.l}</span>
+                    <span style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>{f.l}</span>
                     <span style={{fontSize:12,fontWeight:700,color:T.navy,fontFamily:"'Courier Prime',monospace",textAlign:"right",maxWidth:"55%"}}>{f.v||"—"}</span>
                   </div>
                 ))}
@@ -1492,7 +1506,7 @@ function QuoteBuilder({ initialClient }) {
                   </div>
                 )}
 
-                <button onClick={()=>setQuotes(quotes.filter(x=>x.id!==q.id))} style={{marginTop:12,width:"100%",padding:"7px",background:"transparent",border:`1px solid ${T.border}`,borderRadius:8,color:T.muted,fontSize:11,fontFamily:"'Lato',sans-serif",cursor:"pointer"}}>Remove</button>
+                <button onClick={()=>setQuotes(quotes.filter(x=>x.id!==q.id))} style={{marginTop:12,width:"100%",padding:"7px",background:"transparent",border:`1px solid ${T.border}`,borderRadius:8,color:T.sub,fontSize:11,fontFamily:"'Lato',sans-serif",cursor:"pointer"}}>Remove</button>
               </div>
             </div>
           );
@@ -1533,7 +1547,7 @@ function QuoteBuilder({ initialClient }) {
               {label:"Monthly Premium ($)",key:"premium",ph:"0 for $0 premium plans"},
             ].map(({label,key,ph})=>(
               <div key={key} style={{marginBottom:12}}>
-                <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{label}</div>
+                <div style={{fontSize:10,color:T.sub,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{label}</div>
                 <input placeholder={ph} value={newQ[key]} onChange={e=>setNewQ({...newQ,[key]:e.target.value})}
                   style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
               </div>
@@ -1541,7 +1555,7 @@ function QuoteBuilder({ initialClient }) {
 
             {/* Line selector */}
             <div style={{marginBottom:16}}>
-              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Line of Business</div>
+              <div style={{fontSize:10,color:T.sub,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Line of Business</div>
               <select value={newQ.line} onChange={e=>setNewQ({...newQ,line:e.target.value,customFields:[]})}
                 style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,background:T.bg,outline:"none"}}>
                 {LINES.map(l=><option key={l}>{l}</option>)}
@@ -1568,14 +1582,14 @@ function QuoteBuilder({ initialClient }) {
             {/* Custom fields */}
             {newQ.customFields.length>0 && (
               <div style={{marginBottom:16}}>
-                <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Plan Details</div>
+                <div style={{fontSize:10,color:T.sub,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Plan Details</div>
                 {newQ.customFields.map((f,i)=>(
                   <div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}>
                     <input value={f.l} onChange={e=>updateCustomField(i,"l",e.target.value)}
-                      style={{flex:"0 0 42%",padding:"8px 10px",border:`1px solid ${T.border}`,borderRadius:8,fontSize:12,fontFamily:"'Lato',sans-serif",color:T.muted,background:T.bg,outline:"none"}}/>
+                      style={{flex:"0 0 42%",padding:"8px 10px",border:`1px solid ${T.border}`,borderRadius:8,fontSize:12,fontFamily:"'Lato',sans-serif",color:T.text,background:T.bg,outline:"none"}}/>
                     <input value={f.v} onChange={e=>updateCustomField(i,"v",e.target.value)} placeholder="value"
                       style={{flex:1,padding:"8px 10px",border:`1px solid ${T.border}`,borderRadius:8,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,background:T.bg,outline:"none",fontWeight:600}}/>
-                    <button onClick={()=>removeCustomField(i)} style={{background:"none",border:"none",color:T.muted,cursor:"pointer",fontSize:16,padding:"0 4px"}}>✕</button>
+                    <button onClick={()=>removeCustomField(i)} style={{background:"none",border:"none",color:T.sub,cursor:"pointer",fontSize:16,padding:"0 4px"}}>✕</button>
                   </div>
                 ))}
               </div>
@@ -1590,19 +1604,19 @@ function QuoteBuilder({ initialClient }) {
 
             {/* Best For */}
             <div style={{marginBottom:12}}>
-              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Best For (client-facing)</div>
+              <div style={{fontSize:10,color:T.sub,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Best For (client-facing)</div>
               <input placeholder="e.g. Clients who want $0 premium + OTC benefits" value={newQ.bestFor||""} onChange={e=>setNewQ({...newQ,bestFor:e.target.value})}
                 style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,background:T.bg,outline:"none"}}/>
             </div>
             {/* Agent Recommendation */}
             <div style={{marginBottom:12}}>
-              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Why I Recommend This</div>
+              <div style={{fontSize:10,color:T.sub,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Why I Recommend This</div>
               <input placeholder="e.g. Strongest guaranteed death benefit for this age/budget" value={newQ.recommendation||""} onChange={e=>setNewQ({...newQ,recommendation:e.target.value})}
                 style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,background:T.bg,outline:"none"}}/>
             </div>
             {/* Notes */}
             <div style={{marginBottom:18}}>
-              <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Notes</div>
+              <div style={{fontSize:10,color:T.sub,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Notes</div>
               <textarea placeholder="Highlights, network details, agent tips..." value={newQ.notes} onChange={e=>setNewQ({...newQ,notes:e.target.value})}
                 style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,background:T.bg,outline:"none",height:70,resize:"none"}}/>
             </div>
@@ -1659,7 +1673,7 @@ function ClientQuotesSection({ client }) {
 
   return (
     <div style={{marginTop:16}}>
-      <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>
+      <div style={{fontSize:11,color:T.sub,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>
         Quotes on File ({clientQuotes.length})
       </div>
       <div style={{display:"flex",flexDirection:"column",gap:8}}>
@@ -1670,13 +1684,13 @@ function ClientQuotesSection({ client }) {
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
                 <div>
                   <div style={{fontSize:13,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif"}}>{q.carrier} — {q.plan}</div>
-                  <div style={{fontSize:11,color:T.muted,fontFamily:"'Lato',sans-serif"}}>{q.line} · ${q.premium}/mo</div>
+                  <div style={{fontSize:11,color:T.sub,fontFamily:"'Lato',sans-serif"}}>{q.line} · ${q.premium}/mo</div>
                 </div>
               </div>
               <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                 {QUOTE_STATUSES.map(s=>(
                   <button key={s.id} onClick={()=>changeStatus(q,s.id)}
-                    style={{padding:"3px 9px",borderRadius:20,border:`1px solid ${(q.status||"open")===s.id?s.color:T.border}`,background:(q.status||"open")===s.id?s.color+"18":T.surface,color:(q.status||"open")===s.id?s.color:T.muted,cursor:"pointer",fontSize:10,fontFamily:"'Lato',sans-serif",fontWeight:600,transition:"all 0.15s"}}>
+                    style={{padding:"3px 9px",borderRadius:20,border:`1px solid ${(q.status||"open")===s.id?s.color:T.border}`,background:(q.status||"open")===s.id?s.color+"18":T.surface,color:(q.status||"open")===s.id?s.color:T.sub,cursor:"pointer",fontSize:10,fontFamily:"'Lato',sans-serif",fontWeight:600,transition:"all 0.15s"}}>
                     {s.icon} {s.label}
                   </button>
                 ))}
