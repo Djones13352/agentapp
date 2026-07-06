@@ -1719,8 +1719,206 @@ function ClientQuotesSection({ client }) {
   );
 }
 
+// ── Scope of Appointment Form ────────────────────────────────────
+// Standard CMS Scope of Appointment fields. Auto-populates from the client's
+// Medicare intake data and the agent's Profile. Agent fills in anything
+// remaining, then prints/exports as PDF for signature and filing.
+//
+// COMPLIANCE NOTE: This form is a convenience tool that pre-fills known data.
+// It does not constitute a legally valid electronic signature — the licensed
+// agent is responsible for obtaining proper signatures per CMS requirements
+// and their carrier's SOA process.
+const SOA_PRODUCTS = [
+  "Medicare Advantage Plans (Part C)",
+  "Medicare Advantage Prescription Drug Plans (MAPD)",
+  "Prescription Drug Plans (Part D)",
+  "Medicare Supplement (Medigap) Plans",
+  "Medicare Savings Programs / Extra Help",
+  "Dental, Vision, and Hearing Plans",
+  "Hospital Indemnity Plans",
+  "Other Medicare-related Products",
+];
+
+function ScopeOfAppointment({ client, profile, onClose }) {
+  const intake = client?.intake?.answers || {};
+  const today = new Date().toLocaleDateString("en-US");
+  const [form, setForm] = useState({
+    beneficiaryName: client?.name || "",
+    beneficiaryDOB: intake.dateOfBirth || "",
+    beneficiaryPhone: client?.phone || "",
+    beneficiaryAddress: intake.address || "",
+    medicareNumber: intake.medicareNumber || "",
+    appointmentDate: today,
+    appointmentTime: "",
+    contactMethod: "In Person",
+    agentName: `${profile?.firstName||""} ${profile?.lastName||""}`.trim(),
+    agentPhone: profile?.phone || "",
+    agentNPN: profile?.npn || "",
+    agentLicense: profile?.licenseNum || "",
+    agencyName: profile?.agencyName || "",
+    products: [],
+    notes: "",
+  });
+
+  const set = (key, val) => setForm(f=>({...f,[key]:val}));
+  const toggleProduct = (p) => setForm(f=>({...f, products: f.products.includes(p)?f.products.filter(x=>x!==p):[...f.products,p]}));
+
+  const printSOA = () => {
+    const w = window.open("","_blank");
+    if (!w) { alert("Please allow popups to print/save the SOA."); return; }
+    w.document.write(`<!DOCTYPE html><html><head>
+      <title>Scope of Appointment — ${form.beneficiaryName}</title>
+      <style>
+        body{font-family:Arial,sans-serif;font-size:12px;margin:40px;color:#000;}
+        h1{font-size:16px;text-align:center;margin-bottom:4px;}
+        h2{font-size:13px;border-bottom:1px solid #000;padding-bottom:4px;margin-top:20px;}
+        .subtitle{text-align:center;font-size:11px;margin-bottom:20px;color:#444;}
+        .row{display:flex;gap:20px;margin-bottom:10px;}
+        .field{flex:1;}
+        .field label{font-weight:bold;font-size:10px;display:block;margin-bottom:2px;color:#555;text-transform:uppercase;}
+        .val{border-bottom:1px solid #000;min-height:18px;padding:2px 0;font-size:12px;}
+        .product{margin:5px 0;font-size:11px;}
+        .box{display:inline-block;width:12px;height:12px;border:1px solid #000;margin-right:6px;vertical-align:middle;}
+        .checked{background:#000;}
+        .sig-row{display:flex;gap:40px;margin-top:30px;}
+        .sig{flex:1;border-top:1px solid #000;padding-top:4px;font-size:10px;color:#555;}
+        .note{font-size:9px;color:#666;margin-top:20px;border-top:1px solid #ccc;padding-top:8px;line-height:1.5;}
+      </style></head><body>
+      <h1>SCOPE OF APPOINTMENT</h1>
+      <div class="subtitle">Medicare Sales Appointment Confirmation<br>This form must be completed before discussing Medicare products</div>
+      <h2>Beneficiary Information</h2>
+      <div class="row">
+        <div class="field"><label>Full Name</label><div class="val">${form.beneficiaryName}</div></div>
+        <div class="field"><label>Date of Birth</label><div class="val">${form.beneficiaryDOB}</div></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Phone Number</label><div class="val">${form.beneficiaryPhone}</div></div>
+        <div class="field"><label>Medicare Number (MBI)</label><div class="val">${form.medicareNumber}</div></div>
+      </div>
+      <div class="row"><div class="field"><label>Address</label><div class="val">${form.beneficiaryAddress}</div></div></div>
+      <h2>Appointment Information</h2>
+      <div class="row">
+        <div class="field"><label>Date</label><div class="val">${form.appointmentDate}</div></div>
+        <div class="field"><label>Time</label><div class="val">${form.appointmentTime}</div></div>
+        <div class="field"><label>Method of Contact</label><div class="val">${form.contactMethod}</div></div>
+      </div>
+      <h2>Agent / Broker Information</h2>
+      <div class="row">
+        <div class="field"><label>Agent Name</label><div class="val">${form.agentName}</div></div>
+        <div class="field"><label>Agency Name</label><div class="val">${form.agencyName}</div></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Phone</label><div class="val">${form.agentPhone}</div></div>
+        <div class="field"><label>NPN</label><div class="val">${form.agentNPN}</div></div>
+        <div class="field"><label>License #</label><div class="val">${form.agentLicense}</div></div>
+      </div>
+      <h2>Products to Be Discussed</h2>
+      <p style="font-size:11px;margin:4px 0 8px;">The beneficiary requests information on the following (check all that apply):</p>
+      ${SOA_PRODUCTS.map(p=>`<div class="product"><span class="box${form.products.includes(p)?" checked":""}"></span>${p}</div>`).join("")}
+      ${form.notes?`<h2>Notes</h2><p style="font-size:11px;">${form.notes}</p>`:""}
+      <h2>Acknowledgment &amp; Signatures</h2>
+      <p style="font-size:10px;margin-bottom:16px;">By signing below, the beneficiary confirms they requested this appointment and agrees the above products may be discussed. The agent confirms they will only discuss the selected products.</p>
+      <div class="sig-row">
+        <div class="sig">Beneficiary Signature &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date</div>
+        <div class="sig">Agent Signature &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date</div>
+      </div>
+      <div class="note"><strong>Important:</strong> This Scope of Appointment is required by CMS before any Medicare sales appointment. Both parties must sign and date. Retain copies for 10 years per CMS guidelines. Call 1-800-MEDICARE (1-800-633-4227) with questions.</div>
+      <script>window.onload=()=>window.print();</script>
+    </body></html>`);
+    w.document.close();
+  };
+
+  const Field = ({label, fkey, span, type, placeholder}) => (
+    <div style={span?{gridColumn:"span 2"}:{}}>
+      <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:0.5,marginBottom:3}}>{label}</div>
+      {type==="select" ? null :
+        <input type={type||"text"} value={form[fkey]} onChange={e=>set(fkey,e.target.value)} placeholder={placeholder||""}
+          style={{width:"100%",padding:"8px 10px",border:`1px solid ${T.border}`,borderRadius:8,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>}
+    </div>
+  );
+
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(26,39,68,0.6)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:24,width:"100%",maxWidth:600,maxHeight:"90vh",overflowY:"auto",padding:26}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:18}}>
+          <div>
+            <div style={{fontSize:11,color:"#003087",fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,fontWeight:700,marginBottom:4}}>Medicare · CMS Required</div>
+            <h2 style={{fontSize:22,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",margin:0}}>Scope of Appointment</h2>
+            <div style={{fontSize:12,color:T.muted,fontFamily:"'Lato',sans-serif",marginTop:4}}>Pre-filled from {client.name}'s profile — review and complete before printing.</div>
+          </div>
+          <button onClick={onClose} style={{background:T.bg,border:`1px solid ${T.border}`,borderRadius:10,width:32,height:32,cursor:"pointer",color:T.muted,fontSize:16,flexShrink:0}}>×</button>
+        </div>
+
+        {[
+          {section:"Beneficiary Information", fields:[
+            {label:"Full Name",key:"beneficiaryName"},{label:"Date of Birth",key:"beneficiaryDOB",placeholder:"MM/DD/YYYY"},
+            {label:"Phone Number",key:"beneficiaryPhone"},{label:"Medicare Number (MBI)",key:"medicareNumber"},
+            {label:"Address",key:"beneficiaryAddress",span:true},
+          ]},
+          {section:"Appointment Information", fields:null},
+          {section:"Agent / Broker Information", fields:[
+            {label:"Agent Name",key:"agentName"},{label:"Agency Name",key:"agencyName"},
+            {label:"Agent Phone",key:"agentPhone"},{label:"NPN",key:"agentNPN"},{label:"License Number",key:"agentLicense"},
+          ]},
+        ].map(({section,fields})=>(
+          <div key={section}>
+            <div style={{fontSize:11,color:T.navy,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,fontWeight:700,marginBottom:10,borderBottom:`1px solid ${T.border}`,paddingBottom:6}}>{section}</div>
+            {section==="Appointment Information" ? (
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:14}}>
+                <div><div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:0.5,marginBottom:3}}>Date</div>
+                  <input value={form.appointmentDate} onChange={e=>set("appointmentDate",e.target.value)} style={{width:"100%",padding:"8px 10px",border:`1px solid ${T.border}`,borderRadius:8,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/></div>
+                <div><div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:0.5,marginBottom:3}}>Time</div>
+                  <input type="time" value={form.appointmentTime} onChange={e=>set("appointmentTime",e.target.value)} style={{width:"100%",padding:"8px 10px",border:`1px solid ${T.border}`,borderRadius:8,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/></div>
+                <div><div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:0.5,marginBottom:3}}>Method of Contact</div>
+                  <select value={form.contactMethod} onChange={e=>set("contactMethod",e.target.value)} style={{width:"100%",padding:"8px 10px",border:`1px solid ${T.border}`,borderRadius:8,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}>
+                    {["In Person","Phone","Video Call","Email","Other"].map(o=><option key={o}>{o}</option>)}</select></div>
+              </div>
+            ) : (
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+                {fields.map(f=>(
+                  <div key={f.key} style={f.span?{gridColumn:"span 2"}:{}}>
+                    <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:0.5,marginBottom:3}}>{f.label}</div>
+                    <input value={form[f.key]} onChange={e=>set(f.key,e.target.value)} placeholder={f.placeholder||""}
+                      style={{width:"100%",padding:"8px 10px",border:`1px solid ${T.border}`,borderRadius:8,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+
+        <div style={{fontSize:11,color:T.navy,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,fontWeight:700,marginBottom:6,borderBottom:`1px solid ${T.border}`,paddingBottom:6}}>Products to Be Discussed</div>
+        <div style={{fontSize:11.5,color:T.muted,fontFamily:"'Lato',sans-serif",marginBottom:10}}>Check all products you will discuss at this appointment:</div>
+        <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:16}}>
+          {SOA_PRODUCTS.map(p=>(
+            <label key={p} style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer",fontSize:13,color:T.sub,fontFamily:"'Lato',sans-serif"}}>
+              <input type="checkbox" checked={form.products.includes(p)} onChange={()=>toggleProduct(p)} style={{width:16,height:16,cursor:"pointer",accentColor:T.navy}}/>
+              {p}
+            </label>
+          ))}
+        </div>
+
+        <div style={{marginBottom:14}}>
+          <div style={{fontSize:10,color:T.muted,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:0.5,marginBottom:3}}>Notes (optional)</div>
+          <textarea value={form.notes} onChange={e=>set("notes",e.target.value)} rows={2}
+            style={{width:"100%",padding:"8px 10px",border:`1px solid ${T.border}`,borderRadius:8,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg,resize:"vertical"}}/>
+        </div>
+
+        <div style={{fontSize:10.5,color:T.sub,fontFamily:"'Lato',sans-serif",background:T.bg,borderRadius:10,padding:"10px 14px",marginBottom:18,lineHeight:1.6,borderLeft:"3px solid #003087"}}>
+          <strong>Compliance reminder:</strong> Both parties must sign and date the printed SOA. Retain copies for 10 years per CMS requirements. This tool pre-fills known data — the licensed agent is responsible for accuracy and compliance.
+        </div>
+
+        <div style={{display:"flex",gap:10}}>
+          <button onClick={onClose} style={{flex:1,padding:"12px",background:T.bg,color:T.sub,border:`1px solid ${T.border}`,borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>Cancel</button>
+          <button onClick={printSOA} style={{flex:2,padding:"12px",background:"#003087",color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:14,cursor:"pointer"}}>Print / Save as PDF</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Client Profiles ───────────────────────────────────────────
-function ClientProfiles({ initialClient, onQuoteClient, onDiscoverClient, setTab }) {
+function ClientProfiles({ initialClient, onQuoteClient, onDiscoverClient, setTab, profile }) {
   const [clients, setClients] = useLocalStorage('acc_clients', SAMPLE_CLIENTS);
   const [selected, setSelected] = useState(initialClient||null);
   const [showAdd, setShowAdd] = useState(false);
@@ -1730,6 +1928,7 @@ function ClientProfiles({ initialClient, onQuoteClient, onDiscoverClient, setTab
   const [showArchived, setShowArchived] = useState(false);
   const [confirmArchive, setConfirmArchive] = useState(null); // client pending archive confirmation
   const [intakeClient, setIntakeClient] = useState(null); // client currently in the Smart Intake flow, or null
+  const [soaClient, setSoaClient] = useState(null); // client currently in the SOA form, or null
 
   const filtered = clients.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()) && !!c.archived===showArchived);
 
@@ -1873,9 +2072,15 @@ function ClientProfiles({ initialClient, onQuoteClient, onDiscoverClient, setTab
                 policy anniversary to the Calendar. */}
             <ClientQuotesSection client={selected}/>
 
-            {/* Discovery with Quinn — conversational alternative/companion to
-                the structured Smart Intake form below. Opens Quinn's chat
-                pre-loaded with this client's real data. */}
+            {/* SOA Form — Medicare clients only */}
+            {(selected.line === "Medicare" || selected.intake?.lines?.includes("Medicare")) && (
+              <button onClick={()=>setSoaClient(selected)}
+                style={{width:"100%",marginTop:14,padding:"13px",background:"#003087",color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+                📋 Scope of Appointment for {selected.name}
+              </button>
+            )}
+
+            {/* Discovery with Quinn */}
             <button onClick={()=>{onDiscoverClient && onDiscoverClient(selected); setSelected(null);}}
               style={{width:"100%",marginTop:14,padding:"13px",background:"transparent",color:"#0284C7",border:"2px solid #0284C7",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
               Start Discovery with Quinn for {selected.name} →
@@ -1988,6 +2193,15 @@ function ClientProfiles({ initialClient, onQuoteClient, onDiscoverClient, setTab
           }}
         />
       )}
+
+      {/* SOA Form */}
+      {soaClient && (
+        <ScopeOfAppointment
+          client={soaClient}
+          profile={profile}
+          onClose={()=>setSoaClient(null)}
+        />
+      )}
     </div>
   );
 }
@@ -2047,10 +2261,10 @@ function CarrierLinks() {
 
       {/* Filter by type */}
       <div style={{display:"flex",gap:8,marginBottom:18,flexWrap:"wrap"}}>
-        {["All",...LINK_TYPES.map(l=>l.label)].map(t=>(
-          <button key={t} onClick={()=>setFilterType(t)}
-            style={{padding:"6px 14px",borderRadius:20,border:`1px solid ${filterType===t?T.navy:T.border}`,background:filterType===t?T.navy:T.surface,color:filterType===t?"#fff":T.sub,cursor:"pointer",fontSize:12,fontFamily:"'Lato',sans-serif",fontWeight:600,whiteSpace:"nowrap",transition:"all 0.15s"}}>
-            {t}
+        {[{id:"All",label:"All"},...LINK_TYPES].map(t=>(
+          <button key={t.id} onClick={()=>setFilterType(t.id)}
+            style={{padding:"6px 14px",borderRadius:20,border:`1px solid ${filterType===t.id?T.navy:T.border}`,background:filterType===t.id?T.navy:T.surface,color:filterType===t.id?"#fff":T.sub,cursor:"pointer",fontSize:12,fontFamily:"'Lato',sans-serif",fontWeight:600,whiteSpace:"nowrap",transition:"all 0.15s"}}>
+            {t.label}
           </button>
         ))}
       </div>
@@ -4214,7 +4428,7 @@ export default function App() {
         {tab==="carriers"    && <CarrierHub bg={bg}/>}
         {tab==="links"       && <CarrierLinks bg={bg}/>}
         {tab==="quotes"      && <QuoteBuilder profile={profile} bg={bg} initialClient={quoteClient}/>}
-        {tab==="clients"     && <ClientProfiles bg={bg} onQuoteClient={handleQuoteClient} onDiscoverClient={handleDiscoveryClient} setTab={setTab}/>}
+        {tab==="clients"     && <ClientProfiles bg={bg} profile={profile} onQuoteClient={handleQuoteClient} onDiscoverClient={handleDiscoveryClient} setTab={setTab}/>}
         {tab==="calendar"    && <CalendarView setTab={setTab}/>}
         {tab==="commissions" && <CommissionLog bg={bg} profile={profile}/>}
         {tab==="licenses"    && <LicenseTracker bg={bg}/>}
