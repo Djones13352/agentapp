@@ -2118,26 +2118,21 @@ function ClientProfiles({ initialClient, onQuoteClient, onDiscoverClient, setTab
               Start Discovery with Quinn for {selected.name} →
             </button>
 
-            {/* Quote this client — Smart Intake runs first, then continues to the quote */}
+            {/* Quote this client */}
             {selected.intake?.savedDate && (
-              <>
-                <div style={{fontSize:11, color:T.green, fontFamily:"'Lato',sans-serif", marginTop:14, display:"flex", alignItems:"center", gap:6}}>
-                  <span style={{width:6,height:6,borderRadius:"50%",background:T.green,display:"inline-block"}}/>
-                  Intake on file ({selected.intake.lines.join(", ")}) — saved {selected.intake.savedDate}
-                </div>
-                {/* Compute readiness to decide whether to offer Skip to Quote */}
-                {(() => {
-                  const readiness = getReadinessScore(selected);
-                  return readiness.percent >= 80 ? (
-                    <button onClick={()=>{ setSelected(null); onQuoteClient && onQuoteClient(selected); }}
-                      style={{width:"100%",marginTop:8,padding:"13px",background:T.green,color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-                      {readiness.percent===100 ? `✓ Skip to Quote — ${selected.name} is Ready` : `Skip to Quote (${readiness.percent}% complete)`}
-                    </button>
-                  ) : null;
-                })()}
-              </>
+              <div style={{fontSize:11, color:T.green, fontFamily:"'Lato',sans-serif", marginTop:14, display:"flex", alignItems:"center", gap:6}}>
+                <span style={{width:6,height:6,borderRadius:"50%",background:T.green,display:"inline-block"}}/>
+                Intake on file ({selected.intake.lines.join(", ")}) — saved {selected.intake.savedDate}
+              </div>
             )}
-            <button onClick={()=>setIntakeClient(selected)} 
+
+            {/* Skip to Quote — always available, no intake required */}
+            <button onClick={()=>{ setSelected(null); onQuoteClient && onQuoteClient(selected); }}
+              style={{width:"100%",marginTop:8,padding:"13px",background:T.green,color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+              ✓ Skip to Quote for {selected.name}
+            </button>
+
+            <button onClick={()=>setIntakeClient(selected)}
               style={{width:"100%",marginTop:8,padding:"13px",background:T.navy,color:"#fff",border:"none",borderRadius:12,fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
               {selected.intake?.savedDate ? "Review Intake & Build Quote" : "Smart Intake & Build Quote"} for {selected.name} →
             </button>
