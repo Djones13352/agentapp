@@ -1404,11 +1404,11 @@ function QuoteBuilder({ initialClient }) {
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20,flexWrap:"wrap",gap:12}}>
         <div>
-          <h2 style={{fontSize:26,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>Quote Comparison</h2>
+          <h2 style={{fontSize:26,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif"}}>Quote Comparison</h2>
           <div style={{display:"flex",alignItems:"center",gap:8,marginTop:6,flexWrap:"wrap"}}>
             <span style={{fontSize:12,color:T.sub,fontFamily:"'Lato',sans-serif"}}>Client:</span>
             <input value={clientName} onChange={e=>setClientName(e.target.value)}
-              style={{fontSize:14,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",border:"none",borderBottom:`2px solid ${T.gold}`,background:"transparent",outline:"none",padding:"2px 4px"}}/>
+              style={{fontSize:14,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif",border:"none",borderBottom:`2px solid ${T.gold}`,background:"transparent",outline:"none",padding:"2px 4px"}}/>
             {linkedClient ? (
               <span style={{display:"flex",alignItems:"center",gap:5,fontSize:10.5,color:T.green,fontFamily:"'Lato',sans-serif",fontWeight:700,background:`${T.green}14`,padding:"3px 9px",borderRadius:20}}>
                 <span style={{width:6,height:6,borderRadius:"50%",background:T.green,display:"inline-block"}}/>
@@ -1464,7 +1464,7 @@ function QuoteBuilder({ initialClient }) {
               <div style={{padding:16}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:2}}>
                   <div>
-                    <div style={{fontSize:17,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif"}}>{q.carrier}</div>
+                    <div style={{fontSize:17,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif"}}>{q.carrier}</div>
                     {deletedCarrierNames.has(q.carrier) && (
                       <div style={{fontSize:10,color:T.red,fontFamily:"'Lato',sans-serif",fontWeight:700,marginTop:2}}>Deleted Carrier — historical quote preserved</div>
                     )}
@@ -1560,7 +1560,7 @@ function QuoteBuilder({ initialClient }) {
       {showAdd && (
         <div style={{position:"fixed",inset:0,background:"rgba(26,39,68,0.6)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShowAdd(false)}>
           <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:24,padding:24,width:"100%",maxWidth:500,maxHeight:"90vh",overflowY:"auto",animation:"fadeUp 0.3s ease"}}>
-            <h3 style={{fontSize:20,fontWeight:700,color:T.navy,fontFamily:"'Playfair Display',serif",marginBottom:16}}>{editing?"Edit Quote":"Add Quote"}</h3>
+            <h3 style={{fontSize:20,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif",marginBottom:16}}>{editing?"Edit Quote":"Add Quote"}</h3>
 
             {/* Core fields */}
             {[
@@ -3934,7 +3934,9 @@ function AIEmployeeChat({ employee, profile, onClose, bg, contextClient }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [showMemoryPanel, setShowMemoryPanel] = useState(false);
-  const [pendingMemory, setPendingMemory] = useState(null); // a detected goal/fact awaiting agent confirmation
+  const [pendingMemory, setPendingMemory] = useState(null);
+  const [pendingFile, setPendingFile] = useState(null); // { name, type, mediaType, data, preview }
+  const fileInputRef = React.useRef(null);
   const scrollRef = React.useRef(null);
 
   // Memory is currently scoped to Jordan (Agent Success Coach) only — the one
@@ -4019,11 +4021,65 @@ Client notes on file: ${contextClient.notes || "none"}.`;
     return null;
   };
 
+  const handleFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Supported: images (jpg/png/gif/webp) and PDFs
+    const isImage = file.type.startsWith("image/");
+    const isPDF = file.type === "application/pdf";
+    if (!isImage && !isPDF) {
+      alert("Supported file types: images (JPG, PNG, GIF, WEBP) and PDFs.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File must be under 5MB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const base64 = ev.target.result.split(",")[1];
+      setPendingFile({
+        name: file.name,
+        type: isImage ? "image" : "document",
+        mediaType: file.type,
+        data: base64,
+        preview: isImage ? ev.target.result : null,
+      });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = ""; // reset so same file can be re-selected
+  };
+
   const sendMessage = async () => {
-    if (!input.trim() || loading) return;
-    const userMsg = { role: "user", content: input.trim() };
+    if ((!input.trim() && !pendingFile) || loading) return;
+
+    // Build the user message content — plain text, or multipart if a file is attached
+    let userContent;
+    if (pendingFile) {
+      const blocks = [];
+      if (pendingFile.type === "image") {
+        blocks.push({ type:"image", source:{ type:"base64", media_type:pendingFile.mediaType, data:pendingFile.data } });
+      } else {
+        blocks.push({ type:"document", source:{ type:"base64", media_type:pendingFile.mediaType, data:pendingFile.data } });
+      }
+      if (input.trim()) blocks.push({ type:"text", text:input.trim() });
+      else blocks.push({ type:"text", text:`Please analyze this ${pendingFile.type === "image" ? "image" : "document"}: ${pendingFile.name}` });
+      userContent = blocks;
+    } else {
+      userContent = input.trim();
+    }
+
+    const userMsg = {
+      role: "user",
+      content: userContent,
+      // Store a display version for the chat UI (plain text preview)
+      _display: input.trim() || `📎 ${pendingFile?.name}`,
+      _fileName: pendingFile?.name,
+      _filePreview: pendingFile?.preview,
+    };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
+    setPendingFile(null);
 
     if (hasMemory && memoryApi.memory.enabled) {
       const detected = detectMemorableStatement(input.trim());
@@ -4034,14 +4090,13 @@ Client notes on file: ${contextClient.notes || "none"}.`;
     setLoading(true);
 
     try {
-      // Calls our own Vercel serverless function (/api/chat), not Anthropic
-      // directly — this keeps the API key on the server, never in the browser.
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          max_tokens: 1000,
+          max_tokens: 1500,
           system: employee.systemPrompt + "\n\n" + buildContext(),
+          // Strip internal display fields before sending to API
           messages: newMessages.map(m => ({ role: m.role, content: m.content })),
         }),
       });
@@ -4134,9 +4189,21 @@ Client notes on file: ${contextClient.notes || "none"}.`;
                 maxWidth:"78%", padding:"10px 14px", borderRadius:16,
                 background: m.role==="user" ? T.navy : T.card,
                 color: m.role==="user" ? "#fff" : T.text,
-                fontSize:13.5, fontFamily:"'Lato',sans-serif", lineHeight:1.5, whiteSpace:"pre-wrap",
+                fontSize:13.5, fontFamily:"'Lato',sans-serif", lineHeight:1.5,
                 border: m.role==="user" ? "none" : `1px solid ${T.border}`,
-              }}>{m.content}</div>
+              }}>
+                {/* Image preview if this message had an image attached */}
+                {m._filePreview && (
+                  <img src={m._filePreview} alt={m._fileName} style={{maxWidth:"100%",borderRadius:8,marginBottom:6,display:"block"}}/>
+                )}
+                {/* File name badge for PDFs and other non-image files */}
+                {m._fileName && !m._filePreview && (
+                  <div style={{fontSize:11,background:"rgba(255,255,255,0.15)",padding:"3px 8px",borderRadius:6,marginBottom:6,display:"inline-block"}}>
+                    📎 {m._fileName}
+                  </div>
+                )}
+                <div style={{whiteSpace:"pre-wrap"}}>{m._display || (typeof m.content === "string" ? m.content : "")}</div>
+              </div>
             </div>
           ))}
           {loading && (
@@ -4161,16 +4228,41 @@ Client notes on file: ${contextClient.notes || "none"}.`;
         )}
 
         {/* Input */}
-        <div style={{padding:12, borderTop:`1px solid ${T.border}`, display:"flex", gap:8, background:T.surface}}>
-          <input
-            value={input}
-            onChange={e=>setInput(e.target.value)}
-            onKeyDown={e=>{ if (e.key==="Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-            placeholder={`Ask ${employee.name} anything...`}
-            disabled={loading}
-            style={{flex:1, padding:"12px 14px", border:`1px solid ${T.border}`, borderRadius:14, fontSize:14, fontFamily:"'Lato',sans-serif", color:T.text, outline:"none", background:T.bg}}
-          />
-          <button onClick={sendMessage} disabled={loading || !input.trim()} style={{background:T.navy, color:"#fff", border:"none", borderRadius:14, padding:"0 18px", fontFamily:"'Lato',sans-serif", fontWeight:700, fontSize:14, cursor: loading||!input.trim() ? "default" : "pointer", opacity: loading||!input.trim() ? 0.5 : 1}}>→</button>
+        <div style={{borderTop:`1px solid ${T.border}`, background:T.surface}}>
+          {/* Pending file preview strip */}
+          {pendingFile && (
+            <div style={{padding:"8px 12px 0", display:"flex", alignItems:"center", gap:8}}>
+              {pendingFile.preview
+                ? <img src={pendingFile.preview} alt={pendingFile.name} style={{width:40,height:40,borderRadius:6,objectFit:"cover"}}/>
+                : <div style={{width:40,height:40,borderRadius:6,background:T.bg,border:`1px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>📄</div>
+              }
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:12,fontWeight:700,color:T.navy,fontFamily:"'Lato',sans-serif",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{pendingFile.name}</div>
+                <div style={{fontSize:10.5,color:T.muted,fontFamily:"'Lato',sans-serif"}}>{pendingFile.type === "image" ? "Image" : "PDF"} · Ready to send</div>
+              </div>
+              <button onClick={()=>setPendingFile(null)} style={{background:"none",border:"none",color:T.muted,cursor:"pointer",fontSize:18,padding:4,lineHeight:1}}>×</button>
+            </div>
+          )}
+          <div style={{padding:12, display:"flex", gap:8}}>
+            {/* Hidden file input */}
+            <input ref={fileInputRef} type="file" accept="image/*,.pdf" onChange={handleFileSelect}
+              style={{display:"none"}}/>
+            {/* Upload button */}
+            <button onClick={()=>fileInputRef.current?.click()} title="Upload image or PDF"
+              style={{background:T.bg,border:`1px solid ${T.border}`,borderRadius:12,width:44,height:44,cursor:"pointer",color:T.sub,fontSize:18,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
+              📎
+            </button>
+            <input
+              value={input}
+              onChange={e=>setInput(e.target.value)}
+              onKeyDown={e=>{ if (e.key==="Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+              placeholder={pendingFile ? "Add a message or send now..." : `Ask ${employee.name} anything...`}
+              disabled={loading}
+              style={{flex:1, padding:"12px 14px", border:`1px solid ${T.border}`, borderRadius:14, fontSize:14, fontFamily:"'Lato',sans-serif", color:T.text, outline:"none", background:T.bg}}
+            />
+            <button onClick={sendMessage} disabled={loading || (!input.trim() && !pendingFile)}
+              style={{background:T.navy, color:"#fff", border:"none", borderRadius:14, padding:"0 18px", fontFamily:"'Lato',sans-serif", fontWeight:700, fontSize:14, cursor: (loading||(!input.trim()&&!pendingFile)) ? "default" : "pointer", opacity: (loading||(!input.trim()&&!pendingFile)) ? 0.5 : 1}}>→</button>
+          </div>
         </div>
       </div>
 
