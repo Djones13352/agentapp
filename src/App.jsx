@@ -1470,13 +1470,13 @@ function QuoteBuilder({ initialClient }) {
                     )}
                   </div>
                   <div style={{display:"flex",gap:6,alignItems:"center"}}>
-                    {/* Portal links dropdown — always visible so agents know it's there */}
+                    {/* Portal dropdown — always visible on every quote card */}
                     <select onChange={e=>{ if(e.target.value) window.open(e.target.value,"_blank"); e.target.value=""; }}
                       defaultValue=""
                       style={{padding:"4px 8px",border:`1px solid ${T.border}`,borderRadius:8,fontSize:11,color:T.navy,background:T.surface,cursor:"pointer",fontFamily:"'Lato',sans-serif",fontWeight:600,maxWidth:130}}>
                       <option value="">🔗 Portals</option>
                       {carrierLinks.length === 0
-                        ? <option disabled>No links saved — add in My Links tab</option>
+                        ? <option disabled>Add links in My Links tab</option>
                         : carrierLinks.map(l=>(
                             <option key={l.id} value={l.url}>{l.carrier} — {l.type==="login"?"Login":l.type==="quoting"?"Quoting":l.type==="enrollment"?"Enroll":l.type==="commission"?"Commission":l.type==="training"?"Training":l.type==="marketing"?"Marketing":"Link"}</option>
                           ))
@@ -1572,17 +1572,15 @@ function QuoteBuilder({ initialClient }) {
                 <div style={{fontSize:10,color:T.sub,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{label}</div>
                 <input placeholder={ph} value={newQ[key]} onChange={e=>setNewQ({...newQ,[key]:e.target.value})}
                   style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
-                {/* Portal shortcut — shows when any links are saved */}
-                {key==="carrier" && carrierLinks.length > 0 && (
-                  <div style={{marginTop:6}}>
-                    <select onChange={e=>{ if(e.target.value) window.open(e.target.value,"_blank"); e.target.value=""; }}
-                      defaultValue=""
-                      style={{width:"100%",padding:"8px 10px",border:`1px solid ${T.border}`,borderRadius:8,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.navy,background:T.bg,cursor:"pointer"}}>
-                      <option value="">🔗 Open Carrier Portal...</option>
-                      {carrierLinks.map(l=>(
-                        <option key={l.id} value={l.url}>{l.carrier} — {l.type==="login"?"Agent Login":l.type==="quoting"?"Quoting Tool":l.type==="enrollment"?"Enrollment":l.type==="commission"?"Commission":l.type==="training"?"Training":l.type==="marketing"?"Marketing":"Link"}</option>
-                      ))}
-                    </select>
+                {/* Show portal shortcut below carrier name if links exist */}
+                {key==="carrier" && linksForCarrier(newQ.carrier).length > 0 && (
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:6}}>
+                    {linksForCarrier(newQ.carrier).map(l=>(
+                      <a key={l.id} href={l.url} target="_blank" rel="noreferrer"
+                        style={{fontSize:11,color:T.navy,background:T.bg,border:`1px solid ${T.border}`,borderRadius:8,padding:"3px 10px",textDecoration:"none",fontFamily:"'Lato',sans-serif",fontWeight:600}}>
+                        🔗 {l.type==="login"?"Agent Login":l.type==="quoting"?"Quoting Tool":l.type==="enrollment"?"Enrollment":l.type==="commission"?"Commission":l.type==="training"?"Training":"Open Portal"}
+                      </a>
+                    ))}
                   </div>
                 )}
               </div>
