@@ -1572,16 +1572,19 @@ function QuoteBuilder({ initialClient }) {
                 <div style={{fontSize:10,color:T.sub,fontFamily:"'Lato',sans-serif",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{label}</div>
                 <input placeholder={ph} value={newQ[key]} onChange={e=>setNewQ({...newQ,[key]:e.target.value})}
                   style={{width:"100%",padding:"10px 14px",border:`1px solid ${T.border}`,borderRadius:10,fontSize:14,fontFamily:"'Lato',sans-serif",color:T.text,outline:"none",background:T.bg}}/>
-                {/* Show portal shortcut below carrier name if links exist */}
-                {key==="carrier" && linksForCarrier(newQ.carrier).length > 0 && (
-                  <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:6}}>
-                    {linksForCarrier(newQ.carrier).map(l=>(
-                      <a key={l.id} href={l.url} target="_blank" rel="noreferrer"
-                        style={{fontSize:11,color:T.navy,background:T.bg,border:`1px solid ${T.border}`,borderRadius:8,padding:"3px 10px",textDecoration:"none",fontFamily:"'Lato',sans-serif",fontWeight:600}}>
-                        🔗 {l.type==="login"?"Agent Login":l.type==="quoting"?"Quoting Tool":l.type==="enrollment"?"Enrollment":l.type==="commission"?"Commission":l.type==="training"?"Training":"Open Portal"}
-                      </a>
-                    ))}
-                  </div>
+                {/* Portal dropdown below carrier name field — always visible */}
+                {key==="carrier" && (
+                  <select onChange={e=>{ if(e.target.value) window.open(e.target.value,"_blank"); e.target.value=""; }}
+                    defaultValue=""
+                    style={{width:"100%",marginTop:6,padding:"8px 10px",border:`1px solid ${T.border}`,borderRadius:8,fontSize:13,fontFamily:"'Lato',sans-serif",color:T.navy,background:T.bg,cursor:"pointer"}}>
+                    <option value="">🔗 Open Carrier Portal...</option>
+                    {carrierLinks.length === 0
+                      ? <option disabled>No links saved — add them in My Links tab</option>
+                      : carrierLinks.map(l=>(
+                          <option key={l.id} value={l.url}>{l.carrier} — {l.type==="login"?"Agent Login":l.type==="quoting"?"Quoting Tool":l.type==="enrollment"?"Enrollment":l.type==="commission"?"Commission":l.type==="training"?"Training":l.type==="marketing"?"Marketing":"Link"}</option>
+                        ))
+                    }
+                  </select>
                 )}
               </div>
             ))}
