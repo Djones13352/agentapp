@@ -1,3 +1,17 @@
+import React, { useState, useEffect, useMemo, useRef } from "react";
+
+/* ────────────────────────────────────────────────────────────────
+   Agent Command Center — App.jsx
+   Real, runnable React recreation of the design prototype.
+   Persistence: localStorage, namespaced per signed-in account email.
+   Swap loadJSON/saveJSON + the auth functions for real Supabase calls
+   when you wire up the backend — every call is isolated in this file
+   so that migration touches one place per concern.
+   AI chat calls POST /api/chat (see /api/chat.js) — never call the
+   Anthropic API directly from the client.
+──────────────────────────────────────────────────────────────── */
+
+// ── Design tokens ──
 const T = {
   bg: "#F7F3EC",
   surface: "#FFFFFF",
